@@ -14,7 +14,8 @@ def save_alert_data(data: AlertData):
         Point("Alert")
         .tag("device_id", data.device_id)
         .tag("source", data.source)
-        .tag("type", data.type)
+        .tag("type", data.type).
+         tag("event_type",data.event_type)
         .tag("trigger", data.trigger)
         .field("lat", data.lat)
         .field("lon", data.lon)
@@ -81,7 +82,8 @@ def get_recent_alerts(minutos: int):
                 resultados.append({
                     "timestamp": registo.get_time().isoformat(),
                     "device_id": registo.values.get("device_id"), # Tag
-                    "type": registo.values.get("type"),           # Tag
+                    "type": registo.values.get("type"),  
+                    "event_type":registo.values.get("event_type"),
                     "trigger": registo.values.get("trigger"),     # Tag
                     "lat": registo.values.get("lat"),             # Field
                     "lon": registo.values.get("lon")              # Field

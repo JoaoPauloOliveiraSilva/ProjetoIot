@@ -8,7 +8,13 @@ class Settings(BaseSettings):
         
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-
-    model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
+    
+    MQTT_BROKER: str = "localhost"
+    MQTT_PORT: int = 8883
+    MQTT_USERNAME: str
+    MQTT_PASSWORD: str
+    MQTT_TLS_ENABLED: bool = True
+    
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

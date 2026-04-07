@@ -3,3 +3,4 @@ uvicorn[standard]
 pydantic-settings
 python-multipart
 influxdb-client
+paho-mqtt

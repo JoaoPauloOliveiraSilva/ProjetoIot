@@ -6,6 +6,7 @@ class AlertData(BaseModel):
     device_id: str
     source: str        
     type: str   
+    event_type: str
     timestamp: Optional[datetime] = None
     lat: float        
     lon: float
