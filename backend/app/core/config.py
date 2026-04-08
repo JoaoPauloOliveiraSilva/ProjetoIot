@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     MQTT_PASSWORD: str
     MQTT_TLS_ENABLED: bool = True
     
+    THRESHOLD_FALL_ACCEL: float = 20.0  
+    THRESHOLD_HARD_BRAKE: float = -6.0  
+    THRESHOLD_JAM_SPEED: float = 2.0    
+    JAM_TIME_WINDOW_SEC: int = 60
+    
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
