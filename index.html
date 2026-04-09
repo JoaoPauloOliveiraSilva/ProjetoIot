@@ -3,153 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard IoT - Mobilidade Urbana</title>
+    <title>IoT Dashboard - Mobilidade Urbana</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .container { display: flex; gap: 20px; }
-        #map { height: 500px; flex: 2; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .side-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-        .chart-container, .alerts-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .alerts-container { height: 200px; overflow-y: auto; }
-        .alert-item { background: #ffebee; color: #c62828; padding: 10px; margin-bottom: 10px; border-radius: 4px; border-left: 4px solid #c62828; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        :root {
+            --primary: #165DFF;
+            --success: #00b894;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-light: #cbd5e1;
+            --border: #334155;
+            --shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: var(--transition);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 999;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.08);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        #map {
+            height: 620px;
+            width: 100%;
+            border-radius: 16px;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .alerts-container {
+            height: 280px;
+        }
+
+        #alerts-list {
+            height: 200px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        #alerts-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #alerts-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .alert-item {
+            background: rgba(231, 76, 60, 0.08);
+            border-left: 4px solid var(--danger);
+            color: var(--text);
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-item strong {
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-container {
+            height: 320px;
+        }
+
+        #speedChart {
+            width: 100% !important;
+            height: 240px !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
+
 <body>
+    <button class="theme-toggle" id="themeBtn">
+        <i class="fas fa-moon"></i>
+    </button>
 
     <div class="header">
-        <h2>Plataforma IoT - Monitorização Colaborativa</h2>
+        <h1><i class="fas fa-chart-line"></i> Plataforma IoT - Monitorização Colaborativa</h1>
+        <p>Dashboard em tempo real para mobilidade urbana</p>
     </div>
 
     <div class="container">
-        <div id="map"></div>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-map-marker-alt"></i> Mapa de Localização
+            </div>
+            <div class="card-body">
+                <div id="map"></div>
+            </div>
+        </div>
 
         <div class="side-panel">
-            <div class="alerts-container">
-                <h3>Alertas Recentes</h3>
-                <div id="alerts-list">Carregando alertas...</div>
+            <div class="card alerts-container">
+                <div class="card-header">
+                    <i class="fas fa-bell"></i> Alertas Recentes
+                </div>
+                <div class="card-body">
+                    <div id="alerts-list">Carregando alertas...</div>
+                </div>
             </div>
 
-            <div class="chart-container">
-                <h3>Estatísticas de Velocidade (km/h)</h3>
-                <canvas id="speedChart"></canvas>
+            <div class="card chart-container">
+                <div class="card-header">
+                    <i class="fas fa-tachometer-alt"></i> Estatísticas de Velocidade (km/h)
+                </div>
+                <div class="card-body">
+                    <canvas id="speedChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
+<script>
+    // Configurações da API e WebSocket
     const API_BASE_URL = 'http://localhost:8000/api/v1';
     const WS_URL = 'ws://localhost:8000/ws/alerts';
-    const API_KEY = 'SeiLa'; 
-    //alert(API_KEY)
+    const API_KEY = 'SeiLa'; // Certifique-se de que é a chave exata do seu .env
 
-    // Inicializar mapa e gráfico
+    // Alternância entre tema claro e escuro
+    const themeBtn = document.getElementById('themeBtn');
+    const html = document.documentElement;
+    themeBtn.addEventListener('click', () => {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        themeBtn.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+    });
+
+    // Inicialização do mapa Leaflet
     const map = L.map('map').setView([41.5503, -8.4200], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
-    
+
+    // Inicialização do gráfico de velocidade (Chart.js)
     const ctx = document.getElementById('speedChart').getContext('2d');
     const speedChart = new Chart(ctx, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Velocidade', data: [], borderColor: '#0277bd' }] }
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Velocidade (km/h)',
+                data: [],
+                borderColor: '#165DFF',
+                backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                borderWidth: 2.5,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'top' } },
+            scales: { y: { beginAtZero: true }, x: { ticks: { maxRotation: 0 } } }
+        }
     });
 
-    // Carregar dados iniciais via HTTP GET
+    // Carrega dados iniciais (sensores e alertas) ao carregar a página
     async function loadInitialData() {
         try {
-            // Buscar histórico de telemetria
-            const resSensor = await fetch(`${API_BASE_URL}/sensors?minutos=60&api_key=${API_KEY}`);
+            // 🚨 CORREÇÃO: Enviando a API_KEY no Header (X-API-Key)
+            const resSensor = await fetch(`${API_BASE_URL}/sensors?minutos=60`, {
+                method: 'GET',
+                headers: { 'X-API-Key': API_KEY }
+            });
             const dataSensor = await resSensor.json();
-            if(dataSensor.dados) {
+            if (dataSensor.dados) {
                 updateMap(dataSensor.dados);
                 updateChart(dataSensor.dados);
             }
 
-            // Buscar histórico de alertas
-            const resAlert = await fetch(`${API_BASE_URL}/alerts?minutos=60&api_key=${API_KEY}`);
+            // 🚨 CORREÇÃO: Enviando a API_KEY no Header
+            const resAlert = await fetch(`${API_BASE_URL}/alerts?minutos=60`, {
+                method: 'GET',
+                headers: { 'X-API-Key': API_KEY }
+            });
             const dataAlert = await resAlert.json();
-            if(dataAlert.dados) {
+            if (dataAlert.dados) {
+                document.getElementById('alerts-list').innerHTML = '';
                 dataAlert.dados.forEach(addAlertToUI);
             }
         } catch (e) {
-            console.error("CORS não configurado ou backend não iniciado:", e);
+            console.error("Erro ao carregar dados iniciais:", e);
         }
     }
 
-    // Funções auxiliares para atualizar mapa e gráfico
+    // Atualiza os marcadores no mapa com as posições dos dispositivos
     function updateMap(dados) {
         markersLayer.clearLayers();
         dados.forEach(d => {
-            const marker = L.circleMarker([d.lat, d.lon], { color: 'blue', radius: 5 });
-            marker.bindPopup(`<b>ID:</b> ${d.device_id}<br><b>Velocidade:</b> ${d.speed} km/h`);
+            const marker = L.circleMarker([d.lat, d.lon], {
+                color: '#165DFF',
+                fillColor: '#165DFF',
+                fillOpacity: 0.7,
+                radius: 6
+            });
+            marker.bindPopup(`
+                <div style="font-weight:600">Dispositivo: ${d.device_id}</div>
+                <div>Velocidade: ${d.speed} km/h</div>
+            `);
             markersLayer.addLayer(marker);
         });
     }
+
+    // Atualiza o gráfico com os dados de velocidade mais recentes
     function updateChart(dados) {
-        const recentData = dados.slice(-10);
+        const recentData = dados.slice(-12);
         speedChart.data.labels = recentData.map(d => new Date(d.timestamp).toLocaleTimeString());
         speedChart.data.datasets[0].data = recentData.map(d => d.speed);
         speedChart.update();
     }
 
-    // Adicionar alerta individual à interface
+    // Adiciona um alerta individual na lista de alertas da interface
     function addAlertToUI(alerta) {
         const listDiv = document.getElementById('alerts-list');
+        if (listDiv.innerText === 'Carregando alertas...') listDiv.innerHTML = '';
+
         const alertDiv = document.createElement('div');
         alertDiv.className = 'alert-item';
-        alertDiv.innerHTML = `<strong>⚠️ ${alerta.event_type.toUpperCase()}</strong><br>
-                              Gatilho: ${alerta.trigger}<br>
-                              Hora: ${new Date(alerta.timestamp).toLocaleTimeString()}`;
-        listDiv.insertBefore(alertDiv, listDiv.firstChild); 
+        alertDiv.innerHTML = `
+            <strong><i class="fas fa-exclamation-triangle"></i> ${alerta.event_type.toUpperCase()}</strong>
+            <div>Gatilho: ${alerta.trigger}</div>
+            <div style="font-size:12px; color:var(--text-light)">
+                <i class="far fa-clock"></i> ${new Date(alerta.timestamp).toLocaleTimeString()}
+            </div>
+        `;
+        listDiv.insertBefore(alertDiv, listDiv.firstChild);
     }
 
-    // ---------------------------------------------------------
-    // WebSocket em tempo real
-    // ---------------------------------------------------------
+    // Conexão WebSocket para receber alertas em tempo real
     function connectWebSocket() {
         const ws = new WebSocket(WS_URL);
         
-        ws.onopen = function() {
-            console.log("✅ WebSocket Conectado com sucesso!");
-        };
-
-        ws.onmessage = function(event) {
-            const novoAlerta = JSON.parse(event.data);
-            console.log("🚨 Novo alerta recebido em tempo real:", novoAlerta);
-            
-            // Adicionar à lista de alertas
+        ws.onopen = () => console.log("✅ WebSocket conectado com sucesso!");
+        
+        ws.onmessage = (e) => {
+            const novoAlerta = JSON.parse(e.data);
             addAlertToUI(novoAlerta);
-            
-            // Marcar localização no mapa com círculo vermelho
-            const redMarker = L.circleMarker([novoAlerta.lat, novoAlerta.lon], { 
-                color: 'red', 
-                fillColor: '#f03', 
-                fillOpacity: 0.5, 
-                radius: 15 
-            }).addTo(map);
-            redMarker.bindPopup(`<b>🚨 ACIDENTE!</b><br>${novoAlerta.event_type}`).openPopup();
-        };
 
-        ws.onclose = function() {
-            console.log("❌ WebSocket Desconectado. Tentando reconectar em 3s...");
+            L.circleMarker([novoAlerta.lat, novoAlerta.lon], {
+                color: '#e74c3c',
+                fillColor: '#e74c3c',
+                fillOpacity: 0.6,
+                radius: 16
+            }).addTo(map).bindPopup(`
+                <div style="color:#e74c3c; font-weight:bold">🚨 ALERTA!</div>
+                ${novoAlerta.event_type}
+            `).openPopup();
+        };
+        
+        ws.onclose = () => {
+            console.log("❌ WebSocket desconectado. Tentando reconectar em 3 segundos...");
             setTimeout(connectWebSocket, 3000);
         };
     }
 
-    // Executar após carregamento da página
     loadInitialData();
     connectWebSocket();
 
-    // Atualizar posições GPS a cada 30 segundos (WebSocket apenas para alertas)
+    // Atualiza posições GPS no mapa a cada 30 segundos
     setInterval(async () => {
-        const resSensor = await fetch(`${API_BASE_URL}/sensors?minutos=1&api_key=${API_KEY}`);
-        const dataSensor = await resSensor.json();
-        if(dataSensor.dados) updateMap(dataSensor.dados);
+        try {
+            // 🚨 CORREÇÃO: Enviando a API_KEY no Header
+            const res = await fetch(`${API_BASE_URL}/sensors?minutos=1`, {
+                method: 'GET',
+                headers: { 'X-API-Key': API_KEY }
+            });
+            const data = await res.json();
+            if (data.dados) updateMap(data.dados);
+        } catch (e) {}
     }, 30000);
-
 </script>
 </body>
 </html>
