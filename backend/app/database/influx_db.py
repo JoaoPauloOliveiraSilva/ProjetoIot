@@ -9,7 +9,7 @@ from typing import Optional
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-client = InfluxDBClient(url="http://localhost:32086", token=settings.INFLUX_TOKEN, org=settings.INFLUX_ORG)
+client = InfluxDBClient(url=settings.INFLUX_URL, token=settings.INFLUX_TOKEN, org=settings.INFLUX_ORG)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 query_api = client.query_api()  
 
@@ -226,8 +226,14 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
                 resultados.append({
                     "timestamp": registo.get_time().isoformat(),
                     "device_id": registo.values.get("device_id"),
+<<<<<<< HEAD
                     "type": registo.values.get("type"),
                     "lat": registo.values.get("lat"),
+=======
+                    "type": registo.values.get("type"),           
+                    "trigger": registo.values.get("trigger"),     
+                    "lat": registo.values.get("lat"),             
+>>>>>>> upstream/main
                     "lon": registo.values.get("lon"),
                     "speed": registo.values.get("speed"),
                     "accel_x": registo.values.get("accel_x"),
@@ -238,7 +244,6 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
     except Exception as e:
         logger.error(f"Erro ao ler sensores do InfluxDB: {e}")
         return []
-
 
 def get_alerts_stats():
     query = f"""
