@@ -356,8 +356,15 @@
             });
             const dataAlert = await resAlert.json();
             if (dataAlert.dados) {
-                document.getElementById('alerts-list').innerHTML = '';
-                dataAlert.dados.forEach(addAlertToUI);
+                const listDiv = document.getElementById('alerts-list');
+                listDiv.innerHTML = '';
+                
+                // Ordenar por timestamp decrescente (mais recente primeiro)
+                const sortedAlerts = dataAlert.dados.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                sortedAlerts.forEach(alerta => {
+                    listDiv.appendChild(createAlertElement(alerta));
+                });
             }
         } catch (e) {
             console.error("Erro ao carregar dados iniciais:", e);
@@ -403,11 +410,8 @@
         speedChart.update();
     }
 
-    // Adiciona um alerta individual na lista de alertas da interface
-    function addAlertToUI(alerta) {
-        const listDiv = document.getElementById('alerts-list');
-        if (listDiv.innerText === 'Carregando alertas...') listDiv.innerHTML = '';
-
+    // Cria o elemento HTML para um alerta
+    function createAlertElement(alerta) {
         const alertDiv = document.createElement('div');
         alertDiv.className = 'alert-item';
         alertDiv.innerHTML = `
@@ -426,6 +430,15 @@
                 <i class="far fa-clock"></i> ${new Date(alerta.timestamp).toLocaleString()}
             </div>
         `;
+        return alertDiv;
+    }
+
+    // Adiciona um alerta individual na lista de alertas da interface (usado para WebSocket)
+    function addAlertToUI(alerta) {
+        const listDiv = document.getElementById('alerts-list');
+        if (listDiv.innerText === 'Carregando alertas...') listDiv.innerHTML = '';
+        
+        const alertDiv = createAlertElement(alerta);
         listDiv.insertBefore(alertDiv, listDiv.firstChild);
     }
 

@@ -3,12 +3,13 @@ import json
 import requests
 import os
 import glob
-import time
+import sys
 from datetime import datetime, timezone
 
 API_URL = "http://127.0.0.1:8000/api/v1/sensors"
 API_KEY = "SeiLa"
-DATASET_PATH = r"C:\Users\38240\Downloads\Bike&Safe Dataset\Bike&Safe Dataset\Bike&Safe Dataset"
+# Caminho padrão (pode ser sobrescrito via argumento de linha de comando)
+DEFAULT_DATASET_PATH = r"C:\Users\38240\Downloads\Bike&Safe Dataset\Bike&Safe Dataset\Bike&Safe Dataset"
 
 def process_lap(route_name, lap_name, path):
     print(f"Processing {route_name} - {lap_name}...")
@@ -18,7 +19,7 @@ def process_lap(route_name, lap_name, path):
     accel_files = glob.glob(os.path.join(path, "*accelerometer*.csv"))
     
     if not gps_files or not accel_files:
-        print(f"Skipping {route_name} {lap_name}: Files not found")
+        print(f"Skipping {route_name} {lap_name}: Files not found em {path}")
         return
 
     gps_file = gps_files[0]
@@ -53,8 +54,6 @@ def process_lap(route_name, lap_name, path):
         for row in reader:
             if not row: continue
             try:
-                # The dataset timestamps for sensors are often system uptime or different sync
-                # We'll use the GPS timestamp as our primary reference and interpolate or just match closest
                 accel_data.append({
                     "timestamp_ns": int(row[0]),
                     "x": float(row[2]),
@@ -64,18 +63,12 @@ def process_lap(route_name, lap_name, path):
             except: continue
 
     # Merge and Send
-    # Since GPS is sparse (1Hz) and Accel is dense (50Hz+), 
-    # we'll send telemetry based on GPS points and include the closest accel data
     device_id = f"bike_{route_name.lower().replace(' ', '_')}_{lap_name.lower().replace(' ', '_')}"
     
     count = 0
     for gps in gps_data:
-        # Simple matching: use the GPS timestamp
-        # Convert ms timestamp to ISO
         dt = datetime.fromtimestamp(gps['timestamp_ms'] / 1000.0, tz=timezone.utc)
         
-        # Find closest accel (simplification for this import script)
-        # In a real sync we'd do more, but for visualization this is usually enough
         payload = {
             "device_id": device_id,
             "timestamp": dt.isoformat(),
@@ -102,14 +95,24 @@ def process_lap(route_name, lap_name, path):
     print(f"Imported {count} points for {device_id}")
 
 def main():
+    # Verifica se um caminho foi passado via argumento
+    dataset_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DATASET_PATH
+    
+    if not os.path.exists(dataset_path):
+        print(f"Erro: O caminho do dataset não existe: {dataset_path}")
+        print("Uso: python import_dataset.py \"C:\\caminho\\para\\o\\dataset\"")
+        return
+
     routes = ["First route", "Second route", "Third route"]
     laps = ["First lap", "Second lap", "Third lap"]
     
     for r in routes:
         for l in laps:
-            path = os.path.join(DATASET_PATH, r, l)
+            path = os.path.join(dataset_path, r, l)
             if os.path.exists(path):
                 process_lap(r, l, path)
+            else:
+                print(f"Aviso: Subpasta não encontrada: {path}")
 
 if __name__ == "__main__":
     main()
