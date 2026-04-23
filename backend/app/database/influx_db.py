@@ -27,35 +27,6 @@ def get_all_devices():
         return []
     
 def get_latest_device_state(device_id: str):
-    query = f"""
-        from(bucket: "{settings.INFLUX_BUCKET}")
-          |> range(start: -24h)
-          |> filter(fn: (r) => r["_measurement"] == "Sensor")
-          |> filter(fn: (r) => r["device_id"] == "{device_id}")
-          |> last()
-          |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-    """
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        for tabela in tabelas:
-            for registo in tabela.records:
-                return {
-                    "timestamp": registo.get_time().isoformat(),
-                    "device_id": registo.values.get("device_id"),
-                    "lat": registo.values.get("lat"),
-                    "lon": registo.values.get("lon"),
-                    "speed": registo.values.get("speed"),
-                    "accel_x": registo.values.get("accel_x"),
-                    "accel_y": registo.values.get("accel_y"),
-                    "accel_z": registo.values.get("accel_z")
-                }
-        return None
-    except Exception as e:
-        logger.error(f"Erro ao obter último estado do {device_id}: {e}")
-        return None
-    
-
-def get_latest_device_state(device_id: str):
     """Obtém a última telemetria conhecida de um dispositivo."""
     query = f"""
         from(bucket: "{settings.INFLUX_BUCKET}")
@@ -120,6 +91,10 @@ def save_alert_data(data: AlertData):
         .tag("trigger", data.trigger)
         .field("lat", data.lat)
         .field("lon", data.lon)
+        .field("speed", data.speed if data.speed is not None else 0.0)
+        .field("accel_x", data.accel_x if data.accel_x is not None else 0.0)
+        .field("accel_y", data.accel_y if data.accel_y is not None else 0.0)
+        .field("accel_z", data.accel_z if data.accel_z is not None else 0.0)
     )
 
     if data.timestamp:
@@ -190,7 +165,11 @@ def get_recent_alerts(minutos: int, device_id: Optional[str] = None):
                     "event_type": registo.values.get("event_type"),
                     "trigger": registo.values.get("trigger"),
                     "lat": registo.values.get("lat"),
-                    "lon": registo.values.get("lon")
+                    "lon": registo.values.get("lon"),
+                    "speed": registo.values.get("speed"),
+                    "accel_x": registo.values.get("accel_x"),
+                    "accel_y": registo.values.get("accel_y"),
+                    "accel_z": registo.values.get("accel_z")
                 })
         return resultados
     except Exception as e:
@@ -229,7 +208,7 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
                 })
         return resultados
     except Exception as e:
-        logger.info(f" Erro ao ler do InfluxDB: {e}")
+        logger.error(f"Erro ao ler sensores do InfluxDB: {e}")
         return []
 
 def get_alerts_stats():
