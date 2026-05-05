@@ -17,8 +17,9 @@ fastapi_loop = None
 
 def on_connect(client,userdata,flags,rc):
     if rc == 0:
-        print(f" Ligado ao broker MQTT em {settings.MQTT_BROKER}:{settings.MQTT_PORT} (TLS: {settings.MQTT_TLS_ENABLED})")  
+        logger.info(f"Ligado ao broker MQTT em {settings.MQTT_BROKER}:{settings.MQTT_PORT} (TLS: {settings.MQTT_TLS_ENABLED})")
         client.subscribe("/bike/+/telemetry",qos = 0)
+        client.subscribe("/bike/+/alert",qos=1)
         client.subscribe("/bike/+/alerts",qos=1)
         logger.info("A escutar")
     else:
@@ -56,7 +57,7 @@ def on_message(client, userdata, msg):
                 else:
                     logger.error("FastAPI loop não está disponível para WebSockets!")
 
-        elif topic.endswith("/alert"):
+        elif topic.endswith("/alert") or topic.endswith("/alerts"):
             from app.models.alert import AlertData
             alert_data = AlertData(**data_dict)
             influx_db.save_alert_data(alert_data)

@@ -51,6 +51,13 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
   "accel_x": 0.0,
   "accel_y": 0.0,
   "accel_z": 0.0,
+  "gyro_x": 0.0,
+  "gyro_y": 0.0,
+  "gyro_z": 0.0,
+  "gps_accuracy_m": 3.0,
+  "range_front_m": 4.2,
+  "range_left_m": 1.5,
+  "ultrasonic_valid": true,
   "battery": 100,
   "source": "manual/sensor",
   "type": "telemetry"
@@ -66,6 +73,7 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 ### B. Dashboard Interativo
 *   **Implementação**: [index.html](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/index.html) e [alerts.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/routers/alerts.py)
 *   **Fluxo**: `loadInitialData()` busca histórico via REST -> WebSocket manager empurra alertas em tempo real -> UI ordena decrescentemente (mais recente primeiro).
+*   **API Key**: abrir o dashboard com `?api_key=...` guarda a chave no `localStorage` e evita credenciais hardcoded no HTML.
 
 ### C. Validação com Datasets (Bike&Safe)
 *   **Implementação**: [import_dataset.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/import_dataset.py)
@@ -92,19 +100,29 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 3. Importar Dados do Dataset
-O script de importação permite carregar os dados do Bike&Safe Dataset. Por padrão, ele procura na pasta de Downloads, mas você pode passar um caminho personalizado:
+### 3. Reproduzir Datasets Simulados de Braga
+O script `import_dataset.py` reproduz os cenários em `datasets/braga/*/telemetry.csv`.
 
 ```powershell
-# Usando o caminho padrão
-python import_dataset.py
+# Validar leitura dos cenários sem enviar dados
+python import_dataset.py --mode dry-run
 
-# Usando um caminho personalizado (útil para outros membros da equipe)
-python import_dataset.py "C:\Caminho\Para\Seu\Dataset"
+# Enviar por REST para o backend
+$env:API_KEY_EDGE="a_sua_chave"
+python import_dataset.py --mode rest --api-key $env:API_KEY_EDGE
+
+# Enviar por MQTT com telemetria em QoS 0
+python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1883
+
+# Opcional: publicar também os alertas esperados do truth.json em /bike/{id}/alert com QoS 1
+python import_dataset.py --mode mqtt --publish-truth-alerts
 ```
 
-### 4. Simular Alerta Manual
+### 4. Validar Deteção nos Datasets
+Compara os eventos esperados em `truth.json` com os alertas produzidos pelas regras do backend:
 
+```powershell
+python scripts\validate_braga_datasets.py --strict
 ```
 
----
+### 5. Simular Alerta Manual

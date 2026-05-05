@@ -1,12 +1,12 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import telemetry, alerts 
+from app.routers import telemetry, alerts, devices
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from app.mqtt.subscriber import start_mqtt, stop_mqtt
 from app.services.websocket_manager import manager  
 import asyncio
-import os
+from datetime import datetime, timezone
 
 load_dotenv(".env")
 
@@ -27,6 +27,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "service": "iot-backend",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
 @app.websocket("/ws/alerts")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
@@ -38,3 +46,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 app.include_router(telemetry.router, prefix="/api/v1")
 app.include_router(alerts.router, prefix="/api/v1")
+app.include_router(devices.router, prefix="/api/v1")

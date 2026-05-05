@@ -13,6 +13,77 @@ client = InfluxDBClient(url=settings.INFLUX_URL, token=settings.INFLUX_TOKEN, or
 write_api = client.write_api(write_options=SYNCHRONOUS)
 query_api = client.query_api()  
 
+SENSOR_OPTIONAL_FIELDS = [
+    "gyro_x",
+    "gyro_y",
+    "gyro_z",
+    "gps_accuracy_m",
+    "range_front_m",
+    "range_left_m",
+    "ultrasonic_valid",
+    "battery",
+]
+
+ALERT_OPTIONAL_FIELDS = [
+    "gyro_x",
+    "gyro_y",
+    "gyro_z",
+    "range_front_m",
+    "range_left_m",
+    "ultrasonic_valid",
+]
+
+def _add_optional_fields(point: Point, data, fields: list[str]) -> Point:
+    for field in fields:
+        value = getattr(data, field, None)
+        if value is not None:
+            point = point.field(field, value)
+    return point
+
+def _sensor_record(registo):
+    return {
+        "timestamp": registo.get_time().isoformat(),
+        "device_id": registo.values.get("device_id"),
+        "source": registo.values.get("source"),
+        "type": registo.values.get("type"),
+        "lat": registo.values.get("lat"),
+        "lon": registo.values.get("lon"),
+        "speed": registo.values.get("speed"),
+        "accel_x": registo.values.get("accel_x"),
+        "accel_y": registo.values.get("accel_y"),
+        "accel_z": registo.values.get("accel_z"),
+        "gyro_x": registo.values.get("gyro_x"),
+        "gyro_y": registo.values.get("gyro_y"),
+        "gyro_z": registo.values.get("gyro_z"),
+        "gps_accuracy_m": registo.values.get("gps_accuracy_m"),
+        "range_front_m": registo.values.get("range_front_m"),
+        "range_left_m": registo.values.get("range_left_m"),
+        "ultrasonic_valid": registo.values.get("ultrasonic_valid"),
+        "battery": registo.values.get("battery"),
+    }
+
+def _alert_record(registo):
+    return {
+        "timestamp": registo.get_time().isoformat(),
+        "device_id": registo.values.get("device_id"),
+        "source": registo.values.get("source"),
+        "type": registo.values.get("type"),
+        "event_type": registo.values.get("event_type"),
+        "trigger": registo.values.get("trigger"),
+        "lat": registo.values.get("lat"),
+        "lon": registo.values.get("lon"),
+        "speed": registo.values.get("speed"),
+        "accel_x": registo.values.get("accel_x"),
+        "accel_y": registo.values.get("accel_y"),
+        "accel_z": registo.values.get("accel_z"),
+        "gyro_x": registo.values.get("gyro_x"),
+        "gyro_y": registo.values.get("gyro_y"),
+        "gyro_z": registo.values.get("gyro_z"),
+        "range_front_m": registo.values.get("range_front_m"),
+        "range_left_m": registo.values.get("range_left_m"),
+        "ultrasonic_valid": registo.values.get("ultrasonic_valid"),
+    }
+
 def get_all_devices():
     query = f"""
         import "influxdata/influxdb/schema"
@@ -40,16 +111,7 @@ def get_latest_device_state(device_id: str):
         tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
         for tabela in tabelas:
             for registo in tabela.records:
-                return {
-                    "timestamp": registo.get_time().isoformat(),
-                    "device_id": registo.values.get("device_id"),
-                    "lat": registo.values.get("lat"),
-                    "lon": registo.values.get("lon"),
-                    "speed": registo.values.get("speed"),
-                    "accel_x": registo.values.get("accel_x"),
-                    "accel_y": registo.values.get("accel_y"),
-                    "accel_z": registo.values.get("accel_z")
-                }
+                return _sensor_record(registo)
         return None
     except Exception as e:
         logger.error(f"Erro ao obter último estado do {device_id}: {e}")
@@ -68,12 +130,7 @@ def get_device_history(device_id: str, start: str, end: str):
         resultados = []
         for tabela in tabelas:
             for registo in tabela.records:
-                resultados.append({
-                    "timestamp": registo.get_time().isoformat(),
-                    "speed": registo.values.get("speed"),
-                    "lat": registo.values.get("lat"),
-                    "lon": registo.values.get("lon")
-                })
+                resultados.append(_sensor_record(registo))
         return resultados
     except Exception as e:
         logger.error(f"Erro ao obter histórico de {device_id}: {e}")
@@ -86,8 +143,8 @@ def save_alert_data(data: AlertData):
         Point("Alert")
         .tag("device_id", data.device_id)
         .tag("source", data.source)
-        .tag("type", data.type).
-         tag("event_type",data.event_type)
+        .tag("type", data.type)
+        .tag("event_type", data.event_type)
         .tag("trigger", data.trigger)
         .field("lat", data.lat)
         .field("lon", data.lon)
@@ -96,6 +153,7 @@ def save_alert_data(data: AlertData):
         .field("accel_y", data.accel_y if data.accel_y is not None else 0.0)
         .field("accel_z", data.accel_z if data.accel_z is not None else 0.0)
     )
+    ponto = _add_optional_fields(ponto, data, ALERT_OPTIONAL_FIELDS)
 
     if data.timestamp:
         ponto = ponto.time(data.timestamp, WritePrecision.NS)
@@ -124,6 +182,7 @@ def save_sensor_data(data: SensorData):
         .field("accel_y", data.accel_y)
         .field("accel_z", data.accel_z)
     )
+    ponto = _add_optional_fields(ponto, data, SENSOR_OPTIONAL_FIELDS)
 
     if data.timestamp:
         ponto = ponto.time(data.timestamp, WritePrecision.NS)
@@ -158,19 +217,7 @@ def get_recent_alerts(minutos: int, device_id: Optional[str] = None):
         resultados = []
         for tabela in tabelas:
             for registo in tabela.records:
-                resultados.append({
-                    "timestamp": registo.get_time().isoformat(),
-                    "device_id": registo.values.get("device_id"),
-                    "type": registo.values.get("type"),  
-                    "event_type": registo.values.get("event_type"),
-                    "trigger": registo.values.get("trigger"),
-                    "lat": registo.values.get("lat"),
-                    "lon": registo.values.get("lon"),
-                    "speed": registo.values.get("speed"),
-                    "accel_x": registo.values.get("accel_x"),
-                    "accel_y": registo.values.get("accel_y"),
-                    "accel_z": registo.values.get("accel_z")
-                })
+                resultados.append(_alert_record(registo))
         return resultados
     except Exception as e:
         logger.error(f"Erro ao ler alertas do InfluxDB: {e}")
@@ -194,18 +241,7 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
         resultados = []
         for tabela in tabelas:
             for registo in tabela.records:
-                resultados.append({
-                    "timestamp": registo.get_time().isoformat(),
-                    "device_id": registo.values.get("device_id"),
-                    "type": registo.values.get("type"),           
-                    "trigger": registo.values.get("trigger"),     
-                    "lat": registo.values.get("lat"),             
-                    "lon": registo.values.get("lon"),
-                    "speed": registo.values.get("speed"),
-                    "accel_x": registo.values.get("accel_x"),
-                    "accel_y": registo.values.get("accel_y"),
-                    "accel_z": registo.values.get("accel_z")
-                })
+                resultados.append(_sensor_record(registo))
         return resultados
     except Exception as e:
         logger.error(f"Erro ao ler sensores do InfluxDB: {e}")

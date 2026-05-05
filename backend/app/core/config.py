@@ -12,14 +12,16 @@ class Settings(BaseSettings):
     
     MQTT_BROKER: str = "localhost"
     MQTT_PORT: int = 8883
-    MQTT_USERNAME: str
-    MQTT_PASSWORD: str
+    MQTT_USERNAME: str = ""
+    MQTT_PASSWORD: str = ""
     MQTT_TLS_ENABLED: bool = True
     
     THRESHOLD_FALL_ACCEL: float = 20.0  
     THRESHOLD_HARD_BRAKE: float = -6.0  
     THRESHOLD_JAM_SPEED: float = 2.0    
     JAM_TIME_WINDOW_SEC: int = 60
+    JAM_MIN_CONSECUTIVE_SAMPLES: int = 60
+    ALERT_COOLDOWN_SEC: int = 15
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

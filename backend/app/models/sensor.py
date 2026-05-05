@@ -9,9 +9,15 @@ class SensorData(BaseModel):
     timestamp: Optional[datetime] = None
     lat: float        
     lon: float
-    speed:float
-    accel_x:float
-    accel_y:float
-    accel_z:float
-
-    
+    speed: float
+    accel_x: float
+    accel_y: float
+    accel_z: float
+    gyro_x: Optional[float] = None
+    gyro_y: Optional[float] = None
+    gyro_z: Optional[float] = None
+    gps_accuracy_m: Optional[float] = None
+    range_front_m: Optional[float] = None
+    range_left_m: Optional[float] = None
+    ultrasonic_valid: Optional[bool] = None
+    battery: Optional[float] = None

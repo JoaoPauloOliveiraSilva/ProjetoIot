@@ -287,7 +287,13 @@
     // Configurações da API e WebSocket
     const API_BASE_URL = 'http://localhost:8000/api/v1';
     const WS_URL = 'ws://localhost:8000/ws/alerts';
-    const API_KEY = 'SeiLa'; // Certifique-se de que é a chave exata do seu .env
+    const params = new URLSearchParams(window.location.search);
+    const API_KEY = params.get('api_key') || localStorage.getItem('IOT_API_KEY') || '';
+    if (params.get('api_key')) localStorage.setItem('IOT_API_KEY', params.get('api_key'));
+
+    function authHeaders() {
+        return API_KEY ? { 'X-API-Key': API_KEY } : {};
+    }
 
     // Função auxiliar para formatar texto (remover underscores e capitalizar)
     function formatText(text) {
@@ -341,7 +347,7 @@
             // 🚨 CORREÇÃO: Enviando a API_KEY no Header (X-API-Key)
             const resSensor = await fetch(`${API_BASE_URL}/sensors?minutos=10000000000`, {
                 method: 'GET',
-                headers: { 'X-API-Key': API_KEY }
+                headers: authHeaders()
             });
             const dataSensor = await resSensor.json();
             if (dataSensor.dados) {
@@ -352,7 +358,7 @@
             // 🚨 CORREÇÃO: Enviando a API_KEY no Header
             const resAlert = await fetch(`${API_BASE_URL}/alerts?minutos=10000000000`, {
                 method: 'GET',
-                headers: { 'X-API-Key': API_KEY }
+                headers: authHeaders()
             });
             const dataAlert = await resAlert.json();
             if (dataAlert.dados) {
@@ -495,7 +501,7 @@
             // 🚨 CORREÇÃO: Enviando a API_KEY no Header
             const res = await fetch(`${API_BASE_URL}/sensors?minutos=1`, {
                 method: 'GET',
-                headers: { 'X-API-Key': API_KEY }
+                headers: authHeaders()
             });
             const data = await res.json();
             if (data.dados) updateMap(data.dados);
