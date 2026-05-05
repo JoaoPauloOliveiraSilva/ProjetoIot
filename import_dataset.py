@@ -183,10 +183,11 @@ def send_rest(payload: dict[str, Any], api_url: str, api_key: str, timeout: floa
 def mqtt_client_from_args(args: argparse.Namespace):
     try:
         import paho.mqtt.client as mqtt
+        from paho.mqtt.enums import CallbackAPIVersion
     except ImportError as exc:
         raise RuntimeError("paho-mqtt is required for --mode mqtt. Install backend/requirements.txt first.") from exc
 
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+    client = mqtt.Client(CallbackAPIVersion.VERSION2)
     if args.mqtt_username or args.mqtt_password:
         client.username_pw_set(args.mqtt_username, args.mqtt_password)
     if args.mqtt_tls:

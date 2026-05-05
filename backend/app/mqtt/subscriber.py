@@ -1,6 +1,7 @@
 import json
 import logging
 import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 from app.core.config import settings
 from app.database import influx_db
 from app.models.sensor import SensorData
@@ -15,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 fastapi_loop = None
 
-def on_connect(client,userdata,flags,rc):
+def _reason_code_value(reason_code):
+    return int(getattr(reason_code, "value", reason_code))
+
+def on_connect(client, userdata, flags, reason_code, properties=None):
+    rc = _reason_code_value(reason_code)
     if rc == 0:
         logger.info(f"Ligado ao broker MQTT em {settings.MQTT_BROKER}:{settings.MQTT_PORT} (TLS: {settings.MQTT_TLS_ENABLED})")
         client.subscribe("/bike/+/telemetry",qos = 0)
@@ -27,7 +32,8 @@ def on_connect(client,userdata,flags,rc):
 
 
 
-def on_disconnect(client,userdata,rc):
+def on_disconnect(client, userdata, disconnect_flags, reason_code, properties=None):
+    rc = _reason_code_value(reason_code)
     if rc!=0:
         logger.info("Desligado do mqtt")
 
@@ -73,7 +79,7 @@ def on_message(client, userdata, msg):
         # Isto vai imprimir as linhas a vermelho no terminal dizendo exatamente ONDE falhou
         traceback.print_exc()   
 
-mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+mqtt_client = mqtt.Client(CallbackAPIVersion.VERSION2)
 
 if settings.MQTT_USERNAME and settings.MQTT_PASSWORD:
     mqtt_client.username_pw_set(settings.MQTT_USERNAME,settings.MQTT_PASSWORD)
