@@ -1,0 +1,93 @@
+{
+  "scenario_id": "traffic_jam_001",
+  "device_id": "scooter_braga_006",
+  "description": "Congestionamento com velocidade muito baixa durante janela prolongada.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1881.74,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T11:03:09Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5444183,
+      "lon": -8.4334785
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5398107,
+      "lon": -8.4380551
+    },
+    {
+      "lat": 41.5410223,
+      "lon": -8.4371645
+    },
+    {
+      "lat": 41.542028,
+      "lon": -8.4361602
+    },
+    {
+      "lat": 41.5430917,
+      "lon": -8.434974
+    },
+    {
+      "lat": 41.5442935,
+      "lon": -8.433502
+    },
+    {
+      "lat": 41.5446486,
+      "lon": -8.4333002
+    },
+    {
+      "lat": 41.5456338,
+      "lon": -8.4328033
+    },
+    {
+      "lat": 41.5467081,
+      "lon": -8.4326762
+    },
+    {
+      "lat": 41.547572,
+      "lon": -8.4323442
+    },
+    {
+      "lat": 41.5486779,
+      "lon": -8.4313765
+    },
+    {
+      "lat": 41.5493743,
+      "lon": -8.4305112
+    },
+    {
+      "lat": 41.5506764,
+      "lon": -8.4295844
+    },
+    {
+      "lat": 41.5525017,
+      "lon": -8.4296826
+    }
+  ]
+}

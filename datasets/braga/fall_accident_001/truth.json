@@ -1,0 +1,93 @@
+{
+  "scenario_id": "fall_accident_001",
+  "device_id": "scooter_braga_005",
+  "description": "Queda/acidente com pico de aceleracao e imobilizacao posterior.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1932.84,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "fall_accident",
+      "timestamp": "2026-05-05T10:52:33Z",
+      "expected_trigger": "accel_peak_exceeded",
+      "lat": 41.5531657,
+      "lon": -8.3934973
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5499292,
+      "lon": -8.3860286
+    },
+    {
+      "lat": 41.5497798,
+      "lon": -8.3869676
+    },
+    {
+      "lat": 41.5511603,
+      "lon": -8.389187
+    },
+    {
+      "lat": 41.5526124,
+      "lon": -8.3901772
+    },
+    {
+      "lat": 41.5532158,
+      "lon": -8.3915128
+    },
+    {
+      "lat": 41.55335,
+      "lon": -8.3927558
+    },
+    {
+      "lat": 41.5532974,
+      "lon": -8.3940445
+    },
+    {
+      "lat": 41.5528526,
+      "lon": -8.3950065
+    },
+    {
+      "lat": 41.5530195,
+      "lon": -8.3953523
+    },
+    {
+      "lat": 41.5531326,
+      "lon": -8.3970823
+    },
+    {
+      "lat": 41.5531969,
+      "lon": -8.3994267
+    },
+    {
+      "lat": 41.5539839,
+      "lon": -8.4003095
+    },
+    {
+      "lat": 41.5535324,
+      "lon": -8.4007852
+    }
+  ]
+}

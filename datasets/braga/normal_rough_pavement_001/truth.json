@@ -1,0 +1,81 @@
+{
+  "scenario_id": "normal_rough_pavement_001",
+  "device_id": "scooter_braga_003",
+  "description": "Percurso sem acidente mas com vibracao de piso irregular para testar falsos positivos.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1859.01,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.5479242,
+      "lon": -8.4373155
+    },
+    {
+      "lat": 41.5472397,
+      "lon": -8.4380679
+    },
+    {
+      "lat": 41.5458859,
+      "lon": -8.4369288
+    },
+    {
+      "lat": 41.544886,
+      "lon": -8.435324
+    },
+    {
+      "lat": 41.5446537,
+      "lon": -8.433752
+    },
+    {
+      "lat": 41.544138,
+      "lon": -8.4335969
+    },
+    {
+      "lat": 41.5432845,
+      "lon": -8.4341054
+    },
+    {
+      "lat": 41.5417437,
+      "lon": -8.4342867
+    },
+    {
+      "lat": 41.5402359,
+      "lon": -8.4337995
+    },
+    {
+      "lat": 41.5394566,
+      "lon": -8.4334315
+    },
+    {
+      "lat": 41.5379456,
+      "lon": -8.432391
+    },
+    {
+      "lat": 41.5367412,
+      "lon": -8.4318648
+    }
+  ]
+}

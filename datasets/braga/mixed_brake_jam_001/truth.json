@@ -1,0 +1,96 @@
+{
+  "scenario_id": "mixed_brake_jam_001",
+  "device_id": "scooter_braga_007",
+  "description": "Percurso com travagem brusca e posterior congestionamento.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2970.63,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T11:15:33Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5658954,
+      "lon": -8.4428624
+    },
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T11:16:03Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5660876,
+      "lon": -8.441583
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5678564,
+      "lon": -8.4510127
+    },
+    {
+      "lat": 41.5661317,
+      "lon": -8.4505367
+    },
+    {
+      "lat": 41.565691,
+      "lon": -8.4495732
+    },
+    {
+      "lat": 41.5657785,
+      "lon": -8.4474076
+    },
+    {
+      "lat": 41.5655944,
+      "lon": -8.4451561
+    },
+    {
+      "lat": 41.5659603,
+      "lon": -8.4402661
+    },
+    {
+      "lat": 41.5662237,
+      "lon": -8.4387493
+    },
+    {
+      "lat": 41.5675001,
+      "lon": -8.4377509
+    },
+    {
+      "lat": 41.5692059,
+      "lon": -8.4345571
+    },
+    {
+      "lat": 41.5713694,
+      "lon": -8.4308816
+    },
+    {
+      "lat": 41.5718459,
+      "lon": -8.4296544
+    },
+    {
+      "lat": 41.5733491,
+      "lon": -8.428423
+    }
+  ]
+}

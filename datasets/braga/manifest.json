@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-05-05T14:10:20.874511Z",
+  "generator": "scripts/generate_braga_datasets.py",
+  "city": "Braga, Portugal",
+  "coordinate_source": "OpenStreetMap via Overpass API",
+  "bbox_south_west_north_east": [
+    41.52,
+    -8.47,
+    41.59,
+    -8.35
+  ],
+  "sample_period_s": 1,
+  "sensors_minimum": [
+    "gps",
+    "imu",
+    "ultrasonic"
+  ],
+  "datasets": [
+    {
+      "scenario_id": "normal_001",
+      "device_id": "scooter_braga_001",
+      "rows": 400,
+      "route_length_m": 1664.95,
+      "event_types": [],
+      "telemetry_csv": "datasets\\braga\\normal_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\normal_001\\truth.json"
+    },
+    {
+      "scenario_id": "normal_stop_and_go_001",
+      "device_id": "scooter_braga_002",
+      "rows": 431,
+      "route_length_m": 1503.25,
+      "event_types": [],
+      "telemetry_csv": "datasets\\braga\\normal_stop_and_go_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\normal_stop_and_go_001\\truth.json"
+    },
+    {
+      "scenario_id": "normal_rough_pavement_001",
+      "device_id": "scooter_braga_003",
+      "rows": 671,
+      "route_length_m": 1859.01,
+      "event_types": [],
+      "telemetry_csv": "datasets\\braga\\normal_rough_pavement_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\normal_rough_pavement_001\\truth.json"
+    },
+    {
+      "scenario_id": "hard_brake_001",
+      "device_id": "scooter_braga_004",
+      "rows": 404,
+      "route_length_m": 1419.89,
+      "event_types": [
+        "hard_brake"
+      ],
+      "telemetry_csv": "datasets\\braga\\hard_brake_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\hard_brake_001\\truth.json"
+    },
+    {
+      "scenario_id": "fall_accident_001",
+      "device_id": "scooter_braga_005",
+      "rows": 304,
+      "route_length_m": 1932.84,
+      "event_types": [
+        "fall_accident"
+      ],
+      "telemetry_csv": "datasets\\braga\\fall_accident_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\fall_accident_001\\truth.json"
+    },
+    {
+      "scenario_id": "traffic_jam_001",
+      "device_id": "scooter_braga_006",
+      "rows": 630,
+      "route_length_m": 1881.74,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "telemetry_csv": "datasets\\braga\\traffic_jam_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\traffic_jam_001\\truth.json"
+    },
+    {
+      "scenario_id": "mixed_brake_jam_001",
+      "device_id": "scooter_braga_007",
+      "rows": 806,
+      "route_length_m": 2970.63,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "telemetry_csv": "datasets\\braga\\mixed_brake_jam_001\\telemetry.csv",
+      "truth_json": "datasets\\braga\\mixed_brake_jam_001\\truth.json"
+    }
+  ]
+}

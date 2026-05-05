@@ -1,0 +1,93 @@
+{
+  "scenario_id": "hard_brake_001",
+  "device_id": "scooter_braga_004",
+  "description": "Travagem brusca com queda rapida de velocidade e desaceleracao longitudinal.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1419.89,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T10:38:19Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5281782,
+      "lon": -8.4535
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5339238,
+      "lon": -8.4506765
+    },
+    {
+      "lat": 41.533099,
+      "lon": -8.451612
+    },
+    {
+      "lat": 41.5320844,
+      "lon": -8.4527741
+    },
+    {
+      "lat": 41.5308966,
+      "lon": -8.453787
+    },
+    {
+      "lat": 41.5290765,
+      "lon": -8.4538808
+    },
+    {
+      "lat": 41.5279748,
+      "lon": -8.4526932
+    },
+    {
+      "lat": 41.5274128,
+      "lon": -8.452384
+    },
+    {
+      "lat": 41.5267406,
+      "lon": -8.451692
+    },
+    {
+      "lat": 41.5262425,
+      "lon": -8.450243
+    },
+    {
+      "lat": 41.5259096,
+      "lon": -8.4492546
+    },
+    {
+      "lat": 41.5257045,
+      "lon": -8.4484705
+    },
+    {
+      "lat": 41.5255369,
+      "lon": -8.4482428
+    },
+    {
+      "lat": 41.5252126,
+      "lon": -8.4479948
+    }
+  ]
+}
