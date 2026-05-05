@@ -6,8 +6,8 @@ metadata:
 type: Opaque
 stringData:
   username: admin
-  password: admin
-  admin-token: admin
+  password: adminadmin
+  admin-token: adminadmin
 ---
 apiVersion: v1
 kind: ConfigMap

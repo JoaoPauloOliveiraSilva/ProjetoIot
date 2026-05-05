@@ -43,7 +43,7 @@ spec:
         command:
         - sh
         - -c
-        - mosquitto_passwd -b -c /mosquitto/password/passwords "$MQTT_USERNAME" "$MQTT_PASSWORD"
+        - mosquitto_passwd -b -c /mosquitto/password/passwords "$MQTT_USERNAME" "$MQTT_PASSWORD" && chmod 0644 /mosquitto/password/passwords
         env:
         - name: MQTT_USERNAME
           valueFrom:

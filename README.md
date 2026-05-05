@@ -82,8 +82,8 @@ Serviços:
 - Backend: `http://localhost:8000`
 - Health: `http://localhost:8000/health`
 - Readiness: `http://localhost:8000/health/ready`
-- InfluxDB: `http://localhost:18086`
-- MQTT: `localhost:1883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
+- InfluxDB: `http://localhost:18086` com `admin/adminadmin`
+- MQTT: `localhost:1884` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
 
 ### 2. Execução Manual do Backend
 
@@ -106,7 +106,7 @@ python import_dataset.py --mode dry-run
 python import_dataset.py --mode rest --api-key iot
 
 # Enviar por MQTT com telemetria em QoS 0
-python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1883 --mqtt-username iot --mqtt-password iot
+python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1884 --mqtt-username iot --mqtt-password iot
 
 # Opcional: publicar também os alertas esperados do truth.json em /bike/{id}/alert com QoS 1
 python import_dataset.py --mode mqtt --mqtt-username iot --mqtt-password iot --publish-truth-alerts
@@ -121,7 +121,7 @@ python scripts\validate_braga_datasets.py --strict
 
 ### 5. Deploy Kubernetes
 
-Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/admin`).
+Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/adminadmin`).
 
 ```powershell
 docker build -t iot-backend:latest .\backend

@@ -5,5 +5,7 @@ if [ -z "${MQTT_USERNAME:-}" ] || [ -z "${MQTT_PASSWORD:-}" ]; then
   exit 1
 fi
 
-mosquitto_passwd -b -c /mosquitto/data/passwords "$MQTT_USERNAME" "$MQTT_PASSWORD"
+rm -f /tmp/mosquitto-passwords
+mosquitto_passwd -b -c /tmp/mosquitto-passwords "$MQTT_USERNAME" "$MQTT_PASSWORD"
+chmod 0644 /tmp/mosquitto-passwords
 exec mosquitto -c /mosquitto/config/mosquitto.conf

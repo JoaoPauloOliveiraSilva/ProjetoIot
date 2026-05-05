@@ -10,10 +10,10 @@ services:
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_USERNAME:-admin}
-      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:-admin}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:-adminadmin}
       DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:-uminho_mei}
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:-Iot}
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-admin}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-adminadmin}
     volumes:
       - influxdb-data:/var/lib/influxdb2
     healthcheck:
@@ -27,7 +27,7 @@ services:
     container_name: iot-mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"
+      - "${MQTT_HOST_PORT:-1884}:1883"
     environment:
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
@@ -49,12 +49,12 @@ services:
     container_name: iot-backend
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${BACKEND_HOST_PORT:-8000}:8000"
     environment:
       INFLUX_URL: http://influxdb:8086
       INFLUX_ORG: ${INFLUX_ORG:-uminho_mei}
       INFLUX_BUCKET: ${INFLUX_BUCKET:-Iot}
-      INFLUX_TOKEN: ${INFLUX_TOKEN:-admin}
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-adminadmin}
       API_KEY_EDGE: ${API_KEY_EDGE:-iot}
       MQTT_BROKER: mosquitto
       MQTT_PORT: 1883
@@ -79,7 +79,7 @@ services:
     container_name: iot-dashboard
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${DASHBOARD_HOST_PORT:-8080}:80"
     depends_on:
       backend:
         condition: service_healthy
