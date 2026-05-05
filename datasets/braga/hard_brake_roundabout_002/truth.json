@@ -1,0 +1,97 @@
+{
+  "scenario_id": "hard_brake_roundabout_002",
+  "device_id": "scooter_braga_013",
+  "description": "Travagem brusca num percurso urbano curto.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 984.05,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T12:25:42Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5565567,
+      "lon": -8.4290563
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5577542,
+      "lon": -8.4262576
+    },
+    {
+      "lat": 41.5586807,
+      "lon": -8.4271077
+    },
+    {
+      "lat": 41.5584477,
+      "lon": -8.427785
+    },
+    {
+      "lat": 41.5577812,
+      "lon": -8.4279069
+    },
+    {
+      "lat": 41.5569687,
+      "lon": -8.4282163
+    },
+    {
+      "lat": 41.5565961,
+      "lon": -8.4286493
+    },
+    {
+      "lat": 41.5565113,
+      "lon": -8.429859
+    },
+    {
+      "lat": 41.5564488,
+      "lon": -8.4307759
+    },
+    {
+      "lat": 41.5562142,
+      "lon": -8.4309412
+    },
+    {
+      "lat": 41.5560386,
+      "lon": -8.4315947
+    },
+    {
+      "lat": 41.5558311,
+      "lon": -8.4321043
+    },
+    {
+      "lat": 41.5556549,
+      "lon": -8.4327039
+    },
+    {
+      "lat": 41.5555768,
+      "lon": -8.4335431
+    },
+    {
+      "lat": 41.555515,
+      "lon": -8.4336612
+    }
+  ]
+}

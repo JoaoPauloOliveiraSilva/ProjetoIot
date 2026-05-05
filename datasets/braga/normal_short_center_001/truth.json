@@ -1,0 +1,101 @@
+{
+  "scenario_id": "normal_short_center_001",
+  "device_id": "scooter_braga_008",
+  "description": "Percurso curto urbano no centro de Braga, sem eventos criticos.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 637.67,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.5421324,
+      "lon": -8.3986402
+    },
+    {
+      "lat": 41.5422314,
+      "lon": -8.3986907
+    },
+    {
+      "lat": 41.542302,
+      "lon": -8.3987777
+    },
+    {
+      "lat": 41.5424038,
+      "lon": -8.3990018
+    },
+    {
+      "lat": 41.542548,
+      "lon": -8.399037
+    },
+    {
+      "lat": 41.5438368,
+      "lon": -8.3993148
+    },
+    {
+      "lat": 41.5444253,
+      "lon": -8.3993103
+    },
+    {
+      "lat": 41.5446177,
+      "lon": -8.399251
+    },
+    {
+      "lat": 41.5446728,
+      "lon": -8.3992366
+    },
+    {
+      "lat": 41.5446979,
+      "lon": -8.3993811
+    },
+    {
+      "lat": 41.5447596,
+      "lon": -8.3994727
+    },
+    {
+      "lat": 41.54486,
+      "lon": -8.3995441
+    },
+    {
+      "lat": 41.5449208,
+      "lon": -8.4005474
+    },
+    {
+      "lat": 41.5449795,
+      "lon": -8.401642
+    },
+    {
+      "lat": 41.5450567,
+      "lon": -8.4020793
+    },
+    {
+      "lat": 41.54537,
+      "lon": -8.4021108
+    },
+    {
+      "lat": 41.5457747,
+      "lon": -8.4022107
+    }
+  ]
+}

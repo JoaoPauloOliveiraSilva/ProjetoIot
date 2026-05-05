@@ -86,7 +86,7 @@ def analyze_telemetry(data: SensorData) -> AlertData | None:
             duration = _seconds_between(state["jam_start_time"], current_time)
             enough_time = duration >= settings.JAM_TIME_WINDOW_SEC
             enough_samples = state["jam_samples"] >= settings.JAM_MIN_CONSECUTIVE_SAMPLES
-            if enough_time and enough_samples and not state["jam_alerted"]:
+            if (enough_time or enough_samples) and not state["jam_alerted"]:
                 state["jam_alerted"] = True
                 logger.warning(f"Congestionamento detetado no dispositivo {data.device_id}!")
                 return create_alert(data, "traffic_jam", "prolonged_low_speed")

@@ -1,0 +1,89 @@
+{
+  "scenario_id": "traffic_jam_center_002",
+  "device_id": "scooter_braga_017",
+  "description": "Congestionamento em percurso urbano central.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1503.7,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T13:14:44Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5577156,
+      "lon": -8.4166906
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.556937,
+      "lon": -8.4116181
+    },
+    {
+      "lat": 41.5571353,
+      "lon": -8.4123154
+    },
+    {
+      "lat": 41.5569335,
+      "lon": -8.412773
+    },
+    {
+      "lat": 41.5572077,
+      "lon": -8.413595
+    },
+    {
+      "lat": 41.5578004,
+      "lon": -8.4148664
+    },
+    {
+      "lat": 41.557844,
+      "lon": -8.4153989
+    },
+    {
+      "lat": 41.557528,
+      "lon": -8.4174543
+    },
+    {
+      "lat": 41.5574479,
+      "lon": -8.4179574
+    },
+    {
+      "lat": 41.5564004,
+      "lon": -8.4206866
+    },
+    {
+      "lat": 41.5554836,
+      "lon": -8.422901
+    },
+    {
+      "lat": 41.5539559,
+      "lon": -8.4254258
+    },
+    {
+      "lat": 41.5539082,
+      "lon": -8.4257584
+    }
+  ]
+}

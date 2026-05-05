@@ -1,0 +1,85 @@
+{
+  "scenario_id": "normal_long_cross_city_001",
+  "device_id": "scooter_braga_010",
+  "description": "Percurso normal longo atravessando diferentes zonas da cidade.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 3977.49,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.5540236,
+      "lon": -8.4266119
+    },
+    {
+      "lat": 41.5514335,
+      "lon": -8.4291164
+    },
+    {
+      "lat": 41.5498543,
+      "lon": -8.4330838
+    },
+    {
+      "lat": 41.5492165,
+      "lon": -8.434643
+    },
+    {
+      "lat": 41.5493288,
+      "lon": -8.4381665
+    },
+    {
+      "lat": 41.5481349,
+      "lon": -8.4384068
+    },
+    {
+      "lat": 41.5449534,
+      "lon": -8.4388109
+    },
+    {
+      "lat": 41.5441585,
+      "lon": -8.4414619
+    },
+    {
+      "lat": 41.5443826,
+      "lon": -8.444978
+    },
+    {
+      "lat": 41.5422155,
+      "lon": -8.4505443
+    },
+    {
+      "lat": 41.5422125,
+      "lon": -8.4538131
+    },
+    {
+      "lat": 41.5427875,
+      "lon": -8.4550085
+    },
+    {
+      "lat": 41.543144,
+      "lon": -8.4585016
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "scenario_id": "fall_accident_long_003",
+  "device_id": "scooter_braga_016",
+  "description": "Queda/acidente depois de uma deslocacao mais longa.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2882.4,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "fall_accident",
+      "timestamp": "2026-05-05T13:06:20Z",
+      "expected_trigger": "accel_peak_exceeded",
+      "lat": 41.5490438,
+      "lon": -8.4308578
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5391062,
+      "lon": -8.4407562
+    },
+    {
+      "lat": 41.5406506,
+      "lon": -8.4383766
+    },
+    {
+      "lat": 41.5414728,
+      "lon": -8.4367688
+    },
+    {
+      "lat": 41.5427286,
+      "lon": -8.4354408
+    },
+    {
+      "lat": 41.5444974,
+      "lon": -8.4334607
+    },
+    {
+      "lat": 41.5446298,
+      "lon": -8.4329939
+    },
+    {
+      "lat": 41.5468415,
+      "lon": -8.4326424
+    },
+    {
+      "lat": 41.5484038,
+      "lon": -8.4316595
+    },
+    {
+      "lat": 41.5494502,
+      "lon": -8.4304354
+    },
+    {
+      "lat": 41.551864,
+      "lon": -8.4282497
+    },
+    {
+      "lat": 41.553439,
+      "lon": -8.4257675
+    },
+    {
+      "lat": 41.5547315,
+      "lon": -8.424109
+    },
+    {
+      "lat": 41.5550301,
+      "lon": -8.4212649
+    }
+  ]
+}

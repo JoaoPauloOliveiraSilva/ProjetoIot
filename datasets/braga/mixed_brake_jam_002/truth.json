@@ -1,0 +1,100 @@
+{
+  "scenario_id": "mixed_brake_jam_002",
+  "device_id": "scooter_braga_019",
+  "description": "Travagem brusca seguida de fila de transito numa rota media.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2088.73,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T13:38:41Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5422197,
+      "lon": -8.4179087
+    },
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T13:39:11Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5430549,
+      "lon": -8.4183131
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5398542,
+      "lon": -8.4170869
+    },
+    {
+      "lat": 41.5389977,
+      "lon": -8.4176663
+    },
+    {
+      "lat": 41.5386645,
+      "lon": -8.4182266
+    },
+    {
+      "lat": 41.5406517,
+      "lon": -8.4189453
+    },
+    {
+      "lat": 41.5419111,
+      "lon": -8.4178322
+    },
+    {
+      "lat": 41.5420986,
+      "lon": -8.4178826
+    },
+    {
+      "lat": 41.5428618,
+      "lon": -8.4182167
+    },
+    {
+      "lat": 41.5437474,
+      "lon": -8.418726
+    },
+    {
+      "lat": 41.544234,
+      "lon": -8.4189912
+    },
+    {
+      "lat": 41.5457303,
+      "lon": -8.4198965
+    },
+    {
+      "lat": 41.5450475,
+      "lon": -8.4232648
+    },
+    {
+      "lat": 41.5439878,
+      "lon": -8.4276719
+    },
+    {
+      "lat": 41.5427014,
+      "lon": -8.430929
+    }
+  ]
+}

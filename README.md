@@ -11,7 +11,7 @@ O sistema segue uma arquitetura modular em camadas:
 
 ## 📊 Especificação de Dados (Data Specification)
 
-Os datasets principais estão em `datasets/braga`, com rotas simuladas sobre ruas reais de Braga, Portugal. Cada cenário contém:
+Os datasets principais estão em `datasets/braga`, com 20 rotas simuladas sobre ruas reais de Braga, Portugal. Cada cenário contém:
 
 - `telemetry.csv`: telemetria temporal.
 - `truth.json`: eventos esperados para validação.
@@ -119,7 +119,20 @@ Compara os eventos esperados em `truth.json` com os alertas produzidos pelas reg
 python scripts\validate_braga_datasets.py --strict
 ```
 
-### 5. Deploy Kubernetes
+### 5. Simulação Contínua de Frota para Demo
+Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+
+```powershell
+# Recomendado: via MQTT, com telemetria QoS 0 para o broker do compose
+python simulate_fleet.py --mode mqtt --fleet-size 12 --speedup 5
+
+# Alternativa via REST
+python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
+```
+
+O simulador corre até `Ctrl+C`. Para usar todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 20`. Com o compose atual, o MQTT externo está em `localhost:1884`; o script já usa essa porta por defeito.
+
+### 6. Deploy Kubernetes
 
 Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/adminadmin`).
 

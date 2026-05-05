@@ -1,0 +1,85 @@
+{
+  "scenario_id": "normal_commute_002",
+  "device_id": "scooter_braga_009",
+  "description": "Percurso normal de deslocacao casa-trabalho com distancia media.",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2308.74,
+  "sample_period_s": 1,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.5573942,
+      "lon": -8.4420298
+    },
+    {
+      "lat": 41.5577939,
+      "lon": -8.4422464
+    },
+    {
+      "lat": 41.5602763,
+      "lon": -8.4459838
+    },
+    {
+      "lat": 41.5604537,
+      "lon": -8.4465317
+    },
+    {
+      "lat": 41.5614698,
+      "lon": -8.4479579
+    },
+    {
+      "lat": 41.5637203,
+      "lon": -8.4495364
+    },
+    {
+      "lat": 41.5647557,
+      "lon": -8.4501151
+    },
+    {
+      "lat": 41.5656547,
+      "lon": -8.450414
+    },
+    {
+      "lat": 41.5666015,
+      "lon": -8.4506553
+    },
+    {
+      "lat": 41.5677116,
+      "lon": -8.4509714
+    },
+    {
+      "lat": 41.5696223,
+      "lon": -8.4514412
+    },
+    {
+      "lat": 41.5721796,
+      "lon": -8.452591
+    },
+    {
+      "lat": 41.5744309,
+      "lon": -8.4527511
+    }
+  ]
+}
