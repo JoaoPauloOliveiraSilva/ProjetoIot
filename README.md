@@ -82,7 +82,7 @@ Serviços:
 - Backend: `http://localhost:8000`
 - Health: `http://localhost:8000/health`
 - Readiness: `http://localhost:8000/health/ready`
-- InfluxDB: `http://localhost:8086`
+- InfluxDB: `http://localhost:18086`
 - MQTT: `localhost:1883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
 
 ### 2. Execução Manual do Backend
