@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: iot-surveillance
+type: Opaque
+stringData:
+  api-key-edge: iot
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: iot-surveillance
+data:
+  influx-url: http://influxdb-service:8086
+  influx-org: uminho_mei
+  influx-bucket: Iot
+  mqtt-broker: mosquitto-service
+  mqtt-port: "1883"
+  mqtt-tls-enabled: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-backend
+  namespace: iot-surveillance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iot-backend
+  template:
+    metadata:
+      labels:
+        app: iot-backend
+    spec:
+      containers:
+      - name: backend
+        image: iot-backend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: INFLUX_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: influx-url
+        - name: INFLUX_ORG
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: influx-org
+        - name: INFLUX_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: influx-bucket
+        - name: INFLUX_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: influxdb-secret
+              key: admin-token
+        - name: API_KEY_EDGE
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: api-key-edge
+        - name: MQTT_BROKER
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: mqtt-broker
+        - name: MQTT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: mqtt-port
+        - name: MQTT_TLS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: mqtt-tls-enabled
+        - name: MQTT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mosquitto-secret
+              key: username
+        - name: MQTT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mosquitto-secret
+              key: password
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-backend-service
+  namespace: iot-surveillance
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      nodePort: 30080
+  selector:
+    app: iot-backend

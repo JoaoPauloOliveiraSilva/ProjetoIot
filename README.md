@@ -11,33 +11,16 @@ O sistema segue uma arquitetura modular em camadas:
 
 ## 📊 Especificação de Dados (Data Specification)
 
-Para que novos dados sejam importados corretamente via `import_dataset.py`, eles devem seguir as seguintes normas:
+Os datasets principais estão em `datasets/braga`, com rotas simuladas sobre ruas reais de Braga, Portugal. Cada cenário contém:
 
-### 1. Estrutura de Pastas
-O script espera uma hierarquia organizada por rotas e voltas:
-`Dataset_Root / [Route Name] / [Lap Name] /`
-- Exemplo: `Bike&Safe Dataset / First route / First lap /`
+- `telemetry.csv`: telemetria temporal.
+- `truth.json`: eventos esperados para validação.
 
-### 2. Formato dos Ficheiros (CSV)
-Cada subpasta de "Lap" deve conter pelo menos dois ficheiros identificáveis por palavras-chave no nome:
+Cada linha inclui pelo menos 3 sensores:
 
-- **Ficheiro GPS** (deve conter `GPS` no nome):
-  - **Formato**: CSV (separador `,` ou `;`).
-  - **Colunas obrigatórias**:
-    1. `Tipo` (deve ser a string "GPS").
-    2. `Latitude` (float).
-    3. `Longitude` (float).
-    4. `Velocidade` (float em m/s - o script converte para km/h).
-    5. `Timestamp` (float em milissegundos Unix).
-
-- **Ficheiro de Acelerómetro** (deve conter `accelerometer` no nome):
-  - **Formato**: CSV (separador `,` ou `;`).
-  - **Colunas obrigatórias**:
-    1. `Timestamp` (nanossegundos ou ID sequencial).
-    2. `Sensor ID` (ignorável).
-    3. `Accel X` (float).
-    4. `Accel Y` (float).
-    5. `Accel Z` (float).
+- GPS: `lat`, `lon`, `speed`, `gps_accuracy_m`
+- IMU: `accel_x`, `accel_y`, `accel_z`, `gyro_x`, `gyro_y`, `gyro_z`
+- Ultrassom: `range_front_m`, `range_left_m`, `ultrasonic_valid`
 
 ### 3. Requisitos de Ingestão via API
 Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSON deve respeitar o modelo `SensorData`:
@@ -75,25 +58,37 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 *   **Fluxo**: `loadInitialData()` busca histórico via REST -> WebSocket manager empurra alertas em tempo real -> UI ordena decrescentemente (mais recente primeiro).
 *   **API Key**: abrir o dashboard com `?api_key=...` guarda a chave no `localStorage` e evita credenciais hardcoded no HTML.
 
-### C. Validação com Datasets (Bike&Safe)
+### C. Validação com Datasets de Braga
 *   **Implementação**: [import_dataset.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/import_dataset.py)
-*   **Fluxo**: Lê CSVs brutos -> Sincroniza GPS/IMU -> Envia via API POST -> Ativa motor de deteção real-time.
+*   **Fluxo**: Lê `datasets/braga/*/telemetry.csv` -> Envia via REST ou MQTT -> Ativa motor de deteção real-time.
 
 ### D. Segurança e QoS
 *   **Segurança**: Middleware em [security.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/core/security.py) valida `X-API-Key`.
-*   **QoS (Pendente)**: Implementação de Priority Queue para eventos críticos.
+*   **MQTT**: Mosquitto local/Kubernetes usa username/password e `allow_anonymous false`.
+*   **QoS**: Telemetria é publicada em `/bike/{id}/telemetry` com QoS 0; alertas críticos podem ser publicados em `/bike/{id}/alert` com QoS 1.
 
 ## 🚀 Como Executar
 
-### 1. Iniciar Base de Dados (Docker)
-O InfluxDB deve estar a correr no Docker local:
+### 1. Executar Stack Completa com Docker Compose
+
 ```powershell
-docker ps | findstr influx
-# Caso precise listar o token:
-docker exec influxdb-iot influx auth list --json
+Copy-Item env.example .env
+docker compose up --build
 ```
 
-### 2. Configurar e Iniciar Backend
+Serviços:
+
+- Dashboard: `http://localhost:8080/?api_key=iot`
+- Backend: `http://localhost:8000`
+- Health: `http://localhost:8000/health`
+- Readiness: `http://localhost:8000/health/ready`
+- InfluxDB: `http://localhost:8086`
+- MQTT: `localhost:1883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
+
+### 2. Execução Manual do Backend
+
+O InfluxDB e o Mosquitto devem estar a correr. Para iniciar apenas o backend:
+
 ```powershell
 cd backend
 pip install -r requirements.txt
@@ -108,14 +103,13 @@ O script `import_dataset.py` reproduz os cenários em `datasets/braga/*/telemetr
 python import_dataset.py --mode dry-run
 
 # Enviar por REST para o backend
-$env:API_KEY_EDGE="a_sua_chave"
-python import_dataset.py --mode rest --api-key $env:API_KEY_EDGE
+python import_dataset.py --mode rest --api-key iot
 
 # Enviar por MQTT com telemetria em QoS 0
-python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1883
+python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1883 --mqtt-username iot --mqtt-password iot
 
 # Opcional: publicar também os alertas esperados do truth.json em /bike/{id}/alert com QoS 1
-python import_dataset.py --mode mqtt --publish-truth-alerts
+python import_dataset.py --mode mqtt --mqtt-username iot --mqtt-password iot --publish-truth-alerts
 ```
 
 ### 4. Validar Deteção nos Datasets
@@ -125,4 +119,20 @@ Compara os eventos esperados em `truth.json` com os alertas produzidos pelas reg
 python scripts\validate_braga_datasets.py --strict
 ```
 
-### 5. Simular Alerta Manual
+### 5. Deploy Kubernetes
+
+Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/admin`).
+
+```powershell
+docker build -t iot-backend:latest .\backend
+docker build -t iot-dashboard:latest -f .\frontend\Dockerfile .
+ansible-playbook -i ansible\inventory.ini ansible\deploy-manifests.yml
+```
+
+No dashboard Kubernetes, configurar a API por query string:
+
+```text
+http://<node-ip>:30081/?api_base=http://<node-ip>:30080/api/v1&ws_url=ws://<node-ip>:30080/ws/alerts&api_key=iot
+```
+
+### 6. Simular Alerta Manual

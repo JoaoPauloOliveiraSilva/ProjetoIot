@@ -4,6 +4,10 @@
   become: yes
   vars:
     project_path: "/home/netsim/Desktop/Iot_Project/backend"
+    influx_token: "{{ lookup('env', 'INFLUX_TOKEN') | default('admin', true) }}"
+    api_key_edge: "{{ lookup('env', 'API_KEY_EDGE') | default('iot', true) }}"
+    mqtt_username: "{{ lookup('env', 'MQTT_USERNAME') | default('iot', true) }}"
+    mqtt_password: "{{ lookup('env', 'MQTT_PASSWORD') | default('iot', true) }}"
 
   tasks:
     - name: "[Cleanup] Remover pacotes de container conflituantes"
@@ -81,16 +85,16 @@
       copy:
         dest: "{{ project_path }}/.env"
         content: |
-          INFLUX_TOKEN=Nn8dHuXk5odMxrKMzAwQI6OprwI28IgkI3SXYg-ZPE-5_5AwKlzH9uFXvaE9Tr3N7M_64tH2HaMLgii91ub0PQ==
+          INFLUX_TOKEN={{ influx_token }}
           INFLUX_ORG=uminho_mei
           INFLUX_BUCKET=Iot
           INFLUX_URL=http://100.68.134.61:32086
-          API_KEY_EDGE="SeiLa"
+          API_KEY_EDGE="{{ api_key_edge }}"
           MQTT_BROKER=100.68.134.61
           MQTT_PORT=31883
           MQTT_TLS_ENABLED=False
-          MQTT_USERNAME=admin
-          MQTT_PASSWORD=password123
+          MQTT_USERNAME={{ mqtt_username }}
+          MQTT_PASSWORD={{ mqtt_password }}
 
     - name: "[Docker] Build e Start do Contentor"
       shell: "docker-compose up -d --build"

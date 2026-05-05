@@ -20,6 +20,8 @@
         - 00-namespace.yaml
         - 01-mosquitto.yaml
         - 02-influxdb.yaml
+        - 03-backend.yaml
+        - 04-dashboard.yaml
 
     - name: Verificar estado dos Pods
       command: kubectl get pods -n iot-surveillance

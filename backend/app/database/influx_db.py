@@ -3,8 +3,9 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from app.core.config import settings
 from app.models.alert import AlertData 
 from app.models.sensor import SensorData
-from influxdb_client.client.query_api import QueryApi
+import json
 import logging
+import re
 from typing import Optional
 from datetime import datetime
 
@@ -12,6 +13,48 @@ logger = logging.getLogger(__name__)
 client = InfluxDBClient(url=settings.INFLUX_URL, token=settings.INFLUX_TOKEN, org=settings.INFLUX_ORG)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 query_api = client.query_api()  
+
+class InfluxDBError(RuntimeError):
+    pass
+
+_RELATIVE_TIME_RE = re.compile(r"^-\d+[smhdw]$")
+
+def _flux_string(value: str) -> str:
+    return json.dumps(value)
+
+def _bucket() -> str:
+    return _flux_string(settings.INFLUX_BUCKET)
+
+def _minutes_range(minutos: int) -> str:
+    if minutos < 1:
+        raise ValueError("minutos deve ser maior ou igual a 1")
+    return f"-{minutos}m"
+
+def _time_expr(value: str, allow_relative: bool = True) -> str:
+    value = value.strip()
+    if value == "now()":
+        return value
+    if allow_relative and _RELATIVE_TIME_RE.fullmatch(value):
+        return value
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"Expressão temporal inválida: {value}") from exc
+    return f"time(v: {_flux_string(value)})"
+
+def _query_or_raise(query: str):
+    try:
+        return query_api.query(query=query, org=settings.INFLUX_ORG)
+    except Exception as exc:
+        logger.error(f"Erro ao consultar InfluxDB: {exc}")
+        raise InfluxDBError(str(exc)) from exc
+
+def ping() -> bool:
+    try:
+        return bool(client.ping())
+    except Exception as exc:
+        logger.error(f"Erro no ping ao InfluxDB: {exc}")
+        return False
 
 SENSOR_OPTIONAL_FIELDS = [
     "gyro_x",
@@ -87,54 +130,44 @@ def _alert_record(registo):
 def get_all_devices():
     query = f"""
         import "influxdata/influxdb/schema"
-        schema.tagValues(bucket: "{settings.INFLUX_BUCKET}", tag: "device_id")
+        schema.tagValues(bucket: {_bucket()}, tag: "device_id")
     """
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        dispositivos = [registo.get_value() for tabela in tabelas for registo in tabela.records]
-        return dispositivos
-    except Exception as e:
-        logger.error(f"Erro ao listar dispositivos: {e}")
-        return []
+    tabelas = _query_or_raise(query)
+    dispositivos = [registo.get_value() for tabela in tabelas for registo in tabela.records]
+    return dispositivos
     
 def get_latest_device_state(device_id: str):
     """Obtém a última telemetria conhecida de um dispositivo."""
     query = f"""
-        from(bucket: "{settings.INFLUX_BUCKET}")
+        from(bucket: {_bucket()})
           |> range(start: -24h) // Procura na última janela de 24h
           |> filter(fn: (r) => r["_measurement"] == "Sensor")
-          |> filter(fn: (r) => r["device_id"] == "{device_id}")
+          |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})
           |> last()
           |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     """
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        for tabela in tabelas:
-            for registo in tabela.records:
-                return _sensor_record(registo)
-        return None
-    except Exception as e:
-        logger.error(f"Erro ao obter último estado do {device_id}: {e}")
-        return None
+    tabelas = _query_or_raise(query)
+    for tabela in tabelas:
+        for registo in tabela.records:
+            return _sensor_record(registo)
+    return None
 
 def get_device_history(device_id: str, start: str, end: str):
+    start_expr = _time_expr(start)
+    end_expr = _time_expr(end)
     query = f"""
-        from(bucket: "{settings.INFLUX_BUCKET}")
-          |> range(start: {start}, stop: {end})
+        from(bucket: {_bucket()})
+          |> range(start: {start_expr}, stop: {end_expr})
           |> filter(fn: (r) => r["_measurement"] == "Sensor")
-          |> filter(fn: (r) => r["device_id"] == "{device_id}")
+          |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})
           |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     """
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        resultados = []
-        for tabela in tabelas:
-            for registo in tabela.records:
-                resultados.append(_sensor_record(registo))
-        return resultados
-    except Exception as e:
-        logger.error(f"Erro ao obter histórico de {device_id}: {e}")
-        return []
+    tabelas = _query_or_raise(query)
+    resultados = []
+    for tabela in tabelas:
+        for registo in tabela.records:
+            resultados.append(_sensor_record(registo))
+    return resultados
     
     
         
@@ -164,9 +197,10 @@ def save_alert_data(data: AlertData):
             org=settings.INFLUX_ORG,
             record=ponto
         )
-        logger.info(f"✅ Alerta {data.device_id} gravado no InfluxDB!")
+        logger.info(f"Alerta {data.device_id} gravado no InfluxDB")
     except Exception as e:
-        logger.info(f"❌ Erro ao gravar no InfluxDB: {e}")
+        logger.error(f"Erro ao gravar alerta no InfluxDB: {e}")
+        raise InfluxDBError(str(e)) from e
         
         
 def save_sensor_data(data: SensorData):
@@ -193,81 +227,78 @@ def save_sensor_data(data: SensorData):
             org=settings.INFLUX_ORG,
             record=ponto
         )
-        logger.info(f"✅ Sensor {data.device_id} gravado no InfluxDB!")
+        logger.info(f"Sensor {data.device_id} gravado no InfluxDB")
     except Exception as e:
-        logger.info(f"❌ Erro ao gravar no InfluxDB: {e}")        
+        logger.error(f"Erro ao gravar sensor no InfluxDB: {e}")
+        raise InfluxDBError(str(e)) from e
         
         
 
-def get_recent_alerts(minutos: int, device_id: Optional[str] = None):
+def get_recent_alerts(minutos: int, device_id: Optional[str] = None, event_type: Optional[str] = None):
     query_lines = [
-        f'from(bucket: "{settings.INFLUX_BUCKET}")',
-        f'  |> range(start: -{minutos}m)',
+        f'from(bucket: {_bucket()})',
+        f'  |> range(start: {_minutes_range(minutos)})',
         '  |> filter(fn: (r) => r["_measurement"] == "Alert")'
     ]
     
     if device_id:
-        query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == "{device_id}")')
+        query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
+    if event_type:
+        query_lines.append(f'  |> filter(fn: (r) => r["event_type"] == {_flux_string(event_type)})')
         
     query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     query = "\n".join(query_lines)
     
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        resultados = []
-        for tabela in tabelas:
-            for registo in tabela.records:
-                resultados.append(_alert_record(registo))
-        return resultados
-    except Exception as e:
-        logger.error(f"Erro ao ler alertas do InfluxDB: {e}")
-        return []
+    tabelas = _query_or_raise(query)
+    resultados = []
+    for tabela in tabelas:
+        for registo in tabela.records:
+            resultados.append(_alert_record(registo))
+    return resultados
     
 def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
     query_lines = [
-        f'from(bucket: "{settings.INFLUX_BUCKET}")',
-        f'  |> range(start: -{minutos}m)',
+        f'from(bucket: {_bucket()})',
+        f'  |> range(start: {_minutes_range(minutos)})',
         '  |> filter(fn: (r) => r["_measurement"] == "Sensor")'
     ]
     
     if device_id:
-        query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == "{device_id}")')
+        query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
         
     query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     query = "\n".join(query_lines)
     
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        resultados = []
-        for tabela in tabelas:
-            for registo in tabela.records:
-                resultados.append(_sensor_record(registo))
-        return resultados
-    except Exception as e:
-        logger.error(f"Erro ao ler sensores do InfluxDB: {e}")
-        return []
+    tabelas = _query_or_raise(query)
+    resultados = []
+    for tabela in tabelas:
+        for registo in tabela.records:
+            resultados.append(_sensor_record(registo))
+    return resultados
 
-def get_alerts_stats():
-    query = f"""
-        from(bucket: "{settings.INFLUX_BUCKET}")
-          |> range(start: -30d)
-          |> filter(fn: (r) => r["_measurement"] == "Alert")
-          |> group(columns: ["event_type"])
-          |> count()
-    """
-    try:
-        tabelas = query_api.query(query=query, org=settings.INFLUX_ORG)
-        estatisticas = {}
-        for tabela in tabelas:
-            for registo in tabela.records:
-                evento = registo.values.get("event_type")
-                # O InfluxDB coloca a contagem na coluna '_value' após a função count()
-                estatisticas[evento] = registo.values.get("_value")
-        return estatisticas
-    except Exception as e:
-        logger.error(f"Erro ao obter estatísticas de alertas: {e}")
-        return {}
+def get_alerts_stats(minutos: int = 43200, device_id: Optional[str] = None):
+    query_lines = [
+        f'from(bucket: {_bucket()})',
+        f'  |> range(start: {_minutes_range(minutos)})',
+        '  |> filter(fn: (r) => r["_measurement"] == "Alert")',
+        '  |> filter(fn: (r) => r["_field"] == "lat")',
+    ]
+    if device_id:
+        query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
+    query_lines.extend([
+        '  |> group(columns: ["event_type"])',
+        '  |> count()',
+    ])
+    query = "\n".join(query_lines)
     
+    tabelas = _query_or_raise(query)
+    estatisticas = {}
+    for tabela in tabelas:
+        for registo in tabela.records:
+            evento = registo.values.get("event_type")
+            estatisticas[evento] = registo.values.get("_value")
+    return estatisticas
+
 def close_db_client():
     write_api.close()
     query_api.close()

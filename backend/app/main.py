@@ -1,8 +1,10 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import telemetry, alerts, devices
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+from app.core.security import is_valid_api_key
+from app.database import influx_db
 from app.mqtt.subscriber import start_mqtt, stop_mqtt
 from app.services.websocket_manager import manager  
 import asyncio
@@ -35,8 +37,22 @@ async def health():
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
+@app.get("/health/ready")
+async def readiness():
+    if not influx_db.ping():
+        raise HTTPException(status_code=503, detail="InfluxDB indisponível")
+    return {
+        "status": "ready",
+        "service": "iot-backend",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
 @app.websocket("/ws/alerts")
 async def websocket_endpoint(websocket: WebSocket):
+    api_key = websocket.query_params.get("api_key") or websocket.headers.get("x-api-key")
+    if not is_valid_api_key(api_key):
+        await websocket.close(code=1008)
+        return
     await manager.connect(websocket)
     try:
         while True:

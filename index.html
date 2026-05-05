@@ -285,14 +285,22 @@
 
 <script>
     // Configurações da API e WebSocket
-    const API_BASE_URL = 'http://localhost:8000/api/v1';
-    const WS_URL = 'ws://localhost:8000/ws/alerts';
     const params = new URLSearchParams(window.location.search);
+    const API_BASE_URL = params.get('api_base') || localStorage.getItem('IOT_API_BASE_URL') || 'http://localhost:8000/api/v1';
+    const WS_URL = params.get('ws_url') || localStorage.getItem('IOT_WS_URL') || 'ws://localhost:8000/ws/alerts';
     const API_KEY = params.get('api_key') || localStorage.getItem('IOT_API_KEY') || '';
+    if (params.get('api_base')) localStorage.setItem('IOT_API_BASE_URL', params.get('api_base'));
+    if (params.get('ws_url')) localStorage.setItem('IOT_WS_URL', params.get('ws_url'));
     if (params.get('api_key')) localStorage.setItem('IOT_API_KEY', params.get('api_key'));
 
     function authHeaders() {
         return API_KEY ? { 'X-API-Key': API_KEY } : {};
+    }
+
+    function websocketUrl() {
+        if (!API_KEY) return WS_URL;
+        const separator = WS_URL.includes('?') ? '&' : '?';
+        return `${WS_URL}${separator}api_key=${encodeURIComponent(API_KEY)}`;
     }
 
     // Função auxiliar para formatar texto (remover underscores e capitalizar)
@@ -467,7 +475,7 @@
 
     // Conexão WebSocket para receber alertas em tempo real
     function connectWebSocket() {
-        const ws = new WebSocket(WS_URL);
+        const ws = new WebSocket(websocketUrl());
         
         ws.onopen = () => console.log("✅ WebSocket conectado com sucesso!");
         

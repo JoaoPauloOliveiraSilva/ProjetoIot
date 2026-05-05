@@ -1,15 +1,26 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: mosquitto-secret
+  namespace: iot-surveillance
+type: Opaque
+stringData:
+  username: iot
+  password: iot
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mosquitto-config
   namespace: iot-surveillance
 data:
   mosquitto.conf: |
-    listener 1883
-    allow_anonymous true
-    
-    listener 8883
-    allow_anonymous true
+    listener 1883 0.0.0.0
+    allow_anonymous false
+    password_file /mosquitto/password/passwords
+    persistence true
+    persistence_location /mosquitto/data/
+    log_dest stdout
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -26,20 +37,61 @@ spec:
       labels:
         app: mosquitto
     spec:
+      initContainers:
+      - name: init-password-file
+        image: eclipse-mosquitto:2
+        command:
+        - sh
+        - -c
+        - mosquitto_passwd -b -c /mosquitto/password/passwords "$MQTT_USERNAME" "$MQTT_PASSWORD"
+        env:
+        - name: MQTT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mosquitto-secret
+              key: username
+        - name: MQTT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mosquitto-secret
+              key: password
+        volumeMounts:
+        - name: password
+          mountPath: /mosquitto/password
       containers:
       - name: mosquitto
         image: eclipse-mosquitto:2
         ports:
         - containerPort: 1883
-        - containerPort: 8883
+          name: mqtt
+        readinessProbe:
+          tcpSocket:
+            port: 1883
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 1883
+          initialDelaySeconds: 15
+          periodSeconds: 20
         volumeMounts:
         - name: config
           mountPath: /mosquitto/config/mosquitto.conf
           subPath: mosquitto.conf
+          readOnly: true
+        - name: password
+          mountPath: /mosquitto/password
+          readOnly: true
+        - name: data
+          mountPath: /mosquitto/data
       volumes:
       - name: config
         configMap:
           name: mosquitto-config
+      - name: password
+        emptyDir: {}
+      - name: data
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -51,9 +103,7 @@ spec:
   ports:
     - name: mqtt
       port: 1883
+      targetPort: 1883
       nodePort: 31883
-    - name: mqtts
-      port: 8883
-      nodePort: 30883 # <--- CORRIGIDO AQUI (antes era 32883)
   selector:
     app: mosquitto

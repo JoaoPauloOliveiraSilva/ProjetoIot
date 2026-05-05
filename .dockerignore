@@ -1,0 +1,12 @@
+.git
+__pycache__/
+*.py[cod]
+backend/venv/
+backend/**/__pycache__/
+datasets/**/_cache/
+all_sensor_data/
+example_sensor_data/
+*.pdf
+.env
+*.env
+*.env.*
