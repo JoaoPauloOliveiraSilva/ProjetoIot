@@ -4,7 +4,7 @@ Replay Braga scooter simulation datasets into the IoT backend.
 
 Examples:
   python import_dataset.py --mode rest --api-key %API_KEY_EDGE%
-  python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1884
+  python import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883
   python import_dataset.py --mode dry-run --scenario fall_accident_001
 """
 
@@ -27,6 +27,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "braga"
 DEFAULT_API_URL = f"http://127.0.0.1:{os.getenv('BACKEND_HOST_PORT', '8000')}/api/v1/sensors"
+DEFAULT_MQTT_PORT = 8883
 
 SEND_FIELDS = {
     "device_id",
@@ -264,7 +265,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--api-key", default=os.getenv("API_KEY_EDGE") or os.getenv("IOT_API_KEY", ""), help="REST API key.")
     parser.add_argument("--timeout", type=float, default=10.0, help="REST request timeout in seconds.")
     parser.add_argument("--mqtt-host", default=os.getenv("MQTT_BROKER", "localhost"), help="MQTT broker host.")
-    parser.add_argument("--mqtt-port", type=int, default=int(os.getenv("MQTT_HOST_PORT") or os.getenv("MQTT_PORT", "1884")), help="MQTT broker port.")
+    parser.add_argument("--mqtt-port", type=int, default=int(os.getenv("MQTT_HOST_PORT") or os.getenv("MQTT_PORT", str(DEFAULT_MQTT_PORT))), help="MQTT broker port.")
     parser.add_argument("--mqtt-username", default=os.getenv("MQTT_USERNAME", ""), help="MQTT username.")
     parser.add_argument("--mqtt-password", default=os.getenv("MQTT_PASSWORD", ""), help="MQTT password.")
     parser.add_argument("--mqtt-tls", action="store_true", help="Enable MQTT TLS.")

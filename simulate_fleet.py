@@ -24,6 +24,7 @@ from typing import Any
 from import_dataset import (
     DEFAULT_API_URL,
     DEFAULT_DATASET_ROOT,
+    DEFAULT_MQTT_PORT,
     Scenario,
     discover_scenarios,
     parse_timestamp,
@@ -188,7 +189,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--api-key", default=os.getenv("API_KEY_EDGE") or os.getenv("IOT_API_KEY", "iot"), help="REST API key.")
     parser.add_argument("--timeout", type=float, default=10.0, help="REST request timeout in seconds.")
     parser.add_argument("--mqtt-host", default=os.getenv("MQTT_BROKER", "localhost"), help="MQTT broker host.")
-    parser.add_argument("--mqtt-port", type=int, default=int(os.getenv("MQTT_HOST_PORT") or os.getenv("MQTT_PORT", "1884")), help="MQTT broker port.")
+    parser.add_argument("--mqtt-port", type=int, default=int(os.getenv("MQTT_HOST_PORT") or os.getenv("MQTT_PORT", str(DEFAULT_MQTT_PORT))), help="MQTT broker port.")
     parser.add_argument("--mqtt-username", default=os.getenv("MQTT_USERNAME", "iot"), help="MQTT username.")
     parser.add_argument("--mqtt-password", default=os.getenv("MQTT_PASSWORD", "iot"), help="MQTT password.")
     parser.add_argument("--mqtt-tls", action="store_true", help="Enable MQTT TLS.")

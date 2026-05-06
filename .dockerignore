@@ -2,8 +2,11 @@
 __pycache__/
 *.py[cod]
 backend/venv/
+venv/
+.venv/
 backend/**/__pycache__/
 datasets/**/_cache/
+mosquitto-ca*.crt
 all_sensor_data/
 example_sensor_data/
 *.pdf

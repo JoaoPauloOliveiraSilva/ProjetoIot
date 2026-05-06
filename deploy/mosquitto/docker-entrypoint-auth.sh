@@ -1,3 +1,4 @@
+#!/bin/sh
 set -eu
 
 if [ -z "${MQTT_USERNAME:-}" ] || [ -z "${MQTT_PASSWORD:-}" ]; then
@@ -25,4 +26,5 @@ rm -f /tmp/mosquitto-passwords
 mosquitto_passwd -b -c /tmp/mosquitto-passwords "$MQTT_USERNAME" "$MQTT_PASSWORD"
 chmod 0700 /tmp/mosquitto-passwords
 chown mosquitto:mosquitto /tmp/mosquitto-passwords || true
+
 exec mosquitto -c /mosquitto/config/mosquitto.conf

@@ -5,3 +5,8 @@
 __pycache__/
 *.py[cod]
 datasets/**/_cache/
+venv/
+.venv/
+backend/venv/
+backend/**/__pycache__/
+mosquitto-ca*.crt

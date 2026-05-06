@@ -166,10 +166,10 @@ python import_dataset.py --mode dry-run
 python import_dataset.py --mode rest --api-key iot
 
 # Enviar por MQTT (TLS) com telemetria em QoS 0
-python import_dataset.py --mode mqtt --mqtt-tls --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot
+python import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot
 
 # Opcional: publicar também os alertas esperados do truth.json em /bike/{id}/alert com QoS 1
-python import_dataset.py --mode mqtt --mqtt-tls --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --publish-truth-alerts
+python import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --publish-truth-alerts
 ```
 
 ### 4. Validar Deteção nos Datasets
@@ -179,12 +179,19 @@ Compara os eventos esperados em `truth.json` com os alertas produzidos pelas reg
 python scripts\validate_braga_datasets.py --strict
 ```
 
-### 5. Simulação Contínua de Frota para Demo
+### 5. Smoke Test da Stack
+Com a stack Docker a correr, este teste verifica automaticamente backend, dashboard, REST, MQTT TLS, QoS 0/1, persistência no InfluxDB e endpoint de QoS. Se `.\mosquitto-ca.crt` ainda não existir, o script tenta exportar a CA do container `iot-mosquitto`.
+
+```powershell
+python scripts\smoke_test_stack.py
+```
+
+### 6. Simulação Contínua de Frota para Demo
 Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
 # Recomendado: via MQTT (TLS), com telemetria QoS 0 para o broker do compose
-python simulate_fleet.py --mode mqtt --mqtt-tls --fleet-size 12 --speedup 5
+python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-port 8883 --fleet-size 12 --speedup 5
 
 # Alternativa via REST
 python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
@@ -192,7 +199,7 @@ python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
 
 O simulador corre até `Ctrl+C`. Para usar todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 20`. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS).
 
-### 6. Deploy Kubernetes
+### 7. Deploy Kubernetes
 
 Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/adminadmin`).
 
@@ -208,4 +215,4 @@ No dashboard Kubernetes, configurar a API por query string:
 http://<node-ip>:30081/?api_base=http://<node-ip>:30080/api/v1&ws_url=ws://<node-ip>:30080/ws/alerts&api_key=iot
 ```
 
-### 6. Simular Alerta Manual
+### 8. Simular Alerta Manual
