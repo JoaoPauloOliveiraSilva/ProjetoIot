@@ -149,6 +149,35 @@
             height: 400px;
         }
 
+        .qos-container {
+            height: 200px;
+        }
+
+        .qos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .qos-metric {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: rgba(22, 93, 255, 0.04);
+        }
+
+        .qos-metric .label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 2px;
+        }
+
+        .qos-metric .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
         #alerts-list {
             height: 320px;
             overflow-y: auto;
@@ -253,6 +282,51 @@
                 </div>
                 <div class="card-body">
                     <div id="alerts-list">Carregando alertas...</div>
+                </div>
+            </div>
+
+            <div class="card qos-container">
+                <div class="card-header">
+                    <i class="fas fa-network-wired"></i> Fila MQTT (QoS)
+                </div>
+                <div class="card-body">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                        <div style="font-size:12px; color:var(--text-light);">
+                            Estado: <span id="qos-connected">-</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-light); text-align:right;">
+                            Processamento: <span id="qos-rate">0.0</span>/s
+                        </div>
+                    </div>
+                    <div class="qos-grid">
+                        <div class="qos-metric">
+                            <div class="label">Pendente QoS 1 (alertas)</div>
+                            <div class="value" id="qos-pending-qos1">0</div>
+                        </div>
+                        <div class="qos-metric">
+                            <div class="label">Pendente QoS 0 (telemetria)</div>
+                            <div class="value" id="qos-pending-qos0">0</div>
+                        </div>
+                        <div class="qos-metric">
+                            <div class="label">Processado QoS 1</div>
+                            <div class="value" id="qos-processed-qos1">0</div>
+                        </div>
+                        <div class="qos-metric">
+                            <div class="label">Processado QoS 0</div>
+                            <div class="value" id="qos-processed-qos0">0</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size:12px; color:var(--text-light); display:flex; justify-content:space-between; gap:10px;">
+                        <div>Espera 60s (QoS1 avg/p95): <span id="qos-wait-qos1">-</span> ms</div>
+                        <div>Espera 60s (QoS0 avg/p95): <span id="qos-wait-qos0">-</span> ms</div>
+                    </div>
+                    <div style="margin-top: 6px; font-size:12px; color:var(--text-light); display:flex; justify-content:space-between; gap:10px;">
+                        <div>Proc. 60s (QoS1 avg/p95): <span id="qos-proc-qos1">-</span> ms</div>
+                        <div>Proc. 60s (QoS0 avg/p95): <span id="qos-proc-qos0">-</span> ms</div>
+                    </div>
+                    <div style="margin-top: 10px; font-size:12px; color:var(--text-light);">
+                        Último: <span id="qos-last">-</span>
+                    </div>
                 </div>
             </div>
 
@@ -502,6 +576,60 @@
 
     loadInitialData();
     connectWebSocket();
+
+    async function loadQosStatus() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/qos/status`, {
+                method: 'GET',
+                headers: authHeaders()
+            });
+            const data = await res.json();
+            const qos = data.qos;
+            if (!qos) return;
+
+            const connectedEl = document.getElementById('qos-connected');
+            const pendingQos1El = document.getElementById('qos-pending-qos1');
+            const pendingQos0El = document.getElementById('qos-pending-qos0');
+            const processedQos1El = document.getElementById('qos-processed-qos1');
+            const processedQos0El = document.getElementById('qos-processed-qos0');
+            const rateEl = document.getElementById('qos-rate');
+            const lastEl = document.getElementById('qos-last');
+            const waitQos1El = document.getElementById('qos-wait-qos1');
+            const waitQos0El = document.getElementById('qos-wait-qos0');
+            const procQos1El = document.getElementById('qos-proc-qos1');
+            const procQos0El = document.getElementById('qos-proc-qos0');
+
+            if (!connectedEl || !pendingQos1El || !pendingQos0El || !processedQos1El || !processedQos0El || !rateEl || !lastEl) return;
+
+            connectedEl.innerText = qos.connected ? 'Conectado' : 'Desconectado';
+            pendingQos1El.innerText = `${qos.pending_qos1 ?? 0}`;
+            pendingQos0El.innerText = `${qos.pending_qos0 ?? 0}`;
+            processedQos1El.innerText = `${qos.processed_qos1 ?? 0}`;
+            processedQos0El.innerText = `${qos.processed_qos0 ?? 0}`;
+
+            if (waitQos1El) waitQos1El.innerText = `${(qos.wait_ms_avg_60s_qos1 ?? 0).toFixed(1)}/${(qos.wait_ms_p95_60s_qos1 ?? 0).toFixed(1)}`;
+            if (waitQos0El) waitQos0El.innerText = `${(qos.wait_ms_avg_60s_qos0 ?? 0).toFixed(1)}/${(qos.wait_ms_p95_60s_qos0 ?? 0).toFixed(1)}`;
+            if (procQos1El) procQos1El.innerText = `${(qos.processing_ms_avg_60s_qos1 ?? 0).toFixed(1)}/${(qos.processing_ms_p95_60s_qos1 ?? 0).toFixed(1)}`;
+            if (procQos0El) procQos0El.innerText = `${(qos.processing_ms_avg_60s_qos0 ?? 0).toFixed(1)}/${(qos.processing_ms_p95_60s_qos0 ?? 0).toFixed(1)}`;
+
+            const processedTotal = (qos.processed_total ?? 0);
+            const now = Date.now();
+            if (!window.__qosLast) {
+                window.__qosLast = { t: now, processed: processedTotal };
+            }
+            const dtSec = Math.max(0.001, (now - window.__qosLast.t) / 1000.0);
+            const dp = processedTotal - window.__qosLast.processed;
+            const rate = dp > 0 ? (dp / dtSec) : 0.0;
+            rateEl.innerText = rate.toFixed(1);
+            window.__qosLast = { t: now, processed: processedTotal };
+
+            const last = qos.last_processed_at || qos.last_enqueued_at || '-';
+            lastEl.innerText = last === '-' ? '-' : new Date(last).toLocaleString();
+        } catch (e) {}
+    }
+
+    loadQosStatus();
+    setInterval(loadQosStatus, 1000);
 
     // Atualiza posições GPS no mapa a cada 30 segundos
     setInterval(async () => {

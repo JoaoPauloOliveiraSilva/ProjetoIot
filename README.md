@@ -66,6 +66,7 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 *   **Segurança**: Middleware em [security.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/core/security.py) valida `X-API-Key`.
 *   **MQTT**: Mosquitto local/Kubernetes usa username/password e `allow_anonymous false`.
 *   **QoS**: Telemetria é publicada em `/bike/{id}/telemetry` com QoS 0; alertas críticos podem ser publicados em `/bike/{id}/alert` com QoS 1.
+*   **Visualização de QoS (fila)**: o backend mantém uma fila interna de ingestão MQTT e expõe métricas em `GET /api/v1/qos/status` (mostra pendentes/processados por QoS 0/1). O dashboard mostra estas métricas no cartão “Fila MQTT (QoS)”.
 
 ## 🚀 Como Executar
 
@@ -83,7 +84,66 @@ Serviços:
 - Health: `http://localhost:8000/health`
 - Readiness: `http://localhost:8000/health/ready`
 - InfluxDB: `http://localhost:18086` com `admin/adminadmin`
-- MQTT: `localhost:1884` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
+- MQTT (TLS): `localhost:8883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
+
+#### Verificar TLS + CA (MQTT)
+
+O broker MQTT expõe apenas TLS em `8883`. Isso fornece encriptação em trânsito e permite validar a identidade do broker via CA (evita ataques do tipo man-in-the-middle).
+
+1) Confirmar que a porta sem TLS (1883) não está disponível:
+
+```powershell
+Test-NetConnection localhost -Port 1883
+```
+
+Resultado esperado:
+- `TcpTestSucceeded : False` (ou `WARNING: TCP connect ... failed`)
+
+Porquê:
+- Confirma que não existe listener em `1883` (porta típica de MQTT sem TLS). Isto reduz o risco de alguém publicar/consumir dados em claro por engano.
+
+2) Exportar o certificado da CA gerado no container (para validação do servidor):
+
+```powershell
+docker cp iot-mosquitto:/mosquitto/data/tls/ca.crt .\mosquitto-ca.crt
+```
+
+Resultado esperado:
+- Sem mensagens de erro (o comando normalmente não imprime nada).
+- O ficheiro `.\mosquitto-ca.crt` passa a existir.
+
+Porquê:
+- O `ca.crt` é a “âncora de confiança” usada pelo cliente para validar o certificado TLS apresentado pelo broker. Sem isto, ou não há validação, ou é necessário usar modo inseguro.
+
+3) Teste “TLS com validação” (deve funcionar):
+
+```powershell
+python .\import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --scenario fall_accident_001 --publish-truth-alerts
+```
+
+Resultado esperado:
+- O script imprime linhas do tipo:
+  - `fall_accident_001: sent=... failed=0 rows=...`
+  - `Done: sent=... failed=0 mode=mqtt`
+
+Porquê:
+- O MQTT está a ser usado sobre TLS (`--mqtt-tls`) e o certificado do broker foi validado contra a CA (`--mqtt-ca-cert`). Se a validação falhasse, a ligação não seria estabelecida e o envio não avançaria.
+- `--publish-truth-alerts` força a publicação de eventos “críticos” do `truth.json` em `/bike/{id}/alert` com QoS 1, permitindo observar diferenciação entre QoS 0 (telemetria) e QoS 1 (alertas).
+
+4) Teste “CA errada” (deve falhar):
+
+```powershell
+Copy-Item .\mosquitto-ca.crt .\mosquitto-ca.BAD.crt
+Add-Content .\mosquitto-ca.BAD.crt "corrupted"
+
+python .\import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.BAD.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --scenario fall_accident_001 --publish-truth-alerts
+```
+
+Resultado esperado:
+- O script termina com erro de TLS (mensagem típica: `CERTIFICATE_VERIFY_FAILED`, `TLSV1_ALERT_UNKNOWN_CA` ou `handshake failure`).
+
+Porquê:
+- Esta é a prova prática de que existe validação de certificados: com uma CA incorreta/corrompida o cliente recusa a ligação, evitando ligar a um broker “falso” (man-in-the-middle) e evitando envio de dados para um endpoint não confiável.
 
 ### 2. Execução Manual do Backend
 
@@ -105,11 +165,11 @@ python import_dataset.py --mode dry-run
 # Enviar por REST para o backend
 python import_dataset.py --mode rest --api-key iot
 
-# Enviar por MQTT com telemetria em QoS 0
-python import_dataset.py --mode mqtt --mqtt-host localhost --mqtt-port 1884 --mqtt-username iot --mqtt-password iot
+# Enviar por MQTT (TLS) com telemetria em QoS 0
+python import_dataset.py --mode mqtt --mqtt-tls --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot
 
 # Opcional: publicar também os alertas esperados do truth.json em /bike/{id}/alert com QoS 1
-python import_dataset.py --mode mqtt --mqtt-username iot --mqtt-password iot --publish-truth-alerts
+python import_dataset.py --mode mqtt --mqtt-tls --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --publish-truth-alerts
 ```
 
 ### 4. Validar Deteção nos Datasets
@@ -123,14 +183,14 @@ python scripts\validate_braga_datasets.py --strict
 Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
-# Recomendado: via MQTT, com telemetria QoS 0 para o broker do compose
-python simulate_fleet.py --mode mqtt --fleet-size 12 --speedup 5
+# Recomendado: via MQTT (TLS), com telemetria QoS 0 para o broker do compose
+python simulate_fleet.py --mode mqtt --mqtt-tls --fleet-size 12 --speedup 5
 
 # Alternativa via REST
 python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
 ```
 
-O simulador corre até `Ctrl+C`. Para usar todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 20`. Com o compose atual, o MQTT externo está em `localhost:1884`; o script já usa essa porta por defeito.
+O simulador corre até `Ctrl+C`. Para usar todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 20`. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS).
 
 ### 6. Deploy Kubernetes
 

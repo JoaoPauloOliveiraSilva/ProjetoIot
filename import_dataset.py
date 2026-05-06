@@ -191,7 +191,16 @@ def mqtt_client_from_args(args: argparse.Namespace):
     if args.mqtt_username or args.mqtt_password:
         client.username_pw_set(args.mqtt_username, args.mqtt_password)
     if args.mqtt_tls:
-        client.tls_set(cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS_CLIENT)
+        ca_cert = (args.mqtt_ca_cert or "").strip() or None
+        if ca_cert:
+            client.tls_set(ca_certs=ca_cert, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS_CLIENT)
+            client.tls_insecure_set(False)
+        else:
+            client.tls_set(
+                cert_reqs=ssl.CERT_NONE if args.mqtt_tls_insecure else ssl.CERT_REQUIRED,
+                tls_version=ssl.PROTOCOL_TLS_CLIENT,
+            )
+            client.tls_insecure_set(bool(args.mqtt_tls_insecure))
     client.connect(args.mqtt_host, args.mqtt_port, 60)
     client.loop_start()
     return client
@@ -259,6 +268,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mqtt-username", default=os.getenv("MQTT_USERNAME", ""), help="MQTT username.")
     parser.add_argument("--mqtt-password", default=os.getenv("MQTT_PASSWORD", ""), help="MQTT password.")
     parser.add_argument("--mqtt-tls", action="store_true", help="Enable MQTT TLS.")
+    parser.add_argument("--mqtt-ca-cert", default=os.getenv("MQTT_TLS_CA_CERT", ""), help="Path to CA cert for MQTT TLS.")
+    parser.add_argument("--mqtt-tls-insecure", action="store_true", help="Disable MQTT TLS certificate verification.")
     parser.add_argument("--publish-truth-alerts", action="store_true", help="Also publish truth.json alerts to /bike/{id}/alert with QoS 1 in MQTT mode.")
     parser.add_argument("--realtime", action="store_true", help="Sleep according to dataset timestamps.")
     parser.add_argument("--speedup", type=float, default=1.0, help="Replay speed multiplier when --realtime is used.")

@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     MQTT_USERNAME: str = ""
     MQTT_PASSWORD: str = ""
     MQTT_TLS_ENABLED: bool = True
+    MQTT_TLS_CA_CERT: str = ""
+    MQTT_TLS_INSECURE: bool = False
     
     THRESHOLD_FALL_ACCEL: float = 20.0  
     THRESHOLD_HARD_BRAKE: float = -6.0  

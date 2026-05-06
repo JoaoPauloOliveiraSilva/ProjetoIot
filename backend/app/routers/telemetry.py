@@ -5,6 +5,7 @@ from app.database.influx_db import InfluxDBError
 from app.core.security import validar_api_key
 from app.services.detection import analyze_telemetry
 from app.services.websocket_manager import manager
+from app.mqtt.subscriber import get_qos_status
 
 router = APIRouter()
 
@@ -57,3 +58,8 @@ async def fetch_alerts(
         "total_registos": len(dados),
         "dados": dados
     }
+
+
+@router.get("/qos/status")
+async def qos_status(api_key: str = Depends(validar_api_key)):
+    return {"status": "sucesso", "qos": get_qos_status()}

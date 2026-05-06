@@ -23,11 +23,13 @@ services:
       retries: 12
 
   mosquitto:
-    image: eclipse-mosquitto:2
+    build:
+      context: .
+      dockerfile: deploy/mosquitto/Dockerfile
     container_name: iot-mosquitto
     restart: unless-stopped
     ports:
-      - "${MQTT_HOST_PORT:-1884}:1883"
+      - "${MQTT_HOST_PORT:-8883}:8883"
     environment:
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
@@ -57,10 +59,13 @@ services:
       INFLUX_TOKEN: ${INFLUX_TOKEN:-adminadmin}
       API_KEY_EDGE: ${API_KEY_EDGE:-iot}
       MQTT_BROKER: mosquitto
-      MQTT_PORT: 1883
-      MQTT_TLS_ENABLED: "false"
+      MQTT_PORT: 8883
+      MQTT_TLS_ENABLED: "true"
+      MQTT_TLS_CA_CERT: /mosquitto-data/tls/ca.crt
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
+    volumes:
+      - mosquitto-data:/mosquitto-data:ro
     depends_on:
       influxdb:
         condition: service_healthy
