@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IoT Dashboard - Mobilidade Urbana</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        error: "#ffb4ab",
+                        tertiary: "#ffb3ad",
+                        "on-secondary-container": "#5b3800",
+                        "on-background": "#dde4dd",
+                        "primary-container": "#10b981",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-tint": "#4edea3",
+                        "on-primary": "#003824",
+                        "primary-fixed": "#6ffbbe",
+                        "secondary-container": "#ee9800",
+                        primary: "#4edea3",
+                        background: "#0e1511",
+                        "tertiary-container": "#ff7a73",
+                        "on-surface-variant": "#bbcabf",
+                        "surface-bright": "#343b36",
+                        "surface-container-low": "#161d19",
+                        "surface-container-high": "#242c27",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "inverse-primary": "#006c49",
+                        "on-surface": "#dde4dd",
+                        surface: "#0e1511",
+                        "surface-container": "#1a211d",
+                        outline: "#86948a",
+                        "outline-variant": "#3c4a42",
+                        "surface-container-highest": "#2f3632",
+                        "surface-variant": "#2f3632",
+                        secondary: "#ffb95f"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        gutter: "16px",
+                        margin: "24px",
+                        "panel-padding": "16px",
+                        "container-gap": "20px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Space Grotesk"],
+                        "mono-data": ["monospace"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-md": ["Space Grotesk"],
+                        "title-sm": ["Inter"]
+                    },
+                    fontSize: {
+                        "mono-data": ["14px", { lineHeight: "1", fontWeight: "500" }],
+                        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "label-caps": ["12px", { lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "headline-md": ["24px", { lineHeight: "1.2", fontWeight: "600" }],
+                        "title-sm": ["18px", { lineHeight: "1.4", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background-color: rgba(26, 33, 29, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid #3c4a42;
+        }
+        .glow-indicator-green {
+            box-shadow: 0 0 10px rgba(78, 222, 163, 0.85);
+        }
+        .glow-indicator-red {
+            box-shadow: 0 0 10px rgba(255, 180, 171, 0.85);
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .leaflet-control-container .leaflet-control {
+            background: rgba(26, 33, 29, 0.85);
+            border: 1px solid #3c4a42;
+            color: #dde4dd;
+        }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: rgba(26, 33, 29, 0.92);
+            color: #dde4dd;
+            border: 1px solid #3c4a42;
+        }
+        html.theme-light body {
+            background: #f5f7f6 !important;
+            color: #0e1511 !important;
+        }
+        html.theme-light .bg-surface-dim {
+            background-color: #eef2ef !important;
+        }
+        html.theme-light .glass-panel {
+            background-color: rgba(255, 255, 255, 0.78) !important;
+            border-color: #cbd5d1 !important;
+        }
+        html.theme-light .text-on-surface {
+            color: #0e1511 !important;
+        }
+        html.theme-light .text-on-surface-variant {
+            color: #334a41 !important;
+        }
+        html.theme-light .leaflet-control-container .leaflet-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #cbd5d1;
+            color: #0e1511;
+        }
+        html.theme-light .leaflet-popup-content-wrapper, html.theme-light .leaflet-popup-tip {
+            background: rgba(255, 255, 255, 0.95);
+            color: #0e1511;
+            border: 1px solid #cbd5d1;
+        }
+        html.theme-light [class*="bg-surface-container"] {
+            background-color: rgba(255, 255, 255, 0.78) !important;
+        }
+        html.theme-light [class*="border-outline-variant"] {
+            border-color: #cbd5d1 !important;
+        }
+        html.theme-light [class*="bg-surface-bright"] {
+            background-color: rgba(245, 247, 246, 0.9) !important;
+        }
+        html.theme-light [class*="text-on-surface-variant"] {
+            color: #334a41 !important;
+        }
+        html.theme-light [class*="text-on-surface"] {
+            color: #0e1511 !important;
+        }
+        html.theme-light #map-gradient {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md overflow-hidden flex h-screen">
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="bg-surface-container text-primary font-title-sm text-title-sm w-full h-16 border-b border-outline-variant shadow-sm flex items-center justify-between px-margin shrink-0">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="flex font-display-lg text-[22px] font-bold text-primary mr-6">Dashboard</div>
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-container/10 border border-primary/25">
+                    <div id="health-dot" class="w-2 h-2 rounded-full bg-primary glow-indicator-green"></div>
+                    <span id="health-text" class="text-primary font-label-caps text-label-caps">System Healthy</span>
+                </div>
+                <div class="hidden lg:flex items-center gap-2 text-on-surface-variant font-mono-data text-mono-data">
+                    <span>Active Devices:</span>
+                    <span id="active-devices">0</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-alerts-toggle" class="relative bg-surface-container-high/90 p-2 rounded-lg border border-outline-variant hover:bg-surface-bright transition-colors text-on-surface" title="Alerts">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span id="alerts-badge" class="hidden absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-error text-[11px] leading-5 text-on-primary text-center font-bold">0</span>
+                </button>
+                <button id="theme-toggle" class="bg-surface-container-high/90 p-2 rounded-lg border border-outline-variant hover:bg-surface-bright transition-colors text-on-surface">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+            </div>
+        </header>
+        <main class="flex-1 overflow-y-auto p-gutter bg-surface-dim">
+            <div class="grid grid-cols-12 gap-gutter h-full min-h-[800px]">
+                <div class="col-span-12 lg:col-span-8 glass-panel rounded-xl flex flex-col overflow-hidden relative h-full min-h-[800px]">
+                    <div class="relative z-10 p-panel-padding flex justify-between items-start">
+                        <div class="flex gap-2">
+                            <button id="btn-map-panel" class="bg-surface-container-high/90 p-2 rounded-lg border border-outline-variant hover:bg-surface-bright transition-colors text-on-surface absolute top-3 right-3 z-20" title="Controls">
+                                <span class="material-symbols-outlined">tune</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="absolute inset-0 z-0">
+                        <div id="map"></div>
+                        <div id="map-gradient" class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none"></div>
+                    </div>
+                    <div class="relative z-10 p-panel-padding pt-0">
+                        <div id="map-panel" class="hidden glass-panel rounded-xl p-3 mb-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="bg-surface-container-highest/60 rounded-lg border border-outline-variant p-3">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Device</div>
+                                    <select id="device-select" class="w-full bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
+                                        <option value="">All devices</option>
+                                    </select>
+                                </div>
+                                <div class="bg-surface-container-highest/60 rounded-lg border border-outline-variant p-3">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">History window</div>
+                                    <div class="flex gap-2">
+                                        <select id="history-range" class="w-full bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
+                                            <option value="-1h">Last 1h</option>
+                                            <option value="-24h">Last 24h</option>
+                                            <option value="-7d">Last 7d</option>
+                                        <option value="alltime" selected>All time</option>
+                                        </select>
+                                        <button id="btn-load-history" class="shrink-0 bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-colors rounded-lg px-3 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                                            Load
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-on-surface-variant mt-2">Loads history for selected device, or all devices.</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex justify-end gap-2">
+                                <button id="btn-fit" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-3 py-1 text-xs font-semibold">
+                                    Fit devices
+                                </button>
+                                <button id="btn-clear-history" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-3 py-1 text-xs font-semibold">
+                                    Clear history
+                                </button>
+                            </div>
+                        </div>
+                        <div id="toast" class="hidden mt-3 bg-surface-container-highest/70 border border-outline-variant rounded-lg p-3 text-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div id="toast-title" class="font-semibold text-on-surface">Alert</div>
+                                    <div id="toast-body" class="text-on-surface-variant text-sm mt-1"></div>
+                                </div>
+                                <button id="toast-close" class="text-on-surface-variant hover:text-on-surface">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-4 flex flex-col gap-container-gap h-full">
+                    <div class="glass-panel rounded-xl flex flex-col flex-1 min-h-0">
+                        <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">router</span>
+                                QoS Queue Status
+                            </h3>
+                            <span class="font-mono-data text-mono-data text-on-surface-variant text-xs">/api/v1/qos/status</span>
+                        </div>
+                        <div class="p-panel-padding flex flex-col gap-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-on-surface-variant">MQTT</span>
+                                <span id="qos-connected" class="font-mono-data text-mono-data text-primary">-</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-on-surface-variant">QoS 0 (telemetry)</span>
+                                    <span id="qos0-rate" class="font-mono-data text-mono-data text-primary">0.0/s</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                                    <div id="qos0-bar" class="bg-primary h-1.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-on-surface-variant mt-1">
+                                    <span>pending: <span id="qos-pending-qos0">0</span></span>
+                                    <span>p95 wait: <span id="qos-wait-p95-qos0">0.0</span>ms</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-on-surface-variant">QoS 1 (alerts)</span>
+                                    <span id="qos1-rate" class="font-mono-data text-mono-data text-secondary">0.0/s</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                                    <div id="qos1-bar" class="bg-secondary h-1.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-on-surface-variant mt-1">
+                                    <span>pending: <span id="qos-pending-qos1">0</span></span>
+                                    <span>p95 wait: <span id="qos-wait-p95-qos1">0.0</span>ms</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant mb-1 uppercase tracking-wider">Processed QoS0</div>
+                                    <div id="qos-processed-qos0" class="font-mono-data text-mono-data text-lg text-on-surface">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant mb-1 uppercase tracking-wider">Processed QoS1</div>
+                                    <div id="qos-processed-qos1" class="font-mono-data text-mono-data text-lg text-secondary">0</div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-on-surface-variant">
+                                last: <span id="qos-last">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel rounded-xl flex flex-col flex-1 min-h-0">
+                        <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">speed</span>
+                                Speed Statistics
+                            </h3>
+                            <span id="speed-device" class="font-mono-data text-mono-data text-on-surface-variant text-xs">All devices</span>
+                        </div>
+                        <div class="p-panel-padding">
+                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">AVG</div>
+                                    <div id="speed-avg" class="font-mono-data text-mono-data text-primary">0.0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">MAX</div>
+                                    <div id="speed-max" class="font-mono-data text-mono-data text-error">0.0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">COUNT</div>
+                                    <div id="speed-count" class="font-mono-data text-mono-data text-on-surface">0</div>
+                                </div>
+                            </div>
+                            <div class="h-44">
+                                <canvas id="speedChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="alerts-drawer-backdrop" class="hidden fixed inset-0 bg-black/50 z-40"></div>
+    <div id="alerts-drawer" class="fixed top-16 right-0 h-[calc(100%-4rem)] w-full sm:w-[420px] z-50 translate-x-full transition-transform duration-200">
+        <div class="h-full glass-panel border-l border-outline-variant flex flex-col">
+            <div class="p-panel-padding border-b border-outline-variant flex items-center justify-between bg-surface-container-low/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-error">notifications</span>
+                    <div class="font-title-sm text-title-sm text-on-surface">Recent Alerts</div>
+                    <span class="font-mono-data text-mono-data text-on-surface-variant text-xs flex items-center gap-1 ml-2">
+                        <span id="ws-dot" class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                        Live WebSocket
+                    </span>
+                </div>
+                <button id="btn-alerts-close" class="bg-surface-container-high/90 p-2 rounded-lg border border-outline-variant hover:bg-surface-bright transition-colors text-on-surface" title="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-panel-padding border-b border-outline-variant bg-surface-container-low/30">
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="alert-type" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
+                        <option value="">All types</option>
+                        <option value="fall_accident">fall_accident</option>
+                        <option value="hard_brake">hard_brake</option>
+                        <option value="traffic_jam">traffic_jam</option>
+                    </select>
+                    <select id="alert-range" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
+                        <option value="60" selected>Last 60m</option>
+                        <option value="240">Last 4h</option>
+                        <option value="1440">Last 24h</option>
+                        <option value="10080">Last 7d</option>
+                        <option value="43200">All time</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                    <button id="btn-refresh-alerts" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-3 py-1 text-xs font-semibold">
+                        Refresh
+                    </button>
+                    <button id="btn-toggle-read" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-3 py-1 text-xs font-semibold">
+                        Show read: OFF
+                    </button>
+                </div>
+            </div>
+            <div id="alerts-list" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2"></div>
+            <div class="p-panel-padding border-t border-outline-variant bg-surface-container-low/40 flex justify-between items-center">
+                <button id="btn-clear-read" class="text-xs font-bold text-primary hover:text-primary-fixed uppercase tracking-wider">Clear read</button>
+                <span id="alerts-count" class="font-mono-data text-mono-data text-on-surface-variant text-xs">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const API_BASE_URL = params.get('api_base') || localStorage.getItem('IOT_API_BASE_URL') || 'http://localhost:8000/api/v1';
+        const WS_URL = params.get('ws_url') || localStorage.getItem('IOT_WS_URL') || 'ws://localhost:8000/ws/alerts';
+        const API_KEY = params.get('api_key') || localStorage.getItem('IOT_API_KEY') || '';
+        if (params.get('api_base')) localStorage.setItem('IOT_API_BASE_URL', params.get('api_base'));
+        if (params.get('ws_url')) localStorage.setItem('IOT_WS_URL', params.get('ws_url'));
+        if (params.get('api_key')) localStorage.setItem('IOT_API_KEY', params.get('api_key'));
+
+        const READ_STORAGE_KEY = 'read_alert_keys_v2';
+        const readAlertKeys = new Set(JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]'));
+        let showRead = false;
+        const dashboardStartedAt = Date.now();
+
+        function authHeaders() {
+            return API_KEY ? { 'X-API-Key': API_KEY } : {};
+        }
+
+        function isAfterDashboardStart(timestamp) {
+            if (!timestamp) return false;
+            const ts = new Date(timestamp).getTime();
+            return Number.isFinite(ts) && ts >= dashboardStartedAt;
+        }
+
+        function updateActiveDeviceCount() {
+            const el = document.getElementById('active-devices');
+            if (el) el.innerText = String(deviceMarkers.size);
+        }
+
+        function websocketUrl() {
+            if (!API_KEY) return WS_URL;
+            const separator = WS_URL.includes('?') ? '&' : '?';
+            return `${WS_URL}${separator}api_key=${encodeURIComponent(API_KEY)}`;
+        }
+
+        function setHealth(ok) {
+            const dot = document.getElementById('health-dot');
+            const text = document.getElementById('health-text');
+            if (!dot || !text) return;
+            if (ok) {
+                dot.classList.remove('bg-error', 'glow-indicator-red');
+                dot.classList.add('bg-primary', 'glow-indicator-green');
+                text.innerText = 'System Healthy';
+            } else {
+                dot.classList.remove('bg-primary', 'glow-indicator-green');
+                dot.classList.add('bg-error', 'glow-indicator-red');
+                text.innerText = 'System Degraded';
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const base = API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL.slice(0, -7) : API_BASE_URL;
+                const res = await fetch(`${base}/health/ready`);
+                setHealth(res.ok);
+            } catch {
+                setHealth(false);
+            }
+        }
+
+        const map = L.map('map', { zoomControl: true }).setView([41.5503, -8.4200], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+
+        const devicesLayer = L.layerGroup().addTo(map);
+        const alertsLayer = L.layerGroup().addTo(map);
+        const historyLayer = L.layerGroup().addTo(map);
+        const liveTrailLayer = L.layerGroup().addTo(map);
+
+        const deviceMarkers = new Map();
+        const alertMarkers = new Map();
+        const liveTrails = new Map();
+        const livePointQueues = new Map();
+        const liveLastTimestampByDevice = new Map();
+        let historyLines = [];
+        let historyReplayStates = [];
+        let historyReplayMarker = null;
+        let historyReplayTimer = null;
+        let knownDeviceIds = [];
+        let liveSensorsSeeded = false;
+        const LIVE_TRAIL_LIMIT = 80;
+
+        function formatText(text) {
+            if (!text) return "";
+            return String(text).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function getAlertKey(alerta) {
+            return `${alerta.device_id || ''}|${alerta.event_type || ''}|${alerta.timestamp || ''}`;
+        }
+
+        function persistReadKeys() {
+            localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(Array.from(readAlertKeys)));
+        }
+
+        function showToast(title, body) {
+            const toast = document.getElementById('toast');
+            const t = document.getElementById('toast-title');
+            const b = document.getElementById('toast-body');
+            if (!toast || !t || !b) return;
+            t.innerText = title || 'Alert';
+            b.innerText = body || '';
+            toast.classList.remove('hidden');
+            if (window.__toastTimer) clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => toast.classList.add('hidden'), 6000);
+        }
+
+        document.getElementById('toast-close')?.addEventListener('click', () => {
+            document.getElementById('toast')?.classList.add('hidden');
+        });
+
+        async function loadDevices() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/devices`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const devices = Array.isArray(data.dispositivos) ? data.dispositivos : [];
+                knownDeviceIds = devices.slice();
+                const select = document.getElementById('device-select');
+                if (select) {
+                    const current = select.value;
+                    select.innerHTML = '<option value="">All devices</option>';
+                    for (const id of devices) {
+                        const opt = document.createElement('option');
+                        opt.value = id;
+                        opt.textContent = id;
+                        select.appendChild(opt);
+                    }
+                    select.value = devices.includes(current) ? current : '';
+                }
+                updateActiveDeviceCount();
+                updateHistoryLoadState();
+            } catch {}
+        }
+
+        function updateHistoryLoadState() {
+            const btn = document.getElementById('btn-load-history');
+            if (btn) btn.disabled = false;
+        }
+
+        function clearHistory() {
+            for (const line of historyLines) {
+                historyLayer.removeLayer(line);
+            }
+            historyLines = [];
+            historyReplayStates = [];
+            if (historyReplayMarker) {
+                historyLayer.removeLayer(historyReplayMarker);
+                historyReplayMarker = null;
+            }
+            if (historyReplayTimer) {
+                clearInterval(historyReplayTimer);
+                historyReplayTimer = null;
+            }
+        }
+
+        function resetLiveTrails() {
+            devicesLayer.clearLayers();
+            deviceMarkers.clear();
+            liveTrailLayer.clearLayers();
+            liveTrails.clear();
+            livePointQueues.clear();
+            liveLastTimestampByDevice.clear();
+            liveSensorsSeeded = false;
+            updateActiveDeviceCount();
+        }
+
+        function getLiveTrail(deviceId) {
+            let line = liveTrails.get(deviceId);
+            if (!line) {
+                line = L.polyline([], {
+                    color: '#4edea3',
+                    weight: 5,
+                    opacity: 0.85,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                }).addTo(liveTrailLayer);
+                liveTrails.set(deviceId, line);
+            }
+            return line;
+        }
+
+        function appendLivePoint(row, selectedDevice) {
+            if (!row || row.lat == null || row.lon == null || !row.device_id) return;
+            const lat = Number(row.lat);
+            const lon = Number(row.lon);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+            setDeviceMarker(row.device_id, lat, lon, selectedDevice && row.device_id === selectedDevice);
+
+            const line = getLiveTrail(row.device_id);
+            const points = line.getLatLngs();
+            points.push([lat, lon]);
+            if (points.length > LIVE_TRAIL_LIMIT) {
+                points.splice(0, points.length - LIVE_TRAIL_LIMIT);
+            }
+            line.setLatLngs(points);
+        }
+
+        function seedLiveSensors(rows, selectedDevice) {
+            const latestByDevice = new Map();
+            for (const row of rows) {
+                if (row.lat == null || row.lon == null || !row.device_id || !row.timestamp) continue;
+                const current = latestByDevice.get(row.device_id);
+                if (!current || new Date(row.timestamp) > new Date(current.timestamp)) {
+                    latestByDevice.set(row.device_id, row);
+                }
+            }
+
+            for (const row of latestByDevice.values()) {
+                appendLivePoint(row, selectedDevice);
+                liveLastTimestampByDevice.set(row.device_id, new Date(row.timestamp).getTime());
+            }
+            liveSensorsSeeded = true;
+        }
+
+        function enqueueLiveRows(rows) {
+            const sorted = rows
+                .filter(row => row.lat != null && row.lon != null && row.device_id && row.timestamp)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            for (const row of sorted) {
+                const ts = new Date(row.timestamp).getTime();
+                if (!Number.isFinite(ts)) continue;
+                const lastTs = liveLastTimestampByDevice.get(row.device_id) || 0;
+                if (ts <= lastTs) continue;
+                liveLastTimestampByDevice.set(row.device_id, ts);
+                if (!livePointQueues.has(row.device_id)) livePointQueues.set(row.device_id, []);
+                livePointQueues.get(row.device_id).push(row);
+            }
+        }
+
+        function processLiveQueues() {
+            const select = document.getElementById('device-select');
+            const selectedDevice = select ? select.value : '';
+            for (const [deviceId, queue] of livePointQueues.entries()) {
+                if (queue.length === 0) continue;
+                const row = queue.shift();
+                appendLivePoint(row, selectedDevice);
+            }
+        }
+
+        function setDeviceMarker(deviceId, lat, lon, selected) {
+            let marker = deviceMarkers.get(deviceId);
+            const color = '#2563eb';
+            if (!marker) {
+                marker = L.circleMarker([lat, lon], {
+                    radius: selected ? 9 : 8,
+                    color,
+                    fillColor: color,
+                    weight: 3,
+                    fillOpacity: 0.6
+                }).addTo(devicesLayer);
+                marker.bindPopup(`<div style="font-weight:700">${deviceId}</div>`);
+                deviceMarkers.set(deviceId, marker);
+                updateActiveDeviceCount();
+                return;
+            }
+            marker.setLatLng([lat, lon]);
+            marker.setStyle({
+                radius: selected ? 9 : 8,
+                color,
+                fillColor: color,
+                weight: 3,
+                fillOpacity: 0.6
+            });
+        }
+
+        function setAlertMarker(alerta) {
+            const key = getAlertKey(alerta);
+            if (alertMarkers.has(key)) return;
+            const isFall = alerta.event_type === 'fall_accident';
+            const stroke = '#ff0000';
+            const fill = '#ff0000';
+            const radius = isFall ? 12 : 11;
+            const weight = isFall ? 4 : 4;
+            const marker = L.circleMarker([alerta.lat, alerta.lon], {
+                radius,
+                color: stroke,
+                fillColor: fill,
+                weight,
+                fillOpacity: isFall ? 0.85 : 0.65
+            }).addTo(alertsLayer);
+            marker.bindPopup(`<div style="font-weight:700;color:${stroke}">${isFall ? 'FALL' : 'ALERT'}</div><div>${formatText(alerta.event_type)}</div><div style="font-size:12px;opacity:.85">${alerta.device_id || ''}</div>`);
+            alertMarkers.set(key, marker);
+        }
+
+        async function loadLiveSensors() {
+            try {
+                const select = document.getElementById('device-select');
+                const selectedDevice = select ? select.value : '';
+                const query = selectedDevice ? `&device_id=${encodeURIComponent(selectedDevice)}` : '';
+                const res = await fetch(`${API_BASE_URL}/sensors?minutos=1${query}`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const rows = (Array.isArray(data.dados) ? data.dados : [])
+                    .filter(row => isAfterDashboardStart(row.timestamp));
+                if (!liveSensorsSeeded) {
+                    seedLiveSensors(rows, selectedDevice);
+                } else {
+                    enqueueLiveRows(rows);
+                }
+                updateSpeedChart(rows, selectedDevice);
+            } catch {}
+        }
+
+        function renderAlertItem(alerta) {
+            const key = getAlertKey(alerta);
+            const read = readAlertKeys.has(key);
+            if (!showRead && read) return null;
+
+            const wrap = document.createElement('div');
+            wrap.className = `bg-surface-container-highest rounded-lg p-3 border-l-2 ${read ? 'border-outline-variant' : 'border-error'} hover:bg-surface-bright transition-colors`;
+
+            const top = document.createElement('div');
+            top.className = 'flex justify-between items-start mb-1 gap-3';
+            const left = document.createElement('div');
+            left.className = 'min-w-0';
+            const label = document.createElement('div');
+            label.className = `font-label-caps text-label-caps ${read ? 'text-on-surface-variant' : 'text-error'}`;
+            label.innerText = `${read ? 'READ' : 'LIVE'} • ${alerta.device_id || 'unknown'} • ${formatText(alerta.event_type)}`;
+            const body = document.createElement('div');
+            body.className = 'text-sm text-on-surface-variant mt-1 truncate';
+            body.innerText = `${formatText(alerta.trigger)} • ${new Date(alerta.timestamp).toLocaleString()}`;
+            left.appendChild(label);
+            left.appendChild(body);
+
+            const right = document.createElement('div');
+            right.className = 'flex items-center gap-2';
+            const locate = document.createElement('button');
+            locate.className = 'text-xs font-bold text-primary hover:text-primary-fixed flex items-center gap-1 uppercase tracking-wider';
+            locate.innerHTML = `<span class="material-symbols-outlined text-[14px]">my_location</span> Locate`;
+            locate.addEventListener('click', () => {
+                map.setView([alerta.lat, alerta.lon], 17, { animate: true });
+                setAlertMarker(alerta);
+                const marker = alertMarkers.get(key);
+                if (marker) marker.openPopup();
+            });
+
+            const mark = document.createElement('button');
+            mark.className = 'text-xs font-bold text-on-surface-variant hover:text-on-surface flex items-center gap-1 uppercase tracking-wider';
+            mark.innerHTML = `<span class="material-symbols-outlined text-[14px]">done</span> Read`;
+            mark.disabled = read;
+            mark.style.opacity = read ? '0.4' : '1';
+            mark.addEventListener('click', () => {
+                readAlertKeys.add(key);
+                persistReadKeys();
+                refreshAlerts();
+            });
+
+            right.appendChild(locate);
+            right.appendChild(mark);
+
+            top.appendChild(left);
+            top.appendChild(right);
+            wrap.appendChild(top);
+            return wrap;
+        }
+
+        let cachedAlerts = [];
+
+        function setAlertsDrawerOpen(open) {
+            const drawer = document.getElementById('alerts-drawer');
+            const backdrop = document.getElementById('alerts-drawer-backdrop');
+            if (!drawer || !backdrop) return;
+            if (open) {
+                drawer.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                drawer.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function isAlertsDrawerOpen() {
+            const drawer = document.getElementById('alerts-drawer');
+            if (!drawer) return false;
+            return !drawer.classList.contains('translate-x-full');
+        }
+
+        function updateAlertsBadge() {
+            const badge = document.getElementById('alerts-badge');
+            if (!badge) return;
+            const unread = cachedAlerts.reduce((acc, a) => acc + (readAlertKeys.has(getAlertKey(a)) ? 0 : 1), 0);
+            if (unread > 0) {
+                badge.innerText = String(unread > 99 ? '99+' : unread);
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function syncFallAlertMarkers() {
+            alertsLayer.clearLayers();
+            alertMarkers.clear();
+            for (const alerta of cachedAlerts) {
+                if (alerta?.event_type !== 'fall_accident') continue;
+                if (alerta?.lat == null || alerta?.lon == null) continue;
+                setAlertMarker(alerta);
+            }
+        }
+
+        async function refreshAlerts() {
+            try {
+                const select = document.getElementById('device-select');
+                const selectedDevice = select ? select.value : '';
+                const eventType = document.getElementById('alert-type')?.value || '';
+                const minutes = Number(document.getElementById('alert-range')?.value || '60');
+
+                const parts = [`minutos=${encodeURIComponent(String(minutes))}`];
+                if (selectedDevice) parts.push(`device_id=${encodeURIComponent(selectedDevice)}`);
+                if (eventType) parts.push(`event_type=${encodeURIComponent(eventType)}`);
+
+                const res = await fetch(`${API_BASE_URL}/alerts?${parts.join('&')}`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const alerts = (Array.isArray(data.dados) ? data.dados : [])
+                    .filter(alerta => isAfterDashboardStart(alerta.timestamp));
+                cachedAlerts = alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                renderAlerts();
+                syncFallAlertMarkers();
+            } catch {}
+        }
+
+        function renderAlerts() {
+            const list = document.getElementById('alerts-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            let visibleCount = 0;
+            for (const alerta of cachedAlerts) {
+                const el = renderAlertItem(alerta);
+                if (!el) continue;
+                list.appendChild(el);
+                visibleCount += 1;
+            }
+            document.getElementById('alerts-count').innerText = `${visibleCount}/${cachedAlerts.length}`;
+            updateAlertsBadge();
+        }
+
+        function updateSpeedChart(rows, selectedDevice) {
+            const series = selectedDevice ? rows.filter(r => r.device_id === selectedDevice) : rows;
+            const filtered = series
+                .filter(r => r.timestamp && r.speed != null)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                .slice(-60);
+
+            const labels = filtered.map(d => new Date(d.timestamp).toLocaleTimeString());
+            const speeds = filtered.map(d => Number(d.speed || 0));
+
+            const count = speeds.length;
+            const max = count ? Math.max(...speeds) : 0;
+            const avg = count ? speeds.reduce((a, b) => a + b, 0) / count : 0;
+            document.getElementById('speed-count').innerText = String(count);
+            document.getElementById('speed-max').innerText = max.toFixed(1);
+            document.getElementById('speed-avg').innerText = avg.toFixed(1);
+            document.getElementById('speed-device').innerText = selectedDevice || 'All devices';
+
+            window.__speedChart.data.labels = labels.slice(-30);
+            window.__speedChart.data.datasets[0].data = speeds.slice(-30);
+            window.__speedChart.update();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('speedChart').getContext('2d');
+            window.__speedChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Speed (km/h)',
+                        data: [],
+                        borderColor: '#4edea3',
+                        backgroundColor: 'rgba(78, 222, 163, 0.15)',
+                        borderWidth: 2,
+                        tension: 0.25,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#bbcabf' }, grid: { color: 'rgba(60,74,66,0.6)' } },
+                        x: { ticks: { color: '#bbcabf' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        async function loadHistory() {
+            const deviceId = document.getElementById('device-select')?.value || '';
+            const range = document.getElementById('history-range')?.value || '-1h';
+            const start = range === 'alltime' ? '-365d' : range;
+            const end = 'now()';
+            try {
+                clearHistory();
+                const targetIds = deviceId ? [deviceId] : knownDeviceIds.slice();
+                if (targetIds.length === 0) {
+                    showToast('History', 'No devices available to load history.');
+                    return;
+                }
+
+                const boundsPoints = [];
+                let totalPoints = 0;
+                let firstRowsForChart = null;
+                const replayColors = ['#2563eb', '#4edea3', '#ffb95f', '#ff7a73', '#a78bfa', '#38bdf8'];
+
+                for (const [idx, id] of targetIds.entries()) {
+                    const res = await fetch(`${API_BASE_URL}/devices/${encodeURIComponent(id)}/history?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, { headers: authHeaders() });
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    const rows = Array.isArray(data.dados) ? data.dados : [];
+                    if (!firstRowsForChart) firstRowsForChart = rows;
+                    const points = rows
+                        .filter(r => r.lat != null && r.lon != null)
+                        .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))
+                        .map(r => [Number(r.lat), Number(r.lon)]);
+                    if (points.length < 2) continue;
+                    totalPoints += points.length;
+                    for (const p of points) boundsPoints.push(p);
+                    const line = L.polyline([], {
+                        color: replayColors[idx % replayColors.length],
+                        weight: 6,
+                        opacity: 0.85,
+                        lineCap: 'round',
+                        lineJoin: 'round'
+                    }).addTo(historyLayer);
+                    historyLines.push(line);
+                    historyReplayStates.push({ id, points, index: 0, line });
+                }
+
+                if (historyReplayStates.length === 0) {
+                    showToast('History', 'Not enough points to draw paths.');
+                    return;
+                }
+
+                map.fitBounds(L.latLngBounds(boundsPoints), { padding: [20, 20] });
+                showToast('History replay', deviceId ? `${deviceId} • ${totalPoints} points` : `All devices • ${totalPoints} points`);
+
+                historyReplayTimer = setInterval(() => {
+                    let advanced = false;
+                    for (const state of historyReplayStates) {
+                        if (state.index >= state.points.length) continue;
+                        const point = state.points[state.index++];
+                        const linePoints = state.line.getLatLngs();
+                        linePoints.push(point);
+                        state.line.setLatLngs(linePoints);
+                        setDeviceMarker(state.id, point[0], point[1], deviceId && state.id === deviceId);
+                        advanced = true;
+                    }
+                    if (!advanced) {
+                        clearInterval(historyReplayTimer);
+                        historyReplayTimer = null;
+                        showToast('History replay', 'Completed.');
+                    }
+                }, 120);
+
+                if (deviceId && firstRowsForChart) {
+                    const series = firstRowsForChart
+                        .filter(r => r.timestamp && r.speed != null)
+                        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                        .slice(-120);
+                    const labels = series.map(d => new Date(d.timestamp).toLocaleTimeString());
+                    const speeds = series.map(d => Number(d.speed || 0));
+                    window.__speedChart.data.labels = labels.slice(-60);
+                    window.__speedChart.data.datasets[0].data = speeds.slice(-60);
+                    window.__speedChart.update();
+                    updateSpeedChart(firstRowsForChart, deviceId);
+                }
+            } catch {}
+        }
+
+        async function loadQosStatus() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/qos/status`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const qos = data.qos;
+                if (!qos) return;
+
+                document.getElementById('qos-connected').innerText = qos.connected ? 'Connected' : 'Disconnected';
+                document.getElementById('qos-pending-qos0').innerText = `${qos.pending_qos0 ?? 0}`;
+                document.getElementById('qos-pending-qos1').innerText = `${qos.pending_qos1 ?? 0}`;
+                document.getElementById('qos-processed-qos0').innerText = `${qos.processed_qos0 ?? 0}`;
+                document.getElementById('qos-processed-qos1').innerText = `${qos.processed_qos1 ?? 0}`;
+                document.getElementById('qos-wait-p95-qos0').innerText = `${(qos.wait_ms_p95_60s_qos0 ?? 0).toFixed(1)}`;
+                document.getElementById('qos-wait-p95-qos1').innerText = `${(qos.wait_ms_p95_60s_qos1 ?? 0).toFixed(1)}`;
+
+                const now = Date.now();
+                if (!window.__qosLast) {
+                    window.__qosLast = {
+                        t: now,
+                        p0: Number(qos.processed_qos0 ?? 0),
+                        p1: Number(qos.processed_qos1 ?? 0)
+                    };
+                }
+                const dtSec = Math.max(0.001, (now - window.__qosLast.t) / 1000.0);
+                const dp0 = Number(qos.processed_qos0 ?? 0) - window.__qosLast.p0;
+                const dp1 = Number(qos.processed_qos1 ?? 0) - window.__qosLast.p1;
+                const rate0 = dp0 > 0 ? (dp0 / dtSec) : 0.0;
+                const rate1 = dp1 > 0 ? (dp1 / dtSec) : 0.0;
+                document.getElementById('qos0-rate').innerText = `${rate0.toFixed(1)}/s`;
+                document.getElementById('qos1-rate').innerText = `${rate1.toFixed(1)}/s`;
+                const maxRate = Math.max(1, rate0, rate1);
+                document.getElementById('qos0-bar').style.width = `${Math.min(100, (rate0 / maxRate) * 100).toFixed(0)}%`;
+                document.getElementById('qos1-bar').style.width = `${Math.min(100, (rate1 / maxRate) * 100).toFixed(0)}%`;
+                window.__qosLast = { t: now, p0: Number(qos.processed_qos0 ?? 0), p1: Number(qos.processed_qos1 ?? 0) };
+
+                const last = qos.last_processed_at || qos.last_enqueued_at || '-';
+                document.getElementById('qos-last').innerText = last === '-' ? '-' : new Date(last).toLocaleString();
+            } catch {}
+        }
+
+        function connectWebSocket() {
+            const ws = new WebSocket(websocketUrl());
+            const wsDot = document.getElementById('ws-dot');
+            ws.onopen = () => {
+                if (wsDot) wsDot.classList.add('animate-pulse');
+            };
+            ws.onmessage = (e) => {
+                const alerta = JSON.parse(e.data);
+                if (!isAfterDashboardStart(alerta.timestamp)) return;
+                cachedAlerts.unshift(alerta);
+                cachedAlerts = cachedAlerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
+                renderAlerts();
+                if (alerta?.event_type === 'fall_accident') setAlertMarker(alerta);
+                showToast(`Alert: ${formatText(alerta.event_type)}`, `${alerta.device_id || ''} • ${new Date(alerta.timestamp).toLocaleString()}`);
+            };
+            ws.onclose = () => {
+                if (wsDot) wsDot.classList.remove('animate-pulse');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            const icon = document.querySelector('#theme-toggle .material-symbols-outlined');
+            if (theme === 'light') {
+                root.classList.add('theme-light');
+                root.classList.remove('dark');
+                if (icon) icon.textContent = 'light_mode';
+            } else {
+                root.classList.remove('theme-light');
+                root.classList.add('dark');
+                if (icon) icon.textContent = 'dark_mode';
+            }
+            localStorage.setItem('IOT_THEME', theme);
+        }
+
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            const root = document.documentElement;
+            const isLight = root.classList.contains('theme-light');
+            applyTheme(isLight ? 'dark' : 'light');
+        });
+
+        document.getElementById('btn-fit')?.addEventListener('click', () => {
+            const markers = Array.from(deviceMarkers.values()).map(m => m.getLatLng());
+            if (markers.length === 0) {
+                showToast('Map', 'No device markers to fit.');
+                return;
+            }
+            const bounds = L.latLngBounds(markers);
+            map.fitBounds(bounds, { padding: [20, 20] });
+        });
+
+        document.getElementById('btn-clear-history')?.addEventListener('click', () => {
+            if (historyLines.length === 0 && !historyReplayMarker) {
+                showToast('History', 'Nothing to clear.');
+                return;
+            }
+            clearHistory();
+            showToast('History', 'Cleared.');
+        });
+
+        document.getElementById('btn-map-panel')?.addEventListener('click', () => {
+            const panel = document.getElementById('map-panel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+        });
+
+        document.getElementById('device-select')?.addEventListener('change', async () => {
+            updateHistoryLoadState();
+            clearHistory();
+            resetLiveTrails();
+            await loadLiveSensors();
+            await refreshAlerts();
+        });
+
+        document.getElementById('btn-load-history')?.addEventListener('click', loadHistory);
+        document.getElementById('btn-refresh-alerts')?.addEventListener('click', refreshAlerts);
+
+        document.getElementById('btn-toggle-read')?.addEventListener('click', () => {
+            showRead = !showRead;
+            document.getElementById('btn-toggle-read').innerText = `Show read: ${showRead ? 'ON' : 'OFF'}`;
+            renderAlerts();
+        });
+
+        document.getElementById('btn-clear-read')?.addEventListener('click', () => {
+            readAlertKeys.clear();
+            persistReadKeys();
+            renderAlerts();
+        });
+
+        document.getElementById('btn-alerts-toggle')?.addEventListener('click', () => {
+            setAlertsDrawerOpen(!isAlertsDrawerOpen());
+        });
+        document.getElementById('btn-alerts-close')?.addEventListener('click', () => setAlertsDrawerOpen(false));
+        document.getElementById('alerts-drawer-backdrop')?.addEventListener('click', () => setAlertsDrawerOpen(false));
+
+        async function bootstrap() {
+            document.getElementById('history-range').value = 'alltime';
+            document.getElementById('alert-type').value = '';
+            document.getElementById('alert-range').value = '60';
+
+            initChart();
+            applyTheme(localStorage.getItem('IOT_THEME') || 'dark');
+
+            await loadDevices();
+            await loadLiveSensors();
+            cachedAlerts = [];
+            renderAlerts();
+
+            checkHealth();
+            setInterval(checkHealth, 5000);
+            setInterval(loadDevices, 30000);
+            setInterval(loadLiveSensors, 2000);
+            setInterval(processLiveQueues, 250);
+            setInterval(loadQosStatus, 1000);
+            loadQosStatus();
+            connectWebSocket();
+            updateAlertsBadge();
+        }
+
+        bootstrap();
+    </script>
+</body>
+</html>
