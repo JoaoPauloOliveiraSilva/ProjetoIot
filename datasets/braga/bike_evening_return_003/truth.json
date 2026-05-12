@@ -1,0 +1,112 @@
+{
+  "scenario_id": "bike_evening_return_003",
+  "device_id": "bike_braga_003",
+  "description": "Regresso de fim de tarde em bicicleta com docking e carregamento no fim.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1657.85,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_sao_victor",
+    "name": "Sao Victor",
+    "lat": 41.55383,
+    "lon": -8.41226
+  },
+  "end_station": {
+    "station_id": "bike_mercado",
+    "name": "Mercado Municipal",
+    "lat": 41.55323,
+    "lon": -8.42706
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 546,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.55383,
+      "lon": -8.41226
+    },
+    {
+      "lat": 41.5544638,
+      "lon": -8.4137709
+    },
+    {
+      "lat": 41.5553962,
+      "lon": -8.4140501
+    },
+    {
+      "lat": 41.555636,
+      "lon": -8.4149109
+    },
+    {
+      "lat": 41.5546022,
+      "lon": -8.4170873
+    },
+    {
+      "lat": 41.5542397,
+      "lon": -8.4179858
+    },
+    {
+      "lat": 41.5545405,
+      "lon": -8.4196594
+    },
+    {
+      "lat": 41.5546281,
+      "lon": -8.4206995
+    },
+    {
+      "lat": 41.5535702,
+      "lon": -8.4212033
+    },
+    {
+      "lat": 41.5536991,
+      "lon": -8.4235767
+    },
+    {
+      "lat": 41.5536149,
+      "lon": -8.4250698
+    },
+    {
+      "lat": 41.5538449,
+      "lon": -8.4256442
+    },
+    {
+      "lat": 41.5539216,
+      "lon": -8.4257973
+    },
+    {
+      "lat": 41.5540344,
+      "lon": -8.4265217
+    },
+    {
+      "lat": 41.5536698,
+      "lon": -8.4266216
+    }
+  ]
+}

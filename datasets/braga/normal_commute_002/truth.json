@@ -2,10 +2,14 @@
   "scenario_id": "normal_commute_002",
   "device_id": "scooter_braga_009",
   "description": "Percurso normal de deslocacao casa-trabalho com distancia media.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 2308.74,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

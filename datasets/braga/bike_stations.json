@@ -1,0 +1,53 @@
+{
+  "city": "Braga, Portugal",
+  "stations": [
+    {
+      "station_id": "bike_arcada",
+      "name": "Arcada / Avenida Central",
+      "lat": 41.55172,
+      "lon": -8.4229
+    },
+    {
+      "station_id": "bike_se",
+      "name": "Se de Braga",
+      "lat": 41.54952,
+      "lon": -8.42686
+    },
+    {
+      "station_id": "bike_estacao_cp",
+      "name": "Estacao CP de Braga",
+      "lat": 41.54767,
+      "lon": -8.43402
+    },
+    {
+      "station_id": "bike_mercado",
+      "name": "Mercado Municipal",
+      "lat": 41.55323,
+      "lon": -8.42706
+    },
+    {
+      "station_id": "bike_liberdade",
+      "name": "Avenida da Liberdade",
+      "lat": 41.54883,
+      "lon": -8.42148
+    },
+    {
+      "station_id": "bike_parque_ponte",
+      "name": "Parque da Ponte",
+      "lat": 41.54366,
+      "lon": -8.42308
+    },
+    {
+      "station_id": "bike_sao_victor",
+      "name": "Sao Victor",
+      "lat": 41.55383,
+      "lon": -8.41226
+    },
+    {
+      "station_id": "bike_rodovia",
+      "name": "Parque Desportivo da Rodovia",
+      "lat": 41.55795,
+      "lon": -8.40787
+    }
+  ]
+}

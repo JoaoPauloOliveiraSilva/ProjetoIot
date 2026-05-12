@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     THRESHOLD_FALL_ACCEL: float = 20.0  
     THRESHOLD_HARD_BRAKE: float = -6.0  
     THRESHOLD_JAM_SPEED: float = 2.0    
+    THRESHOLD_OBSTACLE_FRONT_M: float = 0.45
+    THRESHOLD_OBSTACLE_SPEED: float = 6.0
     JAM_TIME_WINDOW_SEC: int = 60
     JAM_MIN_CONSECUTIVE_SAMPLES: int = 60
     ALERT_COOLDOWN_SEC: int = 15

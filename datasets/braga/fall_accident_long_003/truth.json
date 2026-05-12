@@ -2,10 +2,14 @@
   "scenario_id": "fall_accident_long_003",
   "device_id": "scooter_braga_016",
   "description": "Queda/acidente depois de uma deslocacao mais longa.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 2882.4,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

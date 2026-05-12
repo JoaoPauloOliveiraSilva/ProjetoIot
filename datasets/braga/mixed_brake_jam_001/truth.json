@@ -2,10 +2,14 @@
   "scenario_id": "mixed_brake_jam_001",
   "device_id": "scooter_braga_007",
   "description": "Percurso com travagem brusca e posterior congestionamento.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 2970.63,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate synthetic scooter telemetry datasets on real Braga streets.
+Generate synthetic micromobility telemetry datasets on real Braga streets.
 
 The generator fetches Braga road/cycleway geometry from OpenStreetMap through
 Overpass, builds a lightweight routing graph, then creates deterministic
@@ -33,6 +33,7 @@ OSM_CACHE_PATH = CACHE_DIR / "braga_highways_overpass.json"
 
 # Bounding box around Braga city, Portugal: south, west, north, east.
 BRAGA_BBOX = (41.5200, -8.4700, 41.5900, -8.3500)
+BRAGA_CENTER = (41.5503, -8.4253)
 
 HIGHWAY_WHITELIST = {
     "cycleway",
@@ -57,6 +58,15 @@ CSV_COLUMNS = [
     "timestamp",
     "source",
     "type",
+    "vehicle_type",
+    "trip_id",
+    "sequence",
+    "start_station_id",
+    "start_station_name",
+    "end_station_id",
+    "end_station_name",
+    "dock_status",
+    "charging",
     "lat",
     "lon",
     "speed",
@@ -82,6 +92,14 @@ class Node:
 
 
 @dataclass(frozen=True)
+class DockStation:
+    station_id: str
+    name: str
+    lat: float
+    lon: float
+
+
+@dataclass(frozen=True)
 class ScenarioSpec:
     scenario_id: str
     event_type: str | None
@@ -90,6 +108,23 @@ class ScenarioSpec:
     base_speed_kmh: float
     device_id: str
     description: str
+    vehicle_type: str = "scooter"
+    start_station_id: str | None = None
+    end_station_id: str | None = None
+
+
+BIKE_DOCK_STATIONS = [
+    DockStation("bike_arcada", "Arcada / Avenida Central", 41.55172, -8.42290),
+    DockStation("bike_se", "Se de Braga", 41.54952, -8.42686),
+    DockStation("bike_estacao_cp", "Estacao CP de Braga", 41.54767, -8.43402),
+    DockStation("bike_mercado", "Mercado Municipal", 41.55323, -8.42706),
+    DockStation("bike_liberdade", "Avenida da Liberdade", 41.54883, -8.42148),
+    DockStation("bike_parque_ponte", "Parque da Ponte", 41.54366, -8.42308),
+    DockStation("bike_sao_victor", "Sao Victor", 41.55383, -8.41226),
+    DockStation("bike_rodovia", "Parque Desportivo da Rodovia", 41.55795, -8.40787),
+]
+
+BIKE_STATIONS_BY_ID = {station.station_id: station for station in BIKE_DOCK_STATIONS}
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -195,6 +230,42 @@ def largest_component(graph: dict[int, list[tuple[int, float]]]) -> set[int]:
     return largest
 
 
+def nodes_within_radius(
+    nodes: dict[int, Node],
+    component: set[int],
+    center: tuple[float, float],
+    radius_m: float,
+) -> set[int]:
+    return {
+        node_id
+        for node_id in component
+        if haversine_m(nodes[node_id].lat, nodes[node_id].lon, center[0], center[1]) <= radius_m
+    }
+
+
+def nearest_graph_node(
+    nodes: dict[int, Node],
+    component: set[int],
+    lat: float,
+    lon: float,
+) -> int:
+    return min(
+        component,
+        key=lambda node_id: haversine_m(nodes[node_id].lat, nodes[node_id].lon, lat, lon),
+    )
+
+
+def station_payload(station: DockStation | None) -> dict[str, Any] | None:
+    if station is None:
+        return None
+    return {
+        "station_id": station.station_id,
+        "name": station.name,
+        "lat": round(station.lat, 7),
+        "lon": round(station.lon, 7),
+    }
+
+
 def shortest_path(
     graph: dict[int, list[tuple[int, float]]],
     start: int,
@@ -225,6 +296,43 @@ def shortest_path(
         path.append(previous[path[-1]])
     path.reverse()
     return path, distances[end]
+
+
+def choose_station_route(
+    graph: dict[int, list[tuple[int, float]]],
+    nodes: dict[int, Node],
+    component: set[int],
+    rng: random.Random,
+    start_station: DockStation,
+    end_station: DockStation,
+    min_m: float,
+    max_m: float,
+) -> tuple[list[int], float]:
+    start_node = nearest_graph_node(nodes, component, start_station.lat, start_station.lon)
+    end_node = nearest_graph_node(nodes, component, end_station.lat, end_station.lon)
+    direct = shortest_path(graph, start_node, end_node)
+    if direct:
+        path, length_m = direct
+        if min_m <= length_m <= max_m and len(path) >= 8:
+            return path, length_m
+
+    candidates = list(component)
+    for _ in range(800):
+        via = rng.choice(candidates)
+        first = shortest_path(graph, start_node, via)
+        second = shortest_path(graph, via, end_node)
+        if not first or not second:
+            continue
+        first_path, first_m = first
+        second_path, second_m = second
+        route = first_path + second_path[1:]
+        route_m = first_m + second_m
+        if min_m <= route_m <= max_m and len(route) >= 8:
+            return route, route_m
+
+    if direct:
+        return direct
+    raise RuntimeError(f"Could not find station route from {start_station.station_id} to {end_station.station_id}")
 
 
 def choose_route(
@@ -274,6 +382,10 @@ def interpolate_at(points: list[tuple[float, float]], target_m: float) -> tuple[
     return points[-1]
 
 
+def parse_generated_timestamp(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
 def event_window(event_type: str | None, estimated_duration_s: int) -> dict[str, int]:
     if event_type == "hard_brake":
         start = max(20, int(estimated_duration_s * 0.45))
@@ -284,6 +396,9 @@ def event_window(event_type: str | None, estimated_duration_s: int) -> dict[str,
     if event_type == "traffic_jam":
         start = max(25, int(estimated_duration_s * 0.35))
         return {"start": start, "end": start + 95}
+    if event_type == "obstacle_risk":
+        start = max(20, int(estimated_duration_s * 0.40))
+        return {"start": start, "end": start + 8}
     if event_type == "mixed":
         start = max(25, int(estimated_duration_s * 0.30))
         return {"brake_start": start, "brake_end": start + 5, "jam_start": start + 30, "jam_end": start + 120}
@@ -322,6 +437,11 @@ def speed_for_second(
             return max(0.2, rng.gauss(1.1, 0.25))
         return max(6.0, min(20.0, base))
 
+    if spec.event_type == "obstacle_risk":
+        if window["start"] <= t <= window["end"]:
+            return max(7.0, min(18.0, base))
+        return max(6.0, min(22.0, base))
+
     if spec.event_type == "mixed":
         if window["brake_start"] <= t <= window["brake_end"]:
             return max(1.0, 21.0 - (t - window["brake_start"] + 1) * 4.2)
@@ -339,6 +459,8 @@ def event_label_for_second(spec: ScenarioSpec, t: int, window: dict[str, int]) -
         return "fall_accident"
     if spec.event_type == "traffic_jam" and window["start"] <= t <= window["end"]:
         return "traffic_jam"
+    if spec.event_type == "obstacle_risk" and window["start"] <= t <= window["end"]:
+        return "obstacle_risk"
     if spec.event_type == "mixed":
         if window["brake_start"] <= t <= window["brake_end"]:
             return "hard_brake"
@@ -352,6 +474,8 @@ def generate_rows(
     points: list[tuple[float, float]],
     rng: random.Random,
     start_time: datetime,
+    start_station: DockStation | None = None,
+    end_station: DockStation | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     length_m = route_length(points)
     estimated_duration_s = max(60, int(length_m / (spec.base_speed_kmh / 3.6)))
@@ -395,6 +519,11 @@ def generate_rows(
             range_front = rng.uniform(0.6, 1.8)
             range_left = rng.uniform(0.4, 1.4)
 
+        if label == "obstacle_risk":
+            accel_y = rng.gauss(0.0, 0.20)
+            range_front = rng.uniform(0.25, 0.40)
+            range_left = rng.uniform(0.6, 1.5)
+
         if label == "fall_accident":
             accel_x = rng.choice([-1, 1]) * rng.uniform(21.0, 29.0)
             accel_y = rng.choice([-1, 1]) * rng.uniform(7.0, 13.0)
@@ -420,6 +549,15 @@ def generate_rows(
                 "timestamp": timestamp.isoformat().replace("+00:00", "Z"),
                 "source": "simulated",
                 "type": "telemetry",
+                "vehicle_type": spec.vehicle_type,
+                "trip_id": spec.scenario_id,
+                "sequence": str(t),
+                "start_station_id": start_station.station_id if start_station else "",
+                "start_station_name": start_station.name if start_station else "",
+                "end_station_id": end_station.station_id if end_station else "",
+                "end_station_name": end_station.name if end_station else "",
+                "dock_status": "in_transit",
+                "charging": "false",
                 "lat": f"{lat:.7f}",
                 "lon": f"{lon:.7f}",
                 "speed": f"{speed_kmh:.2f}",
@@ -443,6 +581,7 @@ def generate_rows(
                 "hard_brake": "deceleration_threshold",
                 "fall_accident": "accel_peak_exceeded",
                 "traffic_jam": "prolonged_low_speed",
+                "obstacle_risk": "front_range_threshold",
             }[label]
             events.append(
                 {
@@ -461,6 +600,47 @@ def generate_rows(
         if covered_m >= length_m and t > 45:
             break
 
+    if spec.vehicle_type == "bicycle" and end_station and rows:
+        charge_rows = 25
+        last_timestamp = parse_generated_timestamp(rows[-1]["timestamp"])
+        last_sequence = int(rows[-1]["sequence"])
+        for charge_idx in range(1, charge_rows + 1):
+            timestamp = last_timestamp + timedelta(seconds=charge_idx)
+            battery = min(100.0, battery + rng.uniform(0.035, 0.070))
+            rows.append(
+                {
+                    "scenario_id": spec.scenario_id,
+                    "device_id": spec.device_id,
+                    "timestamp": timestamp.isoformat().replace("+00:00", "Z"),
+                    "source": "simulated",
+                    "type": "telemetry",
+                    "vehicle_type": spec.vehicle_type,
+                    "trip_id": spec.scenario_id,
+                    "sequence": str(last_sequence + charge_idx),
+                    "start_station_id": start_station.station_id if start_station else "",
+                    "start_station_name": start_station.name if start_station else "",
+                    "end_station_id": end_station.station_id,
+                    "end_station_name": end_station.name,
+                    "dock_status": "charging",
+                    "charging": "true",
+                    "lat": f"{end_station.lat:.7f}",
+                    "lon": f"{end_station.lon:.7f}",
+                    "speed": "0.00",
+                    "accel_x": f"{rng.gauss(0.0, 0.03):.3f}",
+                    "accel_y": f"{rng.gauss(0.0, 0.03):.3f}",
+                    "accel_z": f"{rng.gauss(9.81, 0.04):.3f}",
+                    "gyro_x": f"{rng.gauss(0.0, 0.005):.4f}",
+                    "gyro_y": f"{rng.gauss(0.0, 0.005):.4f}",
+                    "gyro_z": f"{rng.gauss(0.0, 0.005):.4f}",
+                    "gps_accuracy_m": f"{rng.uniform(2.0, 5.5):.2f}",
+                    "range_front_m": f"{rng.uniform(1.8, 6.0):.2f}",
+                    "range_left_m": f"{rng.uniform(0.8, 2.4):.2f}",
+                    "ultrasonic_valid": "true",
+                    "battery": f"{battery:.1f}",
+                    "event_label": "bike_docked" if charge_idx == 1 else "charging",
+                }
+            )
+
     return rows, events
 
 
@@ -471,6 +651,8 @@ def write_dataset(
     route_m: float,
     rows: list[dict[str, Any]],
     events: list[dict[str, Any]],
+    start_station: DockStation | None = None,
+    end_station: DockStation | None = None,
 ) -> dict[str, Any]:
     scenario_dir = output_root / spec.scenario_id
     scenario_dir.mkdir(parents=True, exist_ok=True)
@@ -485,10 +667,23 @@ def write_dataset(
         "scenario_id": spec.scenario_id,
         "device_id": spec.device_id,
         "description": spec.description,
+        "vehicle_type": spec.vehicle_type,
         "source": "synthetic_osm_replay",
         "city": "Braga, Portugal",
         "route_length_m": round(route_m, 2),
         "sample_period_s": 1,
+        "start_station": station_payload(start_station),
+        "end_station": station_payload(end_station),
+        "data_dump": (
+            {
+                "trigger": "trip_end_dock",
+                "expected_telemetry_rows": len(rows),
+                "charging_after_dock": True,
+                "description": "Ao terminar a viagem, a bicicleta fica numa estação, carrega a bateria e publica um resumo de integridade da descarga de dados.",
+            }
+            if spec.vehicle_type == "bicycle"
+            else None
+        ),
         "sensors": {
             "gps": ["lat", "lon", "speed", "gps_accuracy_m"],
             "imu": ["accel_x", "accel_y", "accel_z", "gyro_x", "gyro_y", "gyro_z"],
@@ -505,9 +700,12 @@ def write_dataset(
     return {
         "scenario_id": spec.scenario_id,
         "device_id": spec.device_id,
+        "vehicle_type": spec.vehicle_type,
         "rows": len(rows),
         "route_length_m": round(route_m, 2),
         "event_types": [event["event_type"] for event in events],
+        "start_station": station_payload(start_station),
+        "end_station": station_payload(end_station),
         "telemetry_csv": str(telemetry_path.relative_to(REPO_ROOT)),
         "truth_json": str((scenario_dir / "truth.json").relative_to(REPO_ROOT)),
     }
@@ -695,6 +893,111 @@ def scenario_specs() -> list[ScenarioSpec]:
             "scooter_braga_020",
             "Percurso longo com travagem brusca e congestionamento posterior.",
         ),
+        ScenarioSpec(
+            "obstacle_risk_001",
+            "obstacle_risk",
+            850,
+            1700,
+            12.5,
+            "scooter_braga_021",
+            "Obstaculo proximo detetado por ultrassom sem travagem brusca nem queda.",
+        ),
+        ScenarioSpec(
+            "bike_normal_center_001",
+            None,
+            700,
+            1600,
+            12.5,
+            "bike_braga_001",
+            "Viagem normal de bicicleta no centro de Braga, terminando em estacao de carregamento.",
+            vehicle_type="bicycle",
+            start_station_id="bike_arcada",
+            end_station_id="bike_se",
+        ),
+        ScenarioSpec(
+            "bike_commute_center_002",
+            None,
+            900,
+            1900,
+            13.0,
+            "bike_braga_002",
+            "Deslocacao curta de bicicleta entre estacoes centrais, sem eventos criticos.",
+            vehicle_type="bicycle",
+            start_station_id="bike_estacao_cp",
+            end_station_id="bike_arcada",
+        ),
+        ScenarioSpec(
+            "bike_evening_return_003",
+            None,
+            1000,
+            2100,
+            11.5,
+            "bike_braga_003",
+            "Regresso de fim de tarde em bicicleta com docking e carregamento no fim.",
+            vehicle_type="bicycle",
+            start_station_id="bike_sao_victor",
+            end_station_id="bike_mercado",
+        ),
+        ScenarioSpec(
+            "bike_hard_brake_center_001",
+            "hard_brake",
+            850,
+            1800,
+            13.5,
+            "bike_braga_004",
+            "Bicicleta com travagem brusca no centro de Braga.",
+            vehicle_type="bicycle",
+            start_station_id="bike_liberdade",
+            end_station_id="bike_estacao_cp",
+        ),
+        ScenarioSpec(
+            "bike_fall_accident_center_001",
+            "fall_accident",
+            750,
+            1700,
+            12.0,
+            "bike_braga_005",
+            "Bicicleta com queda/acidente e imobilizacao posterior antes da recolha.",
+            vehicle_type="bicycle",
+            start_station_id="bike_mercado",
+            end_station_id="bike_parque_ponte",
+        ),
+        ScenarioSpec(
+            "bike_traffic_jam_center_001",
+            "traffic_jam",
+            1000,
+            2200,
+            10.5,
+            "bike_braga_006",
+            "Bicicleta presa em zona central com movimento muito lento durante periodo prolongado.",
+            vehicle_type="bicycle",
+            start_station_id="bike_arcada",
+            end_station_id="bike_sao_victor",
+        ),
+        ScenarioSpec(
+            "bike_obstacle_risk_center_001",
+            "obstacle_risk",
+            700,
+            1500,
+            12.0,
+            "bike_braga_007",
+            "Bicicleta com obstaculo frontal proximo detetado por ultrassom.",
+            vehicle_type="bicycle",
+            start_station_id="bike_se",
+            end_station_id="bike_liberdade",
+        ),
+        ScenarioSpec(
+            "bike_mixed_brake_jam_center_001",
+            "mixed",
+            1200,
+            2600,
+            12.5,
+            "bike_braga_008",
+            "Bicicleta com travagem brusca seguida de congestionamento antes do docking.",
+            vehicle_type="bicycle",
+            start_station_id="bike_parque_ponte",
+            end_station_id="bike_rodovia",
+        ),
     ]
 
 
@@ -706,6 +1009,9 @@ def generate(force_osm: bool = False) -> None:
     component = largest_component(graph)
     if len(component) < 100:
         raise RuntimeError("OpenStreetMap graph for Braga is unexpectedly small")
+    central_component = nodes_within_radius(nodes, component, BRAGA_CENTER, 2600.0)
+    if len(central_component) < 100:
+        central_component = component
 
     if OUTPUT_ROOT.exists():
         for child in OUTPUT_ROOT.iterdir():
@@ -720,15 +1026,45 @@ def generate(force_osm: bool = False) -> None:
     base_time = datetime(2026, 5, 5, 10, 0, tzinfo=timezone.utc)
 
     for index, spec in enumerate(scenario_specs()):
-        route, route_m = choose_route(graph, component, rng, spec.min_route_m, spec.max_route_m)
+        start_station = BIKE_STATIONS_BY_ID.get(spec.start_station_id or "")
+        end_station = BIKE_STATIONS_BY_ID.get(spec.end_station_id or "")
+        if spec.vehicle_type == "bicycle" and start_station and end_station:
+            route, route_m = choose_station_route(
+                graph,
+                nodes,
+                central_component,
+                rng,
+                start_station,
+                end_station,
+                spec.min_route_m,
+                spec.max_route_m,
+            )
+        else:
+            route, route_m = choose_route(graph, component, rng, spec.min_route_m, spec.max_route_m)
         route_points = route_coordinates(nodes, route)
+        if spec.vehicle_type == "bicycle" and start_station and end_station:
+            route_points = [(start_station.lat, start_station.lon), *route_points, (end_station.lat, end_station.lon)]
+            route_m = route_length(route_points)
         rows, events = generate_rows(
             spec,
             route_points,
             rng,
             base_time + timedelta(minutes=index * 12),
+            start_station=start_station,
+            end_station=end_station,
         )
-        manifest_entries.append(write_dataset(OUTPUT_ROOT, spec, route_points, route_m, rows, events))
+        manifest_entries.append(
+            write_dataset(
+                OUTPUT_ROOT,
+                spec,
+                route_points,
+                route_m,
+                rows,
+                events,
+                start_station=start_station,
+                end_station=end_station,
+            )
+        )
 
     manifest = {
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -738,8 +1074,13 @@ def generate(force_osm: bool = False) -> None:
         "bbox_south_west_north_east": BRAGA_BBOX,
         "sample_period_s": 1,
         "sensors_minimum": ["gps", "imu", "ultrasonic"],
+        "bike_dock_stations": [station_payload(station) for station in BIKE_DOCK_STATIONS],
         "datasets": manifest_entries,
     }
+    (OUTPUT_ROOT / "bike_stations.json").write_text(
+        json.dumps({"city": "Braga, Portugal", "stations": manifest["bike_dock_stations"]}, indent=2),
+        encoding="utf-8",
+    )
     (OUTPUT_ROOT / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     print(f"Generated {len(manifest_entries)} datasets in {OUTPUT_ROOT}")

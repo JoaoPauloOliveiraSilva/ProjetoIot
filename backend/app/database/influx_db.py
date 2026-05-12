@@ -57,6 +57,15 @@ def ping() -> bool:
         return False
 
 SENSOR_OPTIONAL_FIELDS = [
+    "vehicle_type",
+    "trip_id",
+    "sequence",
+    "start_station_id",
+    "start_station_name",
+    "end_station_id",
+    "end_station_name",
+    "dock_status",
+    "charging",
     "gyro_x",
     "gyro_y",
     "gyro_z",
@@ -68,12 +77,23 @@ SENSOR_OPTIONAL_FIELDS = [
 ]
 
 ALERT_OPTIONAL_FIELDS = [
+    "vehicle_type",
+    "station_id",
+    "station_name",
     "gyro_x",
     "gyro_y",
     "gyro_z",
     "range_front_m",
     "range_left_m",
     "ultrasonic_valid",
+    "charging",
+    "battery_before",
+    "battery_after",
+    "expected_count",
+    "sent_count",
+    "failed_count",
+    "missing_count",
+    "completeness_pct",
 ]
 
 def _add_optional_fields(point: Point, data, fields: list[str]) -> Point:
@@ -89,6 +109,15 @@ def _sensor_record(registo):
         "device_id": registo.values.get("device_id"),
         "source": registo.values.get("source"),
         "type": registo.values.get("type"),
+        "vehicle_type": registo.values.get("vehicle_type"),
+        "trip_id": registo.values.get("trip_id"),
+        "sequence": registo.values.get("sequence"),
+        "start_station_id": registo.values.get("start_station_id"),
+        "start_station_name": registo.values.get("start_station_name"),
+        "end_station_id": registo.values.get("end_station_id"),
+        "end_station_name": registo.values.get("end_station_name"),
+        "dock_status": registo.values.get("dock_status"),
+        "charging": registo.values.get("charging"),
         "lat": registo.values.get("lat"),
         "lon": registo.values.get("lon"),
         "speed": registo.values.get("speed"),
@@ -113,6 +142,9 @@ def _alert_record(registo):
         "type": registo.values.get("type"),
         "event_type": registo.values.get("event_type"),
         "trigger": registo.values.get("trigger"),
+        "vehicle_type": registo.values.get("vehicle_type"),
+        "station_id": registo.values.get("station_id"),
+        "station_name": registo.values.get("station_name"),
         "lat": registo.values.get("lat"),
         "lon": registo.values.get("lon"),
         "speed": registo.values.get("speed"),
@@ -125,6 +157,14 @@ def _alert_record(registo):
         "range_front_m": registo.values.get("range_front_m"),
         "range_left_m": registo.values.get("range_left_m"),
         "ultrasonic_valid": registo.values.get("ultrasonic_valid"),
+        "charging": registo.values.get("charging"),
+        "battery_before": registo.values.get("battery_before"),
+        "battery_after": registo.values.get("battery_after"),
+        "expected_count": registo.values.get("expected_count"),
+        "sent_count": registo.values.get("sent_count"),
+        "failed_count": registo.values.get("failed_count"),
+        "missing_count": registo.values.get("missing_count"),
+        "completeness_pct": registo.values.get("completeness_pct"),
     }
 
 def get_all_devices():

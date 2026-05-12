@@ -72,6 +72,8 @@ class _FallbackSettings:
     THRESHOLD_FALL_ACCEL = float(os.getenv("THRESHOLD_FALL_ACCEL", "20.0"))
     THRESHOLD_HARD_BRAKE = float(os.getenv("THRESHOLD_HARD_BRAKE", "-6.0"))
     THRESHOLD_JAM_SPEED = float(os.getenv("THRESHOLD_JAM_SPEED", "2.0"))
+    THRESHOLD_OBSTACLE_FRONT_M = float(os.getenv("THRESHOLD_OBSTACLE_FRONT_M", "0.45"))
+    THRESHOLD_OBSTACLE_SPEED = float(os.getenv("THRESHOLD_OBSTACLE_SPEED", "6.0"))
     JAM_TIME_WINDOW_SEC = int(os.getenv("JAM_TIME_WINDOW_SEC", "60"))
     JAM_MIN_CONSECUTIVE_SAMPLES = int(os.getenv("JAM_MIN_CONSECUTIVE_SAMPLES", "60"))
     ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC", "15"))

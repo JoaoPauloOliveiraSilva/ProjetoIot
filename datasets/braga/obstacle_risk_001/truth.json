@@ -1,0 +1,97 @@
+{
+  "scenario_id": "obstacle_risk_001",
+  "device_id": "scooter_braga_021",
+  "description": "Obstaculo proximo detetado por ultrassom sem travagem brusca nem queda.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 989.98,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "obstacle_risk",
+      "timestamp": "2026-05-05T14:01:54Z",
+      "expected_trigger": "front_range_threshold",
+      "lat": 41.5574075,
+      "lon": -8.4174883
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5601506,
+      "lon": -8.4169957
+    },
+    {
+      "lat": 41.559619,
+      "lon": -8.417181
+    },
+    {
+      "lat": 41.559351,
+      "lon": -8.417382
+    },
+    {
+      "lat": 41.5590781,
+      "lon": -8.4181701
+    },
+    {
+      "lat": 41.5584685,
+      "lon": -8.4180754
+    },
+    {
+      "lat": 41.5579732,
+      "lon": -8.4179442
+    },
+    {
+      "lat": 41.5577225,
+      "lon": -8.4179727
+    },
+    {
+      "lat": 41.5575605,
+      "lon": -8.4178722
+    },
+    {
+      "lat": 41.5574919,
+      "lon": -8.4176958
+    },
+    {
+      "lat": 41.5565868,
+      "lon": -8.4173211
+    },
+    {
+      "lat": 41.5552675,
+      "lon": -8.417017
+    },
+    {
+      "lat": 41.5544197,
+      "lon": -8.4170141
+    },
+    {
+      "lat": 41.5529905,
+      "lon": -8.4170756
+    }
+  ]
+}

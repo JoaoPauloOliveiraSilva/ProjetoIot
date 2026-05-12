@@ -2,10 +2,14 @@
   "scenario_id": "traffic_jam_001",
   "device_id": "scooter_braga_006",
   "description": "Congestionamento com velocidade muito baixa durante janela prolongada.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 1881.74,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

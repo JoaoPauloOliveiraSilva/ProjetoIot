@@ -7,6 +7,15 @@ class SensorData(BaseModel):
     source: str        
     type: str   
     timestamp: Optional[datetime] = None
+    vehicle_type: Optional[str] = None
+    trip_id: Optional[str] = None
+    sequence: Optional[int] = None
+    start_station_id: Optional[str] = None
+    start_station_name: Optional[str] = None
+    end_station_id: Optional[str] = None
+    end_station_name: Optional[str] = None
+    dock_status: Optional[str] = None
+    charging: Optional[bool] = None
     lat: float        
     lon: float
     speed: float

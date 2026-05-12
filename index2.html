@@ -161,6 +161,9 @@
                 <div class="hidden lg:flex items-center gap-2 text-on-surface-variant font-mono-data text-mono-data">
                     <span>Active Devices:</span>
                     <span id="active-devices">0</span>
+                    <span class="opacity-60">|</span>
+                    <span>Offline:</span>
+                    <span id="offline-devices">0</span>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -345,6 +348,8 @@
                         <option value="fall_accident">fall_accident</option>
                         <option value="hard_brake">hard_brake</option>
                         <option value="traffic_jam">traffic_jam</option>
+                        <option value="obstacle_risk">obstacle_risk</option>
+                        <option value="dock_data_dump">dock_data_dump</option>
                     </select>
                     <select id="alert-range" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
                         <option value="60" selected>Last 60m</option>
@@ -396,8 +401,13 @@
         }
 
         function updateActiveDeviceCount() {
-            const el = document.getElementById('active-devices');
-            if (el) el.innerText = String(deviceMarkers.size);
+            const activeEl = document.getElementById('active-devices');
+            const offlineEl = document.getElementById('offline-devices');
+            const statusRows = Array.from(deviceStatusById.values());
+            const online = statusRows.length ? statusRows.filter(d => d.online).length : deviceMarkers.size;
+            const offline = statusRows.length ? statusRows.filter(d => !d.online).length : 0;
+            if (activeEl) activeEl.innerText = String(online);
+            if (offlineEl) offlineEl.innerText = String(offline);
         }
 
         function websocketUrl() {
@@ -449,6 +459,7 @@
         let historyReplayMarker = null;
         let historyReplayTimer = null;
         let knownDeviceIds = [];
+        const deviceStatusById = new Map();
         let liveSensorsSeeded = false;
         const LIVE_TRAIL_LIMIT = 80;
 
@@ -459,6 +470,22 @@
 
         function getAlertKey(alerta) {
             return `${alerta.device_id || ''}|${alerta.event_type || ''}|${alerta.timestamp || ''}`;
+        }
+
+        function dedupeAlerts(alerts) {
+            const byKey = new Map();
+            for (const alerta of alerts) {
+                const key = getAlertKey(alerta);
+                const existing = byKey.get(key);
+                if (!existing) {
+                    byKey.set(key, alerta);
+                    continue;
+                }
+                const existingTruth = String(existing.source || '').includes('truth');
+                const candidateTruth = String(alerta.source || '').includes('truth');
+                if (existingTruth && !candidateTruth) byKey.set(key, alerta);
+            }
+            return Array.from(byKey.values());
         }
 
         function persistReadKeys() {
@@ -483,10 +510,15 @@
 
         async function loadDevices() {
             try {
-                const res = await fetch(`${API_BASE_URL}/devices`, { headers: authHeaders() });
+                const res = await fetch(`${API_BASE_URL}/devices/status?minutos=5&offline_after_sec=45`, { headers: authHeaders() });
                 if (!res.ok) return;
                 const data = await res.json();
-                const devices = Array.isArray(data.dispositivos) ? data.dispositivos : [];
+                const statusRows = Array.isArray(data.dispositivos) ? data.dispositivos : [];
+                deviceStatusById.clear();
+                for (const row of statusRows) {
+                    if (row.device_id) deviceStatusById.set(row.device_id, row);
+                }
+                const devices = statusRows.map(row => row.device_id).filter(Boolean);
                 knownDeviceIds = devices.slice();
                 const select = document.getElementById('device-select');
                 if (select) {
@@ -494,12 +526,14 @@
                     select.innerHTML = '<option value="">All devices</option>';
                     for (const id of devices) {
                         const opt = document.createElement('option');
+                        const status = deviceStatusById.get(id);
                         opt.value = id;
-                        opt.textContent = id;
+                        opt.textContent = status && !status.online ? `${id} (offline)` : id;
                         select.appendChild(opt);
                     }
                     select.value = devices.includes(current) ? current : '';
                 }
+                refreshDeviceMarkerStyles(select ? select.value : '');
                 updateActiveDeviceCount();
                 updateHistoryLoadState();
             } catch {}
@@ -558,7 +592,16 @@
             const lon = Number(row.lon);
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
 
+            deviceStatusById.set(row.device_id, {
+                device_id: row.device_id,
+                online: true,
+                status: 'online',
+                last_seen: row.timestamp,
+                age_sec: 0,
+                latest: row
+            });
             setDeviceMarker(row.device_id, lat, lon, selectedDevice && row.device_id === selectedDevice);
+            updateActiveDeviceCount();
 
             const line = getLiveTrail(row.device_id);
             const points = line.getLatLngs();
@@ -612,48 +655,78 @@
             }
         }
 
+        function markerStyleForDevice(deviceId, selected) {
+            const status = deviceStatusById.get(deviceId);
+            const online = !status || status.online;
+            const latest = status?.latest || {};
+            const vehicleType = latest.vehicle_type || (String(deviceId).startsWith('bike_') ? 'bicycle' : 'scooter');
+            const color = online ? (vehicleType === 'bicycle' ? '#10b981' : '#2563eb') : '#7b8a82';
+            return {
+                radius: selected ? 9 : 8,
+                color,
+                fillColor: color,
+                weight: online ? 3 : 2,
+                fillOpacity: online ? 0.6 : 0.35
+            };
+        }
+
+        function refreshDeviceMarkerStyles(selectedDevice) {
+            for (const [deviceId, marker] of deviceMarkers.entries()) {
+                marker.setStyle(markerStyleForDevice(deviceId, selectedDevice && deviceId === selectedDevice));
+            }
+        }
+
         function setDeviceMarker(deviceId, lat, lon, selected) {
             let marker = deviceMarkers.get(deviceId);
-            const color = '#2563eb';
+            const style = markerStyleForDevice(deviceId, selected);
+            const status = deviceStatusById.get(deviceId);
+            const latest = status?.latest || {};
+            const vehicleType = latest.vehicle_type || (String(deviceId).startsWith('bike_') ? 'bicycle' : 'scooter');
+            const battery = latest.battery == null ? '-' : `${Number(latest.battery).toFixed(1)}%`;
+            const dock = latest.dock_status ? `<div style="font-size:12px;opacity:.85">${formatText(latest.dock_status)} • battery ${battery}</div>` : '';
+            const popup = `<div style="font-weight:700">${deviceId}</div><div style="font-size:12px;opacity:.85">${formatText(vehicleType)}</div>${dock}`;
             if (!marker) {
                 marker = L.circleMarker([lat, lon], {
-                    radius: selected ? 9 : 8,
-                    color,
-                    fillColor: color,
-                    weight: 3,
-                    fillOpacity: 0.6
+                    ...style
                 }).addTo(devicesLayer);
-                marker.bindPopup(`<div style="font-weight:700">${deviceId}</div>`);
+                marker.bindPopup(popup);
                 deviceMarkers.set(deviceId, marker);
                 updateActiveDeviceCount();
                 return;
             }
             marker.setLatLng([lat, lon]);
-            marker.setStyle({
-                radius: selected ? 9 : 8,
-                color,
-                fillColor: color,
-                weight: 3,
-                fillOpacity: 0.6
-            });
+            marker.setStyle(style);
+            marker.setPopupContent(popup);
+        }
+
+        function alertMarkerStyle(alerta) {
+            if (alerta.event_type === 'fall_accident') {
+                return { label: 'FALL', stroke: '#ff0000', fill: '#ff0000', radius: 12, fillOpacity: 0.85 };
+            }
+            if (alerta.event_type === 'obstacle_risk') {
+                return { label: 'OBSTACLE', stroke: '#ffb95f', fill: '#ffb95f', radius: 10, fillOpacity: 0.75 };
+            }
+            if (alerta.event_type === 'traffic_jam') {
+                return { label: 'JAM', stroke: '#a78bfa', fill: '#a78bfa', radius: 10, fillOpacity: 0.7 };
+            }
+            if (alerta.event_type === 'dock_data_dump') {
+                return { label: 'DOCK', stroke: '#10b981', fill: '#10b981', radius: 10, fillOpacity: 0.75 };
+            }
+            return { label: 'ALERT', stroke: '#ff7a73', fill: '#ff7a73', radius: 10, fillOpacity: 0.7 };
         }
 
         function setAlertMarker(alerta) {
             const key = getAlertKey(alerta);
             if (alertMarkers.has(key)) return;
-            const isFall = alerta.event_type === 'fall_accident';
-            const stroke = '#ff0000';
-            const fill = '#ff0000';
-            const radius = isFall ? 12 : 11;
-            const weight = isFall ? 4 : 4;
+            const style = alertMarkerStyle(alerta);
             const marker = L.circleMarker([alerta.lat, alerta.lon], {
-                radius,
-                color: stroke,
-                fillColor: fill,
-                weight,
-                fillOpacity: isFall ? 0.85 : 0.65
+                radius: style.radius,
+                color: style.stroke,
+                fillColor: style.fill,
+                weight: 4,
+                fillOpacity: style.fillOpacity
             }).addTo(alertsLayer);
-            marker.bindPopup(`<div style="font-weight:700;color:${stroke}">${isFall ? 'FALL' : 'ALERT'}</div><div>${formatText(alerta.event_type)}</div><div style="font-size:12px;opacity:.85">${alerta.device_id || ''}</div>`);
+            marker.bindPopup(`<div style="font-weight:700;color:${style.stroke}">${style.label}</div><div>${formatText(alerta.event_type)}</div><div style="font-size:12px;opacity:.85">${alerta.device_id || ''}</div>`);
             alertMarkers.set(key, marker);
         }
 
@@ -693,7 +766,13 @@
             label.innerText = `${read ? 'READ' : 'LIVE'} • ${alerta.device_id || 'unknown'} • ${formatText(alerta.event_type)}`;
             const body = document.createElement('div');
             body.className = 'text-sm text-on-surface-variant mt-1 truncate';
-            body.innerText = `${formatText(alerta.trigger)} • ${new Date(alerta.timestamp).toLocaleString()}`;
+            if (alerta.event_type === 'dock_data_dump') {
+                const pct = alerta.completeness_pct == null ? '-' : `${Number(alerta.completeness_pct).toFixed(1)}%`;
+                const station = alerta.station_name || alerta.station_id || 'dock station';
+                body.innerText = `${station} • dump ${pct} • ${new Date(alerta.timestamp).toLocaleString()}`;
+            } else {
+                body.innerText = `${formatText(alerta.trigger)} • ${new Date(alerta.timestamp).toLocaleString()}`;
+            }
             left.appendChild(label);
             left.appendChild(body);
 
@@ -762,11 +841,10 @@
             }
         }
 
-        function syncFallAlertMarkers() {
+        function syncAlertMarkers() {
             alertsLayer.clearLayers();
             alertMarkers.clear();
             for (const alerta of cachedAlerts) {
-                if (alerta?.event_type !== 'fall_accident') continue;
                 if (alerta?.lat == null || alerta?.lon == null) continue;
                 setAlertMarker(alerta);
             }
@@ -788,9 +866,9 @@
                 const data = await res.json();
                 const alerts = (Array.isArray(data.dados) ? data.dados : [])
                     .filter(alerta => isAfterDashboardStart(alerta.timestamp));
-                cachedAlerts = alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                cachedAlerts = dedupeAlerts(alerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderAlerts();
-                syncFallAlertMarkers();
+                syncAlertMarkers();
             } catch {}
         }
 
@@ -995,9 +1073,9 @@
                 const alerta = JSON.parse(e.data);
                 if (!isAfterDashboardStart(alerta.timestamp)) return;
                 cachedAlerts.unshift(alerta);
-                cachedAlerts = cachedAlerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
+                cachedAlerts = dedupeAlerts(cachedAlerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
                 renderAlerts();
-                if (alerta?.event_type === 'fall_accident') setAlertMarker(alerta);
+                if (alerta?.lat != null && alerta?.lon != null) setAlertMarker(alerta);
                 showToast(`Alert: ${formatText(alerta.event_type)}`, `${alerta.device_id || ''} • ${new Date(alerta.timestamp).toLocaleString()}`);
             };
             ws.onclose = () => {

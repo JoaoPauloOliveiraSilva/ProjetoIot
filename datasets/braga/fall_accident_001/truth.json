@@ -2,10 +2,14 @@
   "scenario_id": "fall_accident_001",
   "device_id": "scooter_braga_005",
   "description": "Queda/acidente com pico de aceleracao e imobilizacao posterior.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 1932.84,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

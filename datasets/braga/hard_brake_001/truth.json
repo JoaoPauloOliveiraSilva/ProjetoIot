@@ -2,10 +2,14 @@
   "scenario_id": "hard_brake_001",
   "device_id": "scooter_braga_004",
   "description": "Travagem brusca com queda rapida de velocidade e desaceleracao longitudinal.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 1419.89,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

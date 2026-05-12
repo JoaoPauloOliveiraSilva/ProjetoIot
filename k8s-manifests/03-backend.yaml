@@ -17,8 +17,9 @@ data:
   influx-org: uminho_mei
   influx-bucket: Iot
   mqtt-broker: mosquitto-service
-  mqtt-port: "1883"
-  mqtt-tls-enabled: "false"
+  mqtt-port: "8883"
+  mqtt-tls-enabled: "true"
+  mqtt-tls-insecure: "true"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -83,6 +84,11 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: mqtt-tls-enabled
+        - name: MQTT_TLS_INSECURE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: mqtt-tls-insecure
         - name: MQTT_USERNAME
           valueFrom:
             secretKeyRef:

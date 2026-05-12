@@ -2,10 +2,14 @@
   "scenario_id": "normal_rough_pavement_001",
   "device_id": "scooter_braga_003",
   "description": "Percurso sem acidente mas com vibracao de piso irregular para testar falsos positivos.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 1859.01,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

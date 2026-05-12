@@ -4,17 +4,19 @@ Este projeto é uma plataforma completa de Internet of Things (IoT) desenvolvida
 
 ## 🏗️ Arquitetura do Sistema
 O sistema segue uma arquitetura modular em camadas:
-- **Camada de Dispositivos (Edge)**: Representada pelo script de importação e simulação que processa dados de sensores (GPS, IMU).
+- **Camada de Dispositivos (Edge)**: Representada pelo script de importação e simulação que processa dados de sensores (GPS, IMU e ultrassom).
 - **Backend (FastAPI)**: Servidor Python que processa dados via HTTP/MQTT e executa algoritmos de deteção em tempo real.
 - **Base de Dados (InfluxDB)**: Armazenamento Time Series rodando em Docker para telemetria e alertas.
 - **Frontend (Dashboard)**: Interface interativa usando Leaflet (mapas), Chart.js (estatísticas) e WebSockets.
 
 ## 📊 Especificação de Dados (Data Specification)
 
-Os datasets principais estão em `datasets/braga`, com 20 rotas simuladas sobre ruas reais de Braga, Portugal. Cada cenário contém:
+Os datasets principais estão em `datasets/braga`, com 29 rotas simuladas sobre ruas reais de Braga, Portugal: 21 cenários de trotinetes e 8 cenários de bicicletas, com prioridade para rotas centrais nas bicicletas. Cada cenário contém:
 
 - `telemetry.csv`: telemetria temporal.
 - `truth.json`: eventos esperados para validação.
+
+Os cenários de bicicleta incluem ainda `vehicle_type=bicycle`, estação inicial/final, estado de docking e amostras finais de carregamento. Quando usados no simulador contínuo por MQTT, o fim da viagem publica um alerta QoS 1 `dock_data_dump`, com contadores de linhas esperadas, enviadas, falhadas, em falta e percentagem de completude da descarga de dados.
 
 Cada linha inclui pelo menos 3 sensores:
 
@@ -51,7 +53,9 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 
 ### A. Algoritmos de Deteção Real-time
 *   **Implementação**: [detection.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/services/detection.py)
-*   **Fluxo**: Dado (API/MQTT) -> `analyze_telemetry()` -> Verificação de limites (Ex: Accel > 20 m/s²) -> Criação de `AlertData` -> Gravação no InfluxDB.
+*   **Fluxo**: Dado (API/MQTT) -> `analyze_telemetry()` -> Verificação de limites (aceleração, travagem, velocidade prolongadamente baixa e distância frontal por ultrassom) -> Criação de `AlertData` -> Gravação no InfluxDB.
+*   **Eventos**: `fall_accident`, `hard_brake`, `traffic_jam` e `obstacle_risk`.
+*   **Eventos operacionais**: bicicletas também podem gerar `dock_data_dump` no fim da viagem, quando são deixadas numa estação para carregamento e descarga de dados.
 
 ### B. Dashboard Interativo
 *   **Implementação**: [index.html](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/index.html) e [alerts.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/routers/alerts.py)
@@ -67,6 +71,7 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 *   **MQTT**: Mosquitto local/Kubernetes usa username/password e `allow_anonymous false`.
 *   **QoS**: Telemetria é publicada em `/bike/{id}/telemetry` com QoS 0; alertas críticos podem ser publicados em `/bike/{id}/alert` com QoS 1.
 *   **Visualização de QoS (fila)**: o backend mantém uma fila interna de ingestão MQTT e expõe métricas em `GET /api/v1/qos/status` (mostra pendentes/processados por QoS 0/1). O dashboard mostra estas métricas no cartão “Fila MQTT (QoS)”.
+*   **Estado dos dispositivos**: `GET /api/v1/devices/status` calcula online/offline pela última telemetria recebida.
 
 ## 🚀 Como Executar
 
@@ -187,21 +192,30 @@ python scripts\smoke_test_stack.py
 ```
 
 ### 6. Simulação Contínua de Frota para Demo
-Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
-# Recomendado: via MQTT (TLS), com telemetria QoS 0 para o broker do compose
-python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-port 8883 --fleet-size 12 --speedup 5
+# Recomendado: via MQTT (TLS), com telemetria QoS 0 e alertas esperados QoS 1
+python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-port 8883 --fleet-size 12 --speedup 5 --publish-truth-alerts
 
 # Alternativa via REST
 python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
 ```
 
-O simulador corre até `Ctrl+C`. Para usar todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 20`. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS).
+O simulador corre até `Ctrl+C`. Para usar praticamente todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 29`. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final; para desligar isso pode ser usado `--no-publish-dock-dumps`.
 
-### 7. Deploy Kubernetes
+### 7. Testes Unitários e Latência de Alertas
 
-Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/adminadmin`).
+```powershell
+python -m unittest discover -s tests
+python scripts\measure_alert_latency.py --api-key iot
+```
+
+O primeiro comando valida as regras de deteção. O segundo envia uma telemetria que gera `hard_brake` e mede o tempo até o alerta estar disponível na API.
+
+### 8. Deploy Kubernetes
+
+Os manifests em `k8s-manifests` criam namespace, Mosquitto autenticado, InfluxDB, backend e dashboard. Para a demo académica usam credenciais simples (`iot/iot` e `admin/adminadmin`). O Mosquitto em Kubernetes está configurado para MQTT sobre TLS na porta `8883`; o certificado self-signed é gerado no pod para simplificar a demonstração.
 
 ```powershell
 docker build -t iot-backend:latest .\backend
@@ -215,4 +229,4 @@ No dashboard Kubernetes, configurar a API por query string:
 http://<node-ip>:30081/?api_base=http://<node-ip>:30080/api/v1&ws_url=ws://<node-ip>:30080/ws/alerts&api_key=iot
 ```
 
-### 8. Simular Alerta Manual
+### 9. Simular Alerta Manual

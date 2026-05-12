@@ -8,6 +8,9 @@ class AlertData(BaseModel):
     type: str   
     event_type: str
     timestamp: Optional[datetime] = None
+    vehicle_type: Optional[str] = None
+    station_id: Optional[str] = None
+    station_name: Optional[str] = None
     lat: float        
     lon: float
     trigger: str
@@ -21,3 +24,11 @@ class AlertData(BaseModel):
     range_front_m: Optional[float] = None
     range_left_m: Optional[float] = None
     ultrasonic_valid: Optional[bool] = None
+    charging: Optional[bool] = None
+    battery_before: Optional[float] = None
+    battery_after: Optional[float] = None
+    expected_count: Optional[int] = None
+    sent_count: Optional[int] = None
+    failed_count: Optional[int] = None
+    missing_count: Optional[int] = None
+    completeness_pct: Optional[float] = None

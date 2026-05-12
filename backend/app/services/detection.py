@@ -76,6 +76,16 @@ def analyze_telemetry(data: SensorData) -> AlertData | None:
         logger.warning(f"Travagem brusca detetada no dispositivo {data.device_id}!")
         return create_alert(data, "hard_brake", "deceleration_threshold")
 
+    obstacle_detected = (
+        data.ultrasonic_valid is True
+        and data.range_front_m is not None
+        and data.range_front_m <= settings.THRESHOLD_OBSTACLE_FRONT_M
+        and data.speed >= settings.THRESHOLD_OBSTACLE_SPEED
+    )
+    if obstacle_detected and _can_emit(state, "obstacle_risk", current_time):
+        logger.warning(f"Obstaculo proximo detetado no dispositivo {data.device_id}!")
+        return create_alert(data, "obstacle_risk", "front_range_threshold")
+
     if data.speed < settings.THRESHOLD_JAM_SPEED:
         if state["jam_start_time"] is None:
             state["jam_start_time"] = current_time

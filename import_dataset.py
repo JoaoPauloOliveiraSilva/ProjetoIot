@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Replay Braga scooter simulation datasets into the IoT backend.
+Replay Braga micromobility simulation datasets into the IoT backend.
 
 Examples:
   python import_dataset.py --mode rest --api-key %API_KEY_EDGE%
@@ -34,6 +34,15 @@ SEND_FIELDS = {
     "timestamp",
     "source",
     "type",
+    "vehicle_type",
+    "trip_id",
+    "sequence",
+    "start_station_id",
+    "start_station_name",
+    "end_station_id",
+    "end_station_name",
+    "dock_status",
+    "charging",
     "lat",
     "lon",
     "speed",
@@ -66,7 +75,8 @@ FLOAT_FIELDS = {
     "battery",
 }
 
-BOOL_FIELDS = {"ultrasonic_valid"}
+INT_FIELDS = {"sequence"}
+BOOL_FIELDS = {"ultrasonic_valid", "charging"}
 
 
 @dataclass
@@ -74,6 +84,8 @@ class Scenario:
     scenario_id: str
     telemetry_path: Path
     truth_path: Path | None
+    vehicle_type: str = "scooter"
+    metadata: dict[str, Any] | None = None
 
 
 def parse_bool(value: str) -> bool:
@@ -97,6 +109,8 @@ def telemetry_payload(row: dict[str, str]) -> dict[str, Any]:
             continue
         if key in FLOAT_FIELDS:
             payload[key] = float(value)
+        elif key in INT_FIELDS:
+            payload[key] = int(float(value))
         elif key in BOOL_FIELDS:
             payload[key] = parse_bool(value)
         else:
@@ -111,6 +125,7 @@ def alert_payload(event: dict[str, Any], row: dict[str, str]) -> dict[str, Any]:
         "source": "simulated_truth",
         "type": "alert",
         "event_type": event["event_type"],
+        "vehicle_type": row.get("vehicle_type") or None,
         "lat": float(event.get("lat", row["lat"])),
         "lon": float(event.get("lon", row["lon"])),
         "trigger": event.get("expected_trigger", "truth_event"),
@@ -142,11 +157,21 @@ def discover_scenarios(dataset_root: Path, selected: list[str]) -> list[Scenario
         if not telemetry_path.exists():
             continue
         truth_path = scenario_dir / "truth.json"
+        metadata = None
+        vehicle_type = "scooter"
+        if truth_path.exists():
+            try:
+                metadata = json.loads(truth_path.read_text(encoding="utf-8"))
+                vehicle_type = str(metadata.get("vehicle_type") or vehicle_type)
+            except json.JSONDecodeError:
+                metadata = None
         scenarios.append(
             Scenario(
                 scenario_id=scenario_dir.name,
                 telemetry_path=telemetry_path,
                 truth_path=truth_path if truth_path.exists() else None,
+                vehicle_type=vehicle_type,
+                metadata=metadata,
             )
         )
 
@@ -290,7 +315,7 @@ def main() -> None:
             if scenario.truth_path:
                 truth = json.loads(scenario.truth_path.read_text(encoding="utf-8"))
                 truth_events = [event["event_type"] for event in truth.get("events", [])]
-            print(f"{scenario.scenario_id}: rows={len(rows)} truth_events={truth_events}")
+            print(f"{scenario.scenario_id}: vehicle_type={scenario.vehicle_type} rows={len(rows)} truth_events={truth_events}")
         return
 
     mqtt_client = mqtt_client_from_args(args) if args.mode == "mqtt" else None

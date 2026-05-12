@@ -2,10 +2,14 @@
   "scenario_id": "normal_evening_return_001",
   "device_id": "scooter_braga_011",
   "description": "Percurso normal de regresso com velocidade moderada.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 2245.39,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",

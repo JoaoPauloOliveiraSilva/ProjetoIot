@@ -2,10 +2,14 @@
   "scenario_id": "normal_long_cross_city_001",
   "device_id": "scooter_braga_010",
   "description": "Percurso normal longo atravessando diferentes zonas da cidade.",
+  "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
   "route_length_m": 3977.49,
   "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
   "sensors": {
     "gps": [
       "lat",
