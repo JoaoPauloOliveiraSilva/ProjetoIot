@@ -91,13 +91,13 @@ Serviços:
 - InfluxDB: `http://localhost:18086` com `admin/adminadmin`
 - MQTT (TLS): `localhost:8883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
 
-Por omissão, `docker compose up --build` inicia a infraestrutura principal: Mosquitto, InfluxDB, backend e dashboard. Para iniciar também o simulador Docker, usar o perfil `demo`:
+O comando `docker compose up --build` inicia a stack completa: Mosquitto, InfluxDB, backend, dashboard e simulador Docker.
 
 ```powershell
-docker compose --profile demo up --build
+docker compose up --build
 ```
 
-Neste modo, o serviço `iot-simulator` lê os datasets em `datasets/braga`, publica telemetria em MQTT TLS para o broker, e o backend processa/persiste os dados e propaga alertas por WebSocket.
+O serviço `iot-simulator` lê os datasets em `datasets/braga`, publica telemetria em MQTT TLS para o broker, e o backend processa/persiste os dados e propaga alertas por WebSocket.
 
 #### Verificar TLS + CA (MQTT)
 
@@ -200,15 +200,15 @@ python scripts\smoke_test_stack.py
 ```
 
 ### 6. Simulação Contínua de Frota para Demo
-Para a demonstração, o modo recomendado é usar o simulador dentro de Docker:
+Para a demonstração, usar a stack completa com o simulador dentro de Docker:
 
 ```powershell
-docker compose --profile demo up --build
+docker compose up --build
 ```
 
 Assim, o fluxo fica igual à arquitetura final: datasets -> simulador Docker -> Mosquitto MQTT TLS -> backend -> InfluxDB/dashboard/WebSocket.
 
-Também é possível correr o simulador manualmente fora de Docker. Ele mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+O simulador mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
 # Recomendado: via MQTT (TLS), com telemetria QoS 0 e alertas esperados QoS 1
@@ -218,7 +218,7 @@ python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.cr
 python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
 ```
 
-O simulador corre até `Ctrl+C`. Para usar praticamente todas as rotas logo no início da demo, pode-se aumentar para `--fleet-size 29`. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final; para desligar isso pode ser usado `--no-publish-dock-dumps`.
+O simulador corre enquanto o Docker Compose estiver ativo. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final.
 
 ### 7. Testes Unitários e Latência de Alertas
 

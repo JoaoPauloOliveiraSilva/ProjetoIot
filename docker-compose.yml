@@ -94,7 +94,6 @@ services:
       context: .
       dockerfile: simulator/Dockerfile
     container_name: iot-simulator
-    profiles: ["demo"]
     restart: unless-stopped
     environment:
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
