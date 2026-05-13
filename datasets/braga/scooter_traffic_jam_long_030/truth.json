@@ -1,0 +1,97 @@
+{
+  "scenario_id": "scooter_traffic_jam_long_030",
+  "device_id": "scooter_braga_030",
+  "description": "Congestionamento prolongado numa rota de maior extensao. Variante sintetica 1.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2556.44,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T17:28:07Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5444083,
+      "lon": -8.4264155
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.545029,
+      "lon": -8.4361079
+    },
+    {
+      "lat": 41.5446491,
+      "lon": -8.433862
+    },
+    {
+      "lat": 41.5446461,
+      "lon": -8.4332597
+    },
+    {
+      "lat": 41.5446514,
+      "lon": -8.4307258
+    },
+    {
+      "lat": 41.5445281,
+      "lon": -8.4257731
+    },
+    {
+      "lat": 41.545745,
+      "lon": -8.4199239
+    },
+    {
+      "lat": 41.5441939,
+      "lon": -8.4189668
+    },
+    {
+      "lat": 41.5431086,
+      "lon": -8.4183444
+    },
+    {
+      "lat": 41.5421409,
+      "lon": -8.4178798
+    },
+    {
+      "lat": 41.5419001,
+      "lon": -8.4178356
+    },
+    {
+      "lat": 41.5402831,
+      "lon": -8.4188717
+    },
+    {
+      "lat": 41.5388711,
+      "lon": -8.4177399
+    },
+    {
+      "lat": 41.5398542,
+      "lon": -8.4170869
+    }
+  ]
+}

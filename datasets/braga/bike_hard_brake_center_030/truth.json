@@ -1,0 +1,112 @@
+{
+  "scenario_id": "bike_hard_brake_center_030",
+  "device_id": "bike_braga_030",
+  "description": "Bicicleta com travagem brusca no centro urbano. Variante sintetica 3; inicio e fim em estacao de bicicletas.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1322.73,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_parque_ponte",
+    "name": "Parque da Ponte",
+    "lat": 41.54366,
+    "lon": -8.42308
+  },
+  "end_station": {
+    "station_id": "bike_liberdade",
+    "name": "Avenida da Liberdade",
+    "lat": 41.54883,
+    "lon": -8.42148
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 436,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-06T01:50:55Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5482206,
+      "lon": -8.4211424
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.54366,
+      "lon": -8.42308
+    },
+    {
+      "lat": 41.5456849,
+      "lon": -8.4204035
+    },
+    {
+      "lat": 41.5459445,
+      "lon": -8.4200129
+    },
+    {
+      "lat": 41.5460609,
+      "lon": -8.4199236
+    },
+    {
+      "lat": 41.547115,
+      "lon": -8.4205515
+    },
+    {
+      "lat": 41.5475689,
+      "lon": -8.4208309
+    },
+    {
+      "lat": 41.5481517,
+      "lon": -8.4211054
+    },
+    {
+      "lat": 41.5491118,
+      "lon": -8.4213475
+    },
+    {
+      "lat": 41.5497709,
+      "lon": -8.4201663
+    },
+    {
+      "lat": 41.5502197,
+      "lon": -8.4193617
+    },
+    {
+      "lat": 41.5495999,
+      "lon": -8.420451
+    },
+    {
+      "lat": 41.5490149,
+      "lon": -8.4215232
+    },
+    {
+      "lat": 41.54883,
+      "lon": -8.42148
+    }
+  ]
+}

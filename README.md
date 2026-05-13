@@ -11,12 +11,12 @@ O sistema segue uma arquitetura modular em camadas:
 
 ## 📊 Especificação de Dados (Data Specification)
 
-Os datasets principais estão em `datasets/braga`, com 29 rotas simuladas sobre ruas reais de Braga, Portugal: 21 cenários de trotinetes e 8 cenários de bicicletas, com prioridade para rotas centrais nas bicicletas. Cada cenário contém:
+Os datasets principais estão em `datasets/braga`, com 100 rotas simuladas sobre ruas reais de Braga, Portugal: 50 cenários de trotinetes e 50 cenários de bicicletas, com prioridade para rotas centrais nas bicicletas. Cada cenário contém:
 
 - `telemetry.csv`: telemetria temporal.
 - `truth.json`: eventos esperados para validação.
 
-Os cenários de bicicleta incluem ainda `vehicle_type=bicycle`, estação inicial/final, estado de docking e amostras finais de carregamento. Quando usados no simulador contínuo por MQTT, o fim da viagem publica um alerta QoS 1 `dock_data_dump`, com contadores de linhas esperadas, enviadas, falhadas, em falta e percentagem de completude da descarga de dados.
+Os cenários de bicicleta incluem ainda `vehicle_type=bicycle`, estação inicial/final, estado de docking e amostras finais de carregamento. Todas as bicicletas começam e terminam numa estação. Quando usados no simulador contínuo por MQTT, o fim da viagem publica um alerta QoS 1 `dock_data_dump`, com contadores de linhas esperadas, enviadas, falhadas, em falta e percentagem de completude da descarga de dados.
 
 Cada linha inclui pelo menos 3 sensores:
 
@@ -58,8 +58,8 @@ Se desejar enviar dados diretamente via REST API (`POST /api/v1/sensors`), o JSO
 *   **Eventos operacionais**: bicicletas também podem gerar `dock_data_dump` no fim da viagem, quando são deixadas numa estação para carregamento e descarga de dados.
 
 ### B. Dashboard Interativo
-*   **Implementação**: [index.html](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/index.html) e [alerts.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/routers/alerts.py)
-*   **Fluxo**: `loadInitialData()` busca histórico via REST -> WebSocket manager empurra alertas em tempo real -> UI ordena decrescentemente (mais recente primeiro).
+*   **Implementação**: [index2.html](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/index2.html) e [alerts.py](file:///c:/Users/38240/Documents/GitHub/ProjetoIot/backend/app/routers/alerts.py)
+*   **Fluxo**: a dashboard consulta REST para telemetria/dispositivos/QoS, recebe alertas por WebSocket e mostra também as estações de bicicletas e as descargas `dock_data_dump`.
 *   **API Key**: abrir o dashboard com `?api_key=...` guarda a chave no `localStorage` e evita credenciais hardcoded no HTML.
 
 ### C. Validação com Datasets de Braga
@@ -208,14 +208,14 @@ docker compose up --build
 
 Assim, o fluxo fica igual à arquitetura final: datasets -> simulador Docker -> Mosquitto MQTT TLS -> backend -> InfluxDB/dashboard/WebSocket.
 
-O simulador mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+O simulador mantém várias trotinetes e bicicletas ativas, escolhe aleatoriamente datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
 # Recomendado: via MQTT (TLS), com telemetria QoS 0 e alertas esperados QoS 1
-python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-port 8883 --fleet-size 12 --speedup 5 --publish-truth-alerts
+python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-port 8883 --fleet-size 12 --speedup 5 --selection random --publish-truth-alerts
 
 # Alternativa via REST
-python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --api-key iot
+python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --selection random --api-key iot
 ```
 
 O simulador corre enquanto o Docker Compose estiver ativo. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final.

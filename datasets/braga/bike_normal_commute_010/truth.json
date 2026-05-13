@@ -1,0 +1,100 @@
+{
+  "scenario_id": "bike_normal_commute_010",
+  "device_id": "bike_braga_010",
+  "description": "Deslocacao normal de bicicleta entre zonas de aluguer frequente. Variante sintetica 1; inicio e fim em estacao de bicicletas.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1522.52,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_se",
+    "name": "Se de Braga",
+    "lat": 41.54952,
+    "lon": -8.42686
+  },
+  "end_station": {
+    "station_id": "bike_liberdade",
+    "name": "Avenida da Liberdade",
+    "lat": 41.54883,
+    "lon": -8.42148
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 462,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.54952,
+      "lon": -8.42686
+    },
+    {
+      "lat": 41.5498041,
+      "lon": -8.4274496
+    },
+    {
+      "lat": 41.5500998,
+      "lon": -8.4286118
+    },
+    {
+      "lat": 41.5508957,
+      "lon": -8.4272457
+    },
+    {
+      "lat": 41.55074,
+      "lon": -8.428729
+    },
+    {
+      "lat": 41.5498044,
+      "lon": -8.4278501
+    },
+    {
+      "lat": 41.5496822,
+      "lon": -8.4268615
+    },
+    {
+      "lat": 41.549567,
+      "lon": -8.4253887
+    },
+    {
+      "lat": 41.5496544,
+      "lon": -8.4241649
+    },
+    {
+      "lat": 41.5495935,
+      "lon": -8.4237605
+    },
+    {
+      "lat": 41.5491805,
+      "lon": -8.4231686
+    },
+    {
+      "lat": 41.5489087,
+      "lon": -8.4217166
+    }
+  ]
+}

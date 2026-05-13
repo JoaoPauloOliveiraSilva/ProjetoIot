@@ -495,6 +495,10 @@ def generate_rows(
         lat, lon = interpolate_at(points, covered_m)
         timestamp = start_time + timedelta(seconds=t)
         label = event_label_for_second(spec, t, window)
+        if t == 0 and spec.vehicle_type == "bicycle" and start_station:
+            lat, lon = start_station.lat, start_station.lon
+            speed_kmh = 0.0
+            speed_mps = 0.0
 
         accel_y = (speed_mps - prev_speed_mps) + rng.gauss(0.0, 0.18)
         accel_x = rng.gauss(0.0, 0.35)
@@ -712,7 +716,7 @@ def write_dataset(
 
 
 def scenario_specs() -> list[ScenarioSpec]:
-    return [
+    specs = [
         ScenarioSpec(
             "normal_001",
             None,
@@ -1000,6 +1004,92 @@ def scenario_specs() -> list[ScenarioSpec]:
         ),
     ]
 
+    scooter_templates = [
+        ("scooter_normal_center", None, 650, 1500, 12.0, "Percurso normal urbano no centro de Braga, sem eventos criticos."),
+        ("scooter_normal_commute", None, 1200, 2600, 14.0, "Percurso normal de deslocacao urbana em Braga, sem incidentes."),
+        ("scooter_normal_long", None, 2200, 3900, 16.0, "Percurso normal mais longo, cobrindo varias zonas da cidade."),
+        ("scooter_hard_brake", "hard_brake", 800, 2200, 15.5, "Travagem brusca por obstaculo ou conflito em cruzamento."),
+        ("scooter_hard_brake_crossing", "hard_brake", 1100, 2600, 16.5, "Travagem brusca em zona de passadeira/cruzamento."),
+        ("scooter_fall_accident", "fall_accident", 700, 2100, 13.5, "Queda/acidente com pico de aceleracao e imobilizacao."),
+        ("scooter_fall_curve", "fall_accident", 1000, 2500, 14.5, "Queda em curva ou irregularidade da via."),
+        ("scooter_traffic_jam", "traffic_jam", 900, 2300, 12.0, "Congestionamento com velocidade baixa durante periodo prolongado."),
+        ("scooter_traffic_jam_long", "traffic_jam", 1700, 3400, 13.0, "Congestionamento prolongado numa rota de maior extensao."),
+        ("scooter_obstacle_risk", "obstacle_risk", 650, 1800, 12.5, "Obstaculo frontal proximo detetado pelo sensor ultrassonico."),
+        ("scooter_mixed_brake_jam", "mixed", 1200, 3000, 14.0, "Travagem brusca seguida de congestionamento."),
+    ]
+
+    scooter_count = sum(1 for spec in specs if spec.vehicle_type == "scooter")
+    while scooter_count < 50:
+        next_index = scooter_count + 1
+        template_index = next_index - 22
+        prefix, event_type, min_m, max_m, speed, description = scooter_templates[template_index % len(scooter_templates)]
+        variant = template_index // len(scooter_templates) + 1
+        specs.append(
+            ScenarioSpec(
+                f"{prefix}_{next_index:03d}",
+                event_type,
+                min_m,
+                max_m,
+                speed + ((variant % 3) - 1) * 0.4,
+                f"scooter_braga_{next_index:03d}",
+                f"{description} Variante sintetica {variant}.",
+            )
+        )
+        scooter_count += 1
+
+    bike_templates = [
+        ("bike_normal_center", None, 650, 1600, 11.5, "Viagem normal curta entre estacoes centrais de bicicletas."),
+        ("bike_normal_commute", None, 900, 2100, 12.5, "Deslocacao normal de bicicleta entre zonas de aluguer frequente."),
+        ("bike_normal_evening", None, 1000, 2300, 11.0, "Regresso normal em bicicleta com docking no fim da viagem."),
+        ("bike_hard_brake_center", "hard_brake", 750, 1900, 12.5, "Bicicleta com travagem brusca no centro urbano."),
+        ("bike_hard_brake_crosswalk", "hard_brake", 900, 2200, 13.0, "Bicicleta com travagem brusca junto a passadeira ou cruzamento."),
+        ("bike_fall_accident_center", "fall_accident", 700, 1800, 11.5, "Bicicleta com queda/acidente e recolha para estacao."),
+        ("bike_traffic_jam_center", "traffic_jam", 850, 2200, 10.5, "Bicicleta em zona de trafego lento durante periodo prolongado."),
+        ("bike_obstacle_risk_center", "obstacle_risk", 650, 1700, 12.0, "Bicicleta com obstaculo frontal proximo detetado por ultrassom."),
+        ("bike_mixed_brake_jam_center", "mixed", 1000, 2600, 12.0, "Bicicleta com travagem brusca seguida de congestionamento."),
+    ]
+    central_station_pairs = [
+        ("bike_arcada", "bike_se"),
+        ("bike_se", "bike_liberdade"),
+        ("bike_liberdade", "bike_mercado"),
+        ("bike_mercado", "bike_arcada"),
+        ("bike_estacao_cp", "bike_arcada"),
+        ("bike_arcada", "bike_sao_victor"),
+        ("bike_sao_victor", "bike_liberdade"),
+        ("bike_parque_ponte", "bike_liberdade"),
+        ("bike_liberdade", "bike_estacao_cp"),
+        ("bike_mercado", "bike_parque_ponte"),
+        ("bike_arcada", "bike_arcada"),
+        ("bike_se", "bike_se"),
+        ("bike_rodovia", "bike_sao_victor"),
+        ("bike_sao_victor", "bike_rodovia"),
+    ]
+
+    bike_count = sum(1 for spec in specs if spec.vehicle_type == "bicycle")
+    while bike_count < 50:
+        next_index = bike_count + 1
+        template_index = next_index - 9
+        prefix, event_type, min_m, max_m, speed, description = bike_templates[template_index % len(bike_templates)]
+        start_station_id, end_station_id = central_station_pairs[template_index % len(central_station_pairs)]
+        variant = template_index // len(bike_templates) + 1
+        specs.append(
+            ScenarioSpec(
+                f"{prefix}_{next_index:03d}",
+                event_type,
+                min_m,
+                max_m,
+                speed + ((variant % 3) - 1) * 0.3,
+                f"bike_braga_{next_index:03d}",
+                f"{description} Variante sintetica {variant}; inicio e fim em estacao de bicicletas.",
+                vehicle_type="bicycle",
+                start_station_id=start_station_id,
+                end_station_id=end_station_id,
+            )
+        )
+        bike_count += 1
+
+    return specs
+
 
 def generate(force_osm: bool = False) -> None:
     rng = random.Random(20260505)
@@ -1074,6 +1164,11 @@ def generate(force_osm: bool = False) -> None:
         "bbox_south_west_north_east": BRAGA_BBOX,
         "sample_period_s": 1,
         "sensors_minimum": ["gps", "imu", "ultrasonic"],
+        "dataset_counts": {
+            "scooter": sum(1 for entry in manifest_entries if entry["vehicle_type"] == "scooter"),
+            "bicycle": sum(1 for entry in manifest_entries if entry["vehicle_type"] == "bicycle"),
+            "total": len(manifest_entries),
+        },
         "bike_dock_stations": [station_payload(station) for station in BIKE_DOCK_STATIONS],
         "datasets": manifest_entries,
     }

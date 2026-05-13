@@ -1,0 +1,104 @@
+{
+  "scenario_id": "scooter_mixed_brake_jam_043",
+  "device_id": "scooter_braga_043",
+  "description": "Travagem brusca seguida de congestionamento. Variante sintetica 2.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2072.61,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T20:02:35Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5566608,
+      "lon": -8.4271374
+    },
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T20:03:05Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5557351,
+      "lon": -8.4271121
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5613869,
+      "lon": -8.4264124
+    },
+    {
+      "lat": 41.5609177,
+      "lon": -8.4267078
+    },
+    {
+      "lat": 41.5597322,
+      "lon": -8.4267857
+    },
+    {
+      "lat": 41.5586923,
+      "lon": -8.4271882
+    },
+    {
+      "lat": 41.5573941,
+      "lon": -8.4272576
+    },
+    {
+      "lat": 41.5554607,
+      "lon": -8.427107
+    },
+    {
+      "lat": 41.5540728,
+      "lon": -8.4266338
+    },
+    {
+      "lat": 41.552932,
+      "lon": -8.4265672
+    },
+    {
+      "lat": 41.5529724,
+      "lon": -8.4250262
+    },
+    {
+      "lat": 41.5518401,
+      "lon": -8.4236471
+    },
+    {
+      "lat": 41.5476301,
+      "lon": -8.4208692
+    },
+    {
+      "lat": 41.5474298,
+      "lon": -8.4208883
+    },
+    {
+      "lat": 41.5469824,
+      "lon": -8.4219898
+    }
+  ]
+}

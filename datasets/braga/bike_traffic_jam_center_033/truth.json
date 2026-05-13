@@ -1,0 +1,116 @@
+{
+  "scenario_id": "bike_traffic_jam_center_033",
+  "device_id": "bike_braga_033",
+  "description": "Bicicleta em zona de trafego lento durante periodo prolongado. Variante sintetica 3; inicio e fim em estacao de bicicletas.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2247.85,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_arcada",
+    "name": "Arcada / Avenida Central",
+    "lat": 41.55172,
+    "lon": -8.4229
+  },
+  "end_station": {
+    "station_id": "bike_arcada",
+    "name": "Arcada / Avenida Central",
+    "lat": 41.55172,
+    "lon": -8.4229
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 909,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-06T02:28:37Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5478817,
+      "lon": -8.4277969
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.55172,
+      "lon": -8.4229
+    },
+    {
+      "lat": 41.5516759,
+      "lon": -8.4238831
+    },
+    {
+      "lat": 41.55083,
+      "lon": -8.4240216
+    },
+    {
+      "lat": 41.5500836,
+      "lon": -8.4249744
+    },
+    {
+      "lat": 41.5491645,
+      "lon": -8.4267239
+    },
+    {
+      "lat": 41.5474986,
+      "lon": -8.4285207
+    },
+    {
+      "lat": 41.5457879,
+      "lon": -8.4278125
+    },
+    {
+      "lat": 41.5457434,
+      "lon": -8.4278422
+    },
+    {
+      "lat": 41.5474399,
+      "lon": -8.4285247
+    },
+    {
+      "lat": 41.5490671,
+      "lon": -8.4270578
+    },
+    {
+      "lat": 41.5500677,
+      "lon": -8.4250171
+    },
+    {
+      "lat": 41.5507926,
+      "lon": -8.4241123
+    },
+    {
+      "lat": 41.5516312,
+      "lon": -8.4239707
+    },
+    {
+      "lat": 41.5516823,
+      "lon": -8.4232132
+    }
+  ]
+}

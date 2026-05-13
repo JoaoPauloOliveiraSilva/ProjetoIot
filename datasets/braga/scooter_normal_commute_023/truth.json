@@ -1,0 +1,89 @@
+{
+  "scenario_id": "scooter_normal_commute_023",
+  "device_id": "scooter_braga_023",
+  "description": "Percurso normal de deslocacao urbana em Braga, sem incidentes. Variante sintetica 1.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2556.53,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.5618974,
+      "lon": -8.4409936
+    },
+    {
+      "lat": 41.5605522,
+      "lon": -8.4423232
+    },
+    {
+      "lat": 41.5581854,
+      "lon": -8.4420412
+    },
+    {
+      "lat": 41.5574899,
+      "lon": -8.4416641
+    },
+    {
+      "lat": 41.5565407,
+      "lon": -8.4399844
+    },
+    {
+      "lat": 41.5563206,
+      "lon": -8.4365437
+    },
+    {
+      "lat": 41.5556416,
+      "lon": -8.4337754
+    },
+    {
+      "lat": 41.5556549,
+      "lon": -8.4327039
+    },
+    {
+      "lat": 41.5557982,
+      "lon": -8.4309495
+    },
+    {
+      "lat": 41.5545184,
+      "lon": -8.430614
+    },
+    {
+      "lat": 41.5530979,
+      "lon": -8.4300139
+    },
+    {
+      "lat": 41.5511239,
+      "lon": -8.4287883
+    },
+    {
+      "lat": 41.5498709,
+      "lon": -8.4270456
+    }
+  ]
+}

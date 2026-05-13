@@ -305,7 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fleet-size", type=int, default=7, help="Number of simulated vehicles.")
     parser.add_argument("--device-prefix", default="scooter_demo_", help="Prefix for generated device ids.")
     parser.add_argument("--bike-device-prefix", default="bike_demo_", help="Prefix for generated bicycle device ids.")
-    parser.add_argument("--selection", choices=["round-robin", "random"], default="round-robin", help="How vehicles choose datasets.")
+    parser.add_argument("--selection", choices=["round-robin", "random"], default="random", help="How vehicles choose datasets.")
     parser.add_argument("--trips-per-scooter", "--trips-per-device", dest="trips_per_scooter", type=int, default=0, help="Trips per simulated vehicle; 0 means run until Ctrl+C.")
     parser.add_argument("--speedup", type=float, default=5.0, help="Replay speed multiplier.")
     parser.add_argument("--start-stagger-sec", type=float, default=3.0, help="Delay between vehicle starts.")
@@ -350,7 +350,7 @@ def main() -> None:
 
     print(
         f"Starting fleet simulation: vehicles={args.fleet_size} scenarios={len(scenarios)} "
-        f"mode={args.mode} speedup={args.speedup}",
+        f"mode={args.mode} speedup={args.speedup} selection={args.selection}",
         flush=True,
     )
 

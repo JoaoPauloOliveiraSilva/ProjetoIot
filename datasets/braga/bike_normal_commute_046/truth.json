@@ -1,0 +1,104 @@
+{
+  "scenario_id": "bike_normal_commute_046",
+  "device_id": "bike_braga_046",
+  "description": "Deslocacao normal de bicicleta entre zonas de aluguer frequente. Variante sintetica 5; inicio e fim em estacao de bicicletas.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1599.55,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_mercado",
+    "name": "Mercado Municipal",
+    "lat": 41.55323,
+    "lon": -8.42706
+  },
+  "end_station": {
+    "station_id": "bike_parque_ponte",
+    "name": "Parque da Ponte",
+    "lat": 41.54366,
+    "lon": -8.42308
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 475,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [],
+  "route_preview": [
+    {
+      "lat": 41.55323,
+      "lon": -8.42706
+    },
+    {
+      "lat": 41.5528703,
+      "lon": -8.4265626
+    },
+    {
+      "lat": 41.552896,
+      "lon": -8.4256952
+    },
+    {
+      "lat": 41.5528954,
+      "lon": -8.424597
+    },
+    {
+      "lat": 41.5521066,
+      "lon": -8.423811
+    },
+    {
+      "lat": 41.548851,
+      "lon": -8.4215926
+    },
+    {
+      "lat": 41.5476301,
+      "lon": -8.4208692
+    },
+    {
+      "lat": 41.5473965,
+      "lon": -8.4207203
+    },
+    {
+      "lat": 41.5468557,
+      "lon": -8.4203966
+    },
+    {
+      "lat": 41.5460609,
+      "lon": -8.4199236
+    },
+    {
+      "lat": 41.545962,
+      "lon": -8.4200129
+    },
+    {
+      "lat": 41.5457901,
+      "lon": -8.4199863
+    },
+    {
+      "lat": 41.5452746,
+      "lon": -8.4222437
+    }
+  ]
+}

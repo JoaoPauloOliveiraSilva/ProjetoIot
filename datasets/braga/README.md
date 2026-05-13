@@ -9,7 +9,7 @@ Cada cenario tem:
 - `telemetry.csv`: amostras temporais de telemetria.
 - `truth.json`: eventos esperados para validacao.
 
-O ficheiro `manifest.json` resume todos os 29 cenarios gerados: 21 de trotinetes e 8 de bicicletas.
+O ficheiro `manifest.json` resume todos os 100 cenarios gerados: 50 de trotinetes e 50 de bicicletas.
 
 ## Sensores Incluidos
 
@@ -26,9 +26,11 @@ Os cenarios de bicicleta incluem tambem:
 - `end_station_id`, `end_station_name`
 - `dock_status` e `charging`
 
-No fim da viagem, a bicicleta fica parada na estacao final durante algumas amostras com `charging=true`. O simulador usa estes metadados para publicar o evento operacional `dock_data_dump`, que resume se a descarga de dados foi completa.
+No fim da viagem, a bicicleta fica parada na estacao final durante algumas amostras com `charging=true`. O simulador usa estes metadados para publicar o evento operacional `dock_data_dump`, que resume se a descarga de dados foi completa. Todos os cenarios de bicicleta começam numa estacao e acabam numa estacao, podendo ser a mesma.
 
 ## Cenarios
+
+O conjunto combina percursos normais, travagens bruscas, quedas/acidentes, congestionamentos, risco de obstaculo por ultrassom e cenarios mistos. Os nomes abaixo mostram as familias principais; as variantes numeradas completam as 50 rotas de cada veiculo.
 
 ### Trotinetes
 

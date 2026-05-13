@@ -1,0 +1,93 @@
+{
+  "scenario_id": "scooter_fall_curve_050",
+  "device_id": "scooter_braga_050",
+  "description": "Queda em curva ou irregularidade da via. Variante sintetica 3.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1678.37,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "fall_accident",
+      "timestamp": "2026-05-05T21:27:55Z",
+      "expected_trigger": "accel_peak_exceeded",
+      "lat": 41.5678321,
+      "lon": -8.4510058
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5616258,
+      "lon": -8.4492361
+    },
+    {
+      "lat": 41.5611726,
+      "lon": -8.4485365
+    },
+    {
+      "lat": 41.5612545,
+      "lon": -8.4480158
+    },
+    {
+      "lat": 41.5624119,
+      "lon": -8.4486345
+    },
+    {
+      "lat": 41.5642873,
+      "lon": -8.4498765
+    },
+    {
+      "lat": 41.5651498,
+      "lon": -8.4502673
+    },
+    {
+      "lat": 41.5656547,
+      "lon": -8.450414
+    },
+    {
+      "lat": 41.5664449,
+      "lon": -8.4506197
+    },
+    {
+      "lat": 41.5675008,
+      "lon": -8.4509075
+    },
+    {
+      "lat": 41.5683906,
+      "lon": -8.4511413
+    },
+    {
+      "lat": 41.5699753,
+      "lon": -8.4516218
+    },
+    {
+      "lat": 41.5725773,
+      "lon": -8.4526454
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "scenario_id": "scooter_hard_brake_036",
+  "device_id": "scooter_braga_036",
+  "description": "Travagem brusca por obstaculo ou conflito em cruzamento. Variante sintetica 2.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1996.78,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T18:39:23Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5575422,
+      "lon": -8.3934275
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5594199,
+      "lon": -8.4013857
+    },
+    {
+      "lat": 41.5591134,
+      "lon": -8.4008799
+    },
+    {
+      "lat": 41.5590864,
+      "lon": -8.3995468
+    },
+    {
+      "lat": 41.5583109,
+      "lon": -8.3980326
+    },
+    {
+      "lat": 41.5572044,
+      "lon": -8.39776
+    },
+    {
+      "lat": 41.5566632,
+      "lon": -8.3973112
+    },
+    {
+      "lat": 41.5563824,
+      "lon": -8.3971124
+    },
+    {
+      "lat": 41.556013,
+      "lon": -8.3948053
+    },
+    {
+      "lat": 41.557296,
+      "lon": -8.3936995
+    },
+    {
+      "lat": 41.5579082,
+      "lon": -8.3919249
+    },
+    {
+      "lat": 41.5573446,
+      "lon": -8.3896277
+    },
+    {
+      "lat": 41.5570395,
+      "lon": -8.3871091
+    },
+    {
+      "lat": 41.5596914,
+      "lon": -8.3856805
+    }
+  ]
+}

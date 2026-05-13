@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T22:12:26.550549Z",
+  "generated_at": "2026-05-13T01:28:12.445094Z",
   "generator": "scripts/generate_braga_datasets.py",
   "city": "Braga, Portugal",
   "coordinate_source": "OpenStreetMap via Overpass API",
@@ -15,6 +15,11 @@
     "imu",
     "ultrasonic"
   ],
+  "dataset_counts": {
+    "scooter": 50,
+    "bicycle": 50,
+    "total": 100
+  },
   "bike_dock_stations": [
     {
       "station_id": "bike_arcada",
@@ -533,6 +538,1378 @@
       },
       "telemetry_csv": "datasets\\braga\\bike_mixed_brake_jam_center_001\\telemetry.csv",
       "truth_json": "datasets\\braga\\bike_mixed_brake_jam_center_001\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_center_022",
+      "device_id": "scooter_braga_022",
+      "vehicle_type": "scooter",
+      "rows": 382,
+      "route_length_m": 1271.53,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_center_022\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_center_022\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_commute_023",
+      "device_id": "scooter_braga_023",
+      "vehicle_type": "scooter",
+      "rows": 654,
+      "route_length_m": 2556.53,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_commute_023\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_commute_023\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_long_024",
+      "device_id": "scooter_braga_024",
+      "vehicle_type": "scooter",
+      "rows": 588,
+      "route_length_m": 2596.6,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_long_024\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_long_024\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_025",
+      "device_id": "scooter_braga_025",
+      "vehicle_type": "scooter",
+      "rows": 506,
+      "route_length_m": 1746.03,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_025\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_025\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_crossing_026",
+      "device_id": "scooter_braga_026",
+      "vehicle_type": "scooter",
+      "rows": 700,
+      "route_length_m": 2449.75,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_crossing_026\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_crossing_026\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_accident_027",
+      "device_id": "scooter_braga_027",
+      "vehicle_type": "scooter",
+      "rows": 247,
+      "route_length_m": 1477.12,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_accident_027\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_accident_027\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_curve_028",
+      "device_id": "scooter_braga_028",
+      "vehicle_type": "scooter",
+      "rows": 178,
+      "route_length_m": 1082.08,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_curve_028\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_curve_028\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_traffic_jam_029",
+      "device_id": "scooter_braga_029",
+      "vehicle_type": "scooter",
+      "rows": 695,
+      "route_length_m": 2036.77,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_traffic_jam_029\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_traffic_jam_029\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_traffic_jam_long_030",
+      "device_id": "scooter_braga_030",
+      "vehicle_type": "scooter",
+      "rows": 792,
+      "route_length_m": 2556.44,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_traffic_jam_long_030\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_traffic_jam_long_030\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_obstacle_risk_031",
+      "device_id": "scooter_braga_031",
+      "vehicle_type": "scooter",
+      "rows": 373,
+      "route_length_m": 1298.44,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_obstacle_risk_031\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_obstacle_risk_031\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_mixed_brake_jam_032",
+      "device_id": "scooter_braga_032",
+      "vehicle_type": "scooter",
+      "rows": 662,
+      "route_length_m": 2239.64,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_mixed_brake_jam_032\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_mixed_brake_jam_032\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_center_033",
+      "device_id": "scooter_braga_033",
+      "vehicle_type": "scooter",
+      "rows": 379,
+      "route_length_m": 1303.89,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_center_033\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_center_033\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_commute_034",
+      "device_id": "scooter_braga_034",
+      "vehicle_type": "scooter",
+      "rows": 560,
+      "route_length_m": 2238.47,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_commute_034\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_commute_034\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_long_035",
+      "device_id": "scooter_braga_035",
+      "vehicle_type": "scooter",
+      "rows": 595,
+      "route_length_m": 2701.63,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_long_035\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_long_035\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_036",
+      "device_id": "scooter_braga_036",
+      "vehicle_type": "scooter",
+      "rows": 569,
+      "route_length_m": 1996.78,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_036\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_036\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_crossing_037",
+      "device_id": "scooter_braga_037",
+      "vehicle_type": "scooter",
+      "rows": 683,
+      "route_length_m": 2409.81,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_crossing_037\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_crossing_037\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_accident_038",
+      "device_id": "scooter_braga_038",
+      "vehicle_type": "scooter",
+      "rows": 256,
+      "route_length_m": 1585.53,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_accident_038\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_accident_038\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_curve_039",
+      "device_id": "scooter_braga_039",
+      "vehicle_type": "scooter",
+      "rows": 322,
+      "route_length_m": 2195.4,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_curve_039\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_curve_039\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_traffic_jam_040",
+      "device_id": "scooter_braga_040",
+      "vehicle_type": "scooter",
+      "rows": 630,
+      "route_length_m": 1862.83,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_traffic_jam_040\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_traffic_jam_040\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_traffic_jam_long_041",
+      "device_id": "scooter_braga_041",
+      "vehicle_type": "scooter",
+      "rows": 837,
+      "route_length_m": 2799.77,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_traffic_jam_long_041\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_traffic_jam_long_041\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_obstacle_risk_042",
+      "device_id": "scooter_braga_042",
+      "vehicle_type": "scooter",
+      "rows": 347,
+      "route_length_m": 1233.75,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_obstacle_risk_042\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_obstacle_risk_042\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_mixed_brake_jam_043",
+      "device_id": "scooter_braga_043",
+      "vehicle_type": "scooter",
+      "rows": 603,
+      "route_length_m": 2072.61,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_mixed_brake_jam_043\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_mixed_brake_jam_043\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_center_044",
+      "device_id": "scooter_braga_044",
+      "vehicle_type": "scooter",
+      "rows": 394,
+      "route_length_m": 1278.21,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_center_044\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_center_044\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_commute_045",
+      "device_id": "scooter_braga_045",
+      "vehicle_type": "scooter",
+      "rows": 601,
+      "route_length_m": 2252.69,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_commute_045\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_commute_045\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_normal_long_046",
+      "device_id": "scooter_braga_046",
+      "vehicle_type": "scooter",
+      "rows": 529,
+      "route_length_m": 2276.3,
+      "event_types": [],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_normal_long_046\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_normal_long_046\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_047",
+      "device_id": "scooter_braga_047",
+      "vehicle_type": "scooter",
+      "rows": 592,
+      "route_length_m": 2021.31,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_047\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_047\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_hard_brake_crossing_048",
+      "device_id": "scooter_braga_048",
+      "vehicle_type": "scooter",
+      "rows": 729,
+      "route_length_m": 2533.39,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_hard_brake_crossing_048\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_hard_brake_crossing_048\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_accident_049",
+      "device_id": "scooter_braga_049",
+      "vehicle_type": "scooter",
+      "rows": 218,
+      "route_length_m": 1238.51,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_accident_049\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_accident_049\\truth.json"
+    },
+    {
+      "scenario_id": "scooter_fall_curve_050",
+      "device_id": "scooter_braga_050",
+      "vehicle_type": "scooter",
+      "rows": 266,
+      "route_length_m": 1678.37,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": null,
+      "end_station": null,
+      "telemetry_csv": "datasets\\braga\\scooter_fall_curve_050\\telemetry.csv",
+      "truth_json": "datasets\\braga\\scooter_fall_curve_050\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_center_009",
+      "device_id": "bike_braga_009",
+      "vehicle_type": "bicycle",
+      "rows": 293,
+      "route_length_m": 852.39,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_center_009\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_center_009\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_commute_010",
+      "device_id": "bike_braga_010",
+      "vehicle_type": "bicycle",
+      "rows": 462,
+      "route_length_m": 1522.52,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_commute_010\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_commute_010\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_evening_011",
+      "device_id": "bike_braga_011",
+      "vehicle_type": "bicycle",
+      "rows": 721,
+      "route_length_m": 2123.0,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_evening_011\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_evening_011\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_center_012",
+      "device_id": "bike_braga_012",
+      "vehicle_type": "bicycle",
+      "rows": 432,
+      "route_length_m": 1314.06,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_center_012\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_center_012\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_crosswalk_013",
+      "device_id": "bike_braga_013",
+      "vehicle_type": "bicycle",
+      "rows": 460,
+      "route_length_m": 1426.23,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_crosswalk_013\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_crosswalk_013\\truth.json"
+    },
+    {
+      "scenario_id": "bike_fall_accident_center_014",
+      "device_id": "bike_braga_014",
+      "vehicle_type": "bicycle",
+      "rows": 319,
+      "route_length_m": 1531.54,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_fall_accident_center_014\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_fall_accident_center_014\\truth.json"
+    },
+    {
+      "scenario_id": "bike_traffic_jam_center_015",
+      "device_id": "bike_braga_015",
+      "vehicle_type": "bicycle",
+      "rows": 510,
+      "route_length_m": 1173.63,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_traffic_jam_center_015\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_traffic_jam_center_015\\truth.json"
+    },
+    {
+      "scenario_id": "bike_obstacle_risk_center_016",
+      "device_id": "bike_braga_016",
+      "vehicle_type": "bicycle",
+      "rows": 273,
+      "route_length_m": 824.83,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_obstacle_risk_center_016\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_obstacle_risk_center_016\\truth.json"
+    },
+    {
+      "scenario_id": "bike_mixed_brake_jam_center_017",
+      "device_id": "bike_braga_017",
+      "vehicle_type": "bicycle",
+      "rows": 556,
+      "route_length_m": 1504.2,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "telemetry_csv": "datasets\\braga\\bike_mixed_brake_jam_center_017\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_mixed_brake_jam_center_017\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_center_018",
+      "device_id": "bike_braga_018",
+      "vehicle_type": "bicycle",
+      "rows": 505,
+      "route_length_m": 1599.55,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_center_018\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_center_018\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_commute_019",
+      "device_id": "bike_braga_019",
+      "vehicle_type": "bicycle",
+      "rows": 421,
+      "route_length_m": 1408.49,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_commute_019\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_commute_019\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_evening_020",
+      "device_id": "bike_braga_020",
+      "vehicle_type": "bicycle",
+      "rows": 660,
+      "route_length_m": 1993.24,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_evening_020\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_evening_020\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_center_021",
+      "device_id": "bike_braga_021",
+      "vehicle_type": "bicycle",
+      "rows": 374,
+      "route_length_m": 1127.39,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_center_021\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_center_021\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_crosswalk_022",
+      "device_id": "bike_braga_022",
+      "vehicle_type": "bicycle",
+      "rows": 364,
+      "route_length_m": 1127.39,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_crosswalk_022\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_crosswalk_022\\truth.json"
+    },
+    {
+      "scenario_id": "bike_fall_accident_center_023",
+      "device_id": "bike_braga_023",
+      "vehicle_type": "bicycle",
+      "rows": 320,
+      "route_length_m": 1579.07,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_fall_accident_center_023\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_fall_accident_center_023\\truth.json"
+    },
+    {
+      "scenario_id": "bike_traffic_jam_center_024",
+      "device_id": "bike_braga_024",
+      "vehicle_type": "bicycle",
+      "rows": 462,
+      "route_length_m": 1038.43,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_traffic_jam_center_024\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_traffic_jam_center_024\\truth.json"
+    },
+    {
+      "scenario_id": "bike_obstacle_risk_center_025",
+      "device_id": "bike_braga_025",
+      "vehicle_type": "bicycle",
+      "rows": 329,
+      "route_length_m": 1026.76,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "telemetry_csv": "datasets\\braga\\bike_obstacle_risk_center_025\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_obstacle_risk_center_025\\truth.json"
+    },
+    {
+      "scenario_id": "bike_mixed_brake_jam_center_026",
+      "device_id": "bike_braga_026",
+      "vehicle_type": "bicycle",
+      "rows": 494,
+      "route_length_m": 1314.06,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_mixed_brake_jam_center_026\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_mixed_brake_jam_center_026\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_center_027",
+      "device_id": "bike_braga_027",
+      "vehicle_type": "bicycle",
+      "rows": 484,
+      "route_length_m": 1426.23,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_center_027\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_center_027\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_commute_028",
+      "device_id": "bike_braga_028",
+      "vehicle_type": "bicycle",
+      "rows": 477,
+      "route_length_m": 1531.54,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_commute_028\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_commute_028\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_evening_029",
+      "device_id": "bike_braga_029",
+      "vehicle_type": "bicycle",
+      "rows": 417,
+      "route_length_m": 1173.63,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_evening_029\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_evening_029\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_center_030",
+      "device_id": "bike_braga_030",
+      "vehicle_type": "bicycle",
+      "rows": 436,
+      "route_length_m": 1322.73,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_center_030\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_center_030\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_crosswalk_031",
+      "device_id": "bike_braga_031",
+      "vehicle_type": "bicycle",
+      "rows": 476,
+      "route_length_m": 1504.2,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_crosswalk_031\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_crosswalk_031\\truth.json"
+    },
+    {
+      "scenario_id": "bike_fall_accident_center_032",
+      "device_id": "bike_braga_032",
+      "vehicle_type": "bicycle",
+      "rows": 338,
+      "route_length_m": 1599.55,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "telemetry_csv": "datasets\\braga\\bike_fall_accident_center_032\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_fall_accident_center_032\\truth.json"
+    },
+    {
+      "scenario_id": "bike_traffic_jam_center_033",
+      "device_id": "bike_braga_033",
+      "vehicle_type": "bicycle",
+      "rows": 909,
+      "route_length_m": 2247.85,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_traffic_jam_center_033\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_traffic_jam_center_033\\truth.json"
+    },
+    {
+      "scenario_id": "bike_obstacle_risk_center_034",
+      "device_id": "bike_braga_034",
+      "vehicle_type": "bicycle",
+      "rows": 480,
+      "route_length_m": 1484.03,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_obstacle_risk_center_034\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_obstacle_risk_center_034\\truth.json"
+    },
+    {
+      "scenario_id": "bike_mixed_brake_jam_center_035",
+      "device_id": "bike_braga_035",
+      "vehicle_type": "bicycle",
+      "rows": 456,
+      "route_length_m": 1127.39,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_mixed_brake_jam_center_035\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_mixed_brake_jam_center_035\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_center_036",
+      "device_id": "bike_braga_036",
+      "vehicle_type": "bicycle",
+      "rows": 380,
+      "route_length_m": 1127.39,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_center_036\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_center_036\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_commute_037",
+      "device_id": "bike_braga_037",
+      "vehicle_type": "bicycle",
+      "rows": 392,
+      "route_length_m": 1265.97,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_commute_037\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_commute_037\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_evening_038",
+      "device_id": "bike_braga_038",
+      "vehicle_type": "bicycle",
+      "rows": 695,
+      "route_length_m": 2039.76,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_evening_038\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_evening_038\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_center_039",
+      "device_id": "bike_braga_039",
+      "vehicle_type": "bicycle",
+      "rows": 340,
+      "route_length_m": 1026.76,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_center_039\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_center_039\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_crosswalk_040",
+      "device_id": "bike_braga_040",
+      "vehicle_type": "bicycle",
+      "rows": 415,
+      "route_length_m": 1314.06,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_crosswalk_040\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_crosswalk_040\\truth.json"
+    },
+    {
+      "scenario_id": "bike_fall_accident_center_041",
+      "device_id": "bike_braga_041",
+      "vehicle_type": "bicycle",
+      "rows": 301,
+      "route_length_m": 1426.23,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_fall_accident_center_041\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_fall_accident_center_041\\truth.json"
+    },
+    {
+      "scenario_id": "bike_traffic_jam_center_042",
+      "device_id": "bike_braga_042",
+      "vehicle_type": "bicycle",
+      "rows": 638,
+      "route_length_m": 1531.54,
+      "event_types": [
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_traffic_jam_center_042\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_traffic_jam_center_042\\truth.json"
+    },
+    {
+      "scenario_id": "bike_obstacle_risk_center_043",
+      "device_id": "bike_braga_043",
+      "vehicle_type": "bicycle",
+      "rows": 381,
+      "route_length_m": 1173.63,
+      "event_types": [
+        "obstacle_risk"
+      ],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_obstacle_risk_center_043\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_obstacle_risk_center_043\\truth.json"
+    },
+    {
+      "scenario_id": "bike_mixed_brake_jam_center_044",
+      "device_id": "bike_braga_044",
+      "vehicle_type": "bicycle",
+      "rows": 891,
+      "route_length_m": 2607.03,
+      "event_types": [
+        "hard_brake",
+        "traffic_jam"
+      ],
+      "start_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "end_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "telemetry_csv": "datasets\\braga\\bike_mixed_brake_jam_center_044\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_mixed_brake_jam_center_044\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_center_045",
+      "device_id": "bike_braga_045",
+      "vehicle_type": "bicycle",
+      "rows": 486,
+      "route_length_m": 1504.2,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_liberdade",
+        "name": "Avenida da Liberdade",
+        "lat": 41.54883,
+        "lon": -8.42148
+      },
+      "end_station": {
+        "station_id": "bike_estacao_cp",
+        "name": "Estacao CP de Braga",
+        "lat": 41.54767,
+        "lon": -8.43402
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_center_045\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_center_045\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_commute_046",
+      "device_id": "bike_braga_046",
+      "vehicle_type": "bicycle",
+      "rows": 475,
+      "route_length_m": 1599.55,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_mercado",
+        "name": "Mercado Municipal",
+        "lat": 41.55323,
+        "lon": -8.42706
+      },
+      "end_station": {
+        "station_id": "bike_parque_ponte",
+        "name": "Parque da Ponte",
+        "lat": 41.54366,
+        "lon": -8.42308
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_commute_046\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_commute_046\\truth.json"
+    },
+    {
+      "scenario_id": "bike_normal_evening_047",
+      "device_id": "bike_braga_047",
+      "vehicle_type": "bicycle",
+      "rows": 732,
+      "route_length_m": 2230.72,
+      "event_types": [],
+      "start_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "end_station": {
+        "station_id": "bike_arcada",
+        "name": "Arcada / Avenida Central",
+        "lat": 41.55172,
+        "lon": -8.4229
+      },
+      "telemetry_csv": "datasets\\braga\\bike_normal_evening_047\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_normal_evening_047\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_center_048",
+      "device_id": "bike_braga_048",
+      "vehicle_type": "bicycle",
+      "rows": 419,
+      "route_length_m": 1272.41,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "end_station": {
+        "station_id": "bike_se",
+        "name": "Se de Braga",
+        "lat": 41.54952,
+        "lon": -8.42686
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_center_048\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_center_048\\truth.json"
+    },
+    {
+      "scenario_id": "bike_hard_brake_crosswalk_049",
+      "device_id": "bike_braga_049",
+      "vehicle_type": "bicycle",
+      "rows": 367,
+      "route_length_m": 1127.39,
+      "event_types": [
+        "hard_brake"
+      ],
+      "start_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "end_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "telemetry_csv": "datasets\\braga\\bike_hard_brake_crosswalk_049\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_hard_brake_crosswalk_049\\truth.json"
+    },
+    {
+      "scenario_id": "bike_fall_accident_center_050",
+      "device_id": "bike_braga_050",
+      "vehicle_type": "bicycle",
+      "rows": 244,
+      "route_length_m": 1127.39,
+      "event_types": [
+        "fall_accident"
+      ],
+      "start_station": {
+        "station_id": "bike_sao_victor",
+        "name": "Sao Victor",
+        "lat": 41.55383,
+        "lon": -8.41226
+      },
+      "end_station": {
+        "station_id": "bike_rodovia",
+        "name": "Parque Desportivo da Rodovia",
+        "lat": 41.55795,
+        "lon": -8.40787
+      },
+      "telemetry_csv": "datasets\\braga\\bike_fall_accident_center_050\\telemetry.csv",
+      "truth_json": "datasets\\braga\\bike_fall_accident_center_050\\truth.json"
     }
   ]
 }

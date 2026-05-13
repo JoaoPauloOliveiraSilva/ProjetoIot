@@ -1,0 +1,120 @@
+{
+  "scenario_id": "bike_hard_brake_center_039",
+  "device_id": "bike_braga_039",
+  "description": "Bicicleta com travagem brusca no centro urbano. Variante sintetica 4; inicio e fim em estacao de bicicletas.",
+  "vehicle_type": "bicycle",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 1026.76,
+  "sample_period_s": 1,
+  "start_station": {
+    "station_id": "bike_liberdade",
+    "name": "Avenida da Liberdade",
+    "lat": 41.54883,
+    "lon": -8.42148
+  },
+  "end_station": {
+    "station_id": "bike_mercado",
+    "name": "Mercado Municipal",
+    "lat": 41.55323,
+    "lon": -8.42706
+  },
+  "data_dump": {
+    "trigger": "trip_end_dock",
+    "expected_telemetry_rows": 340,
+    "charging_after_dock": true,
+    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+  },
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-06T03:38:12Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5515548,
+      "lon": -8.4233798
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.54883,
+      "lon": -8.42148
+    },
+    {
+      "lat": 41.5488775,
+      "lon": -8.4214755
+    },
+    {
+      "lat": 41.5490008,
+      "lon": -8.4215483
+    },
+    {
+      "lat": 41.5481517,
+      "lon": -8.4211054
+    },
+    {
+      "lat": 41.5482332,
+      "lon": -8.4212233
+    },
+    {
+      "lat": 41.5510799,
+      "lon": -8.4229398
+    },
+    {
+      "lat": 41.5518401,
+      "lon": -8.4236471
+    },
+    {
+      "lat": 41.5525999,
+      "lon": -8.4241336
+    },
+    {
+      "lat": 41.5528183,
+      "lon": -8.4244254
+    },
+    {
+      "lat": 41.5529403,
+      "lon": -8.4248288
+    },
+    {
+      "lat": 41.552962,
+      "lon": -8.4253161
+    },
+    {
+      "lat": 41.5528809,
+      "lon": -8.4259003
+    },
+    {
+      "lat": 41.5528776,
+      "lon": -8.4264131
+    },
+    {
+      "lat": 41.552932,
+      "lon": -8.4265672
+    },
+    {
+      "lat": 41.5533518,
+      "lon": -8.4265981
+    }
+  ]
+}

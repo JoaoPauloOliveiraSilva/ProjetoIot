@@ -1,0 +1,108 @@
+{
+  "scenario_id": "scooter_mixed_brake_jam_032",
+  "device_id": "scooter_braga_032",
+  "description": "Travagem brusca seguida de congestionamento. Variante sintetica 1.",
+  "vehicle_type": "scooter",
+  "source": "synthetic_osm_replay",
+  "city": "Braga, Portugal",
+  "route_length_m": 2239.64,
+  "sample_period_s": 1,
+  "start_station": null,
+  "end_station": null,
+  "data_dump": null,
+  "sensors": {
+    "gps": [
+      "lat",
+      "lon",
+      "speed",
+      "gps_accuracy_m"
+    ],
+    "imu": [
+      "accel_x",
+      "accel_y",
+      "accel_z",
+      "gyro_x",
+      "gyro_y",
+      "gyro_z"
+    ],
+    "ultrasonic": [
+      "range_front_m",
+      "range_left_m",
+      "ultrasonic_valid"
+    ]
+  },
+  "events": [
+    {
+      "event_type": "hard_brake",
+      "timestamp": "2026-05-05T17:50:52Z",
+      "expected_trigger": "deceleration_threshold",
+      "lat": 41.5528735,
+      "lon": -8.411969
+    },
+    {
+      "event_type": "traffic_jam",
+      "timestamp": "2026-05-05T17:51:22Z",
+      "expected_trigger": "prolonged_low_speed",
+      "lat": 41.5522157,
+      "lon": -8.4125826
+    }
+  ],
+  "route_preview": [
+    {
+      "lat": 41.5565926,
+      "lon": -8.4093056
+    },
+    {
+      "lat": 41.5564557,
+      "lon": -8.4081618
+    },
+    {
+      "lat": 41.5552129,
+      "lon": -8.4082424
+    },
+    {
+      "lat": 41.5541738,
+      "lon": -8.4095967
+    },
+    {
+      "lat": 41.5528131,
+      "lon": -8.4121257
+    },
+    {
+      "lat": 41.5509208,
+      "lon": -8.4121698
+    },
+    {
+      "lat": 41.5500334,
+      "lon": -8.4107915
+    },
+    {
+      "lat": 41.5482914,
+      "lon": -8.4098611
+    },
+    {
+      "lat": 41.5473851,
+      "lon": -8.4092147
+    },
+    {
+      "lat": 41.5460041,
+      "lon": -8.408769
+    },
+    {
+      "lat": 41.5460071,
+      "lon": -8.4074845
+    },
+    {
+      "lat": 41.5458389,
+      "lon": -8.4069455
+    },
+    {
+      "lat": 41.5450577,
+      "lon": -8.4051738
+    },
+    {
+      "lat": 41.5434498,
+      "lon": -8.4048918
+    }
+  ]
+}

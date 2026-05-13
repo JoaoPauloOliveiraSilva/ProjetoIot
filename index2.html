@@ -292,6 +292,32 @@
                             </div>
                         </div>
                     </div>
+                    <div class="glass-panel rounded-xl flex flex-col min-h-[240px] max-h-[300px] overflow-hidden">
+                        <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">cloud_done</span>
+                                Bike Station Dumps
+                            </h3>
+                            <span class="font-mono-data text-mono-data text-on-surface-variant text-xs">dock_data_dump</span>
+                        </div>
+                        <div class="p-panel-padding border-b border-outline-variant">
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Dumps</div>
+                                    <div id="bike-dump-count" class="font-mono-data text-mono-data text-on-surface">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Complete</div>
+                                    <div id="bike-dump-complete" class="font-mono-data text-mono-data text-primary">0%</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Missing</div>
+                                    <div id="bike-dump-missing" class="font-mono-data text-mono-data text-error">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bike-dump-list" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2"></div>
+                    </div>
                     <div class="glass-panel rounded-xl flex flex-col flex-1 min-h-0">
                         <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
                             <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
@@ -876,6 +902,7 @@
         }
 
         let cachedAlerts = [];
+        let cachedDockDumps = [];
 
         function setAlertsDrawerOpen(open) {
             const drawer = document.getElementById('alerts-drawer');
@@ -952,6 +979,70 @@
             }
             document.getElementById('alerts-count').innerText = `${visibleCount}/${cachedAlerts.length}`;
             updateAlertsBadge();
+        }
+
+        async function loadBikeDumps() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/alerts?minutos=43200&event_type=dock_data_dump`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const rows = Array.isArray(data.dados) ? data.dados : [];
+                cachedDockDumps = dedupeAlerts(rows)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 30);
+                renderBikeDumps();
+            } catch {}
+        }
+
+        function renderBikeDumps() {
+            const list = document.getElementById('bike-dump-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const count = cachedDockDumps.length;
+            const complete = count
+                ? cachedDockDumps.filter(d => Number(d.completeness_pct ?? 0) >= 99.9 && Number(d.missing_count ?? 0) === 0 && Number(d.failed_count ?? 0) === 0).length
+                : 0;
+            const missing = cachedDockDumps.reduce((acc, d) => acc + Number(d.missing_count ?? 0), 0);
+            document.getElementById('bike-dump-count').innerText = String(count);
+            document.getElementById('bike-dump-complete').innerText = count ? `${Math.round((complete / count) * 100)}%` : '0%';
+            document.getElementById('bike-dump-missing').innerText = String(missing);
+
+            if (count === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'text-sm text-on-surface-variant bg-surface-container-highest/50 rounded-lg p-3 border border-outline-variant';
+                empty.innerText = 'No bicycle dock dumps yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            for (const dump of cachedDockDumps.slice(0, 10)) {
+                const pct = Number(dump.completeness_pct ?? 0);
+                const ok = pct >= 99.9 && Number(dump.missing_count ?? 0) === 0 && Number(dump.failed_count ?? 0) === 0;
+                const item = document.createElement('div');
+                item.className = `rounded-lg p-3 border-l-2 bg-surface-container-highest ${ok ? 'border-primary' : 'border-error'}`;
+                const station = dump.station_name || dump.station_id || 'station';
+                const expected = Number(dump.expected_count ?? 0);
+                const sent = Number(dump.sent_count ?? 0);
+                const failed = Number(dump.failed_count ?? 0);
+                const battery = dump.battery_after == null ? '-' : `${Number(dump.battery_after).toFixed(1)}%`;
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="font-label-caps text-label-caps ${ok ? 'text-primary' : 'text-error'} truncate">${dump.device_id || 'bike'} • ${ok ? 'complete' : 'incomplete'}</div>
+                            <div class="text-sm text-on-surface-variant truncate">${station}</div>
+                        </div>
+                        <div class="font-mono-data text-mono-data ${ok ? 'text-primary' : 'text-error'}">${pct.toFixed(1)}%</div>
+                    </div>
+                    <div class="mt-2 grid grid-cols-3 gap-2 text-xs text-on-surface-variant">
+                        <div>sent <span class="text-on-surface">${sent}/${expected}</span></div>
+                        <div>failed <span class="text-on-surface">${failed}</span></div>
+                        <div>battery <span class="text-on-surface">${battery}</span></div>
+                    </div>
+                    <div class="mt-1 text-xs text-on-surface-variant">${new Date(dump.timestamp).toLocaleString()}</div>
+                `;
+                list.appendChild(item);
+            }
         }
 
         function updateSpeedChart(rows, selectedDevice) {
@@ -1141,6 +1232,11 @@
                 cachedAlerts = dedupeAlerts(cachedAlerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
                 renderAlerts();
                 if (alerta?.lat != null && alerta?.lon != null) setAlertMarker(alerta);
+                if (alerta?.event_type === 'dock_data_dump') {
+                    cachedDockDumps.unshift(alerta);
+                    cachedDockDumps = dedupeAlerts(cachedDockDumps).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 30);
+                    renderBikeDumps();
+                }
                 showToast(`Alert: ${formatText(alerta.event_type)}`, `${alerta.device_id || ''} • ${new Date(alerta.timestamp).toLocaleString()}`);
             };
             ws.onclose = () => {
@@ -1201,6 +1297,7 @@
             resetLiveTrails();
             await loadLiveSensors();
             await refreshAlerts();
+            await loadBikeDumps();
         });
 
         document.getElementById('btn-load-history')?.addEventListener('click', loadHistory);
@@ -1237,6 +1334,7 @@
             await loadLiveSensors();
             cachedAlerts = [];
             renderAlerts();
+            await loadBikeDumps();
 
             checkHealth();
             setInterval(checkHealth, 5000);
@@ -1244,6 +1342,7 @@
             setInterval(loadLiveSensors, 2000);
             setInterval(processLiveQueues, 250);
             setInterval(loadQosStatus, 1000);
+            setInterval(loadBikeDumps, 5000);
             loadQosStatus();
             connectWebSocket();
             updateAlertsBadge();
