@@ -389,6 +389,7 @@
         const readAlertKeys = new Set(JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]'));
         let showRead = false;
         const dashboardStartedAt = Date.now();
+        let backendOnline = false;
 
         function authHeaders() {
             return API_KEY ? { 'X-API-Key': API_KEY } : {};
@@ -417,8 +418,18 @@
         }
 
         function setHealth(ok) {
+            backendOnline = Boolean(ok);
             const dot = document.getElementById('health-dot');
             const text = document.getElementById('health-text');
+            if (!ok) {
+                livePointQueues.clear();
+                for (const status of deviceStatusById.values()) {
+                    status.online = false;
+                    status.status = 'offline';
+                }
+                refreshDeviceMarkerStyles(document.getElementById('device-select')?.value || '');
+                updateActiveDeviceCount();
+            }
             if (!dot || !text) return;
             if (ok) {
                 dot.classList.remove('bg-error', 'glow-indicator-red');
@@ -444,6 +455,7 @@
         const map = L.map('map', { zoomControl: true }).setView([41.5503, -8.4200], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
+        const stationsLayer = L.layerGroup().addTo(map);
         const devicesLayer = L.layerGroup().addTo(map);
         const alertsLayer = L.layerGroup().addTo(map);
         const historyLayer = L.layerGroup().addTo(map);
@@ -462,6 +474,16 @@
         const deviceStatusById = new Map();
         let liveSensorsSeeded = false;
         const LIVE_TRAIL_LIMIT = 80;
+        const BIKE_STATIONS = [
+            { id: 'bike_arcada', name: 'Arcada / Avenida Central', lat: 41.55172, lon: -8.42290 },
+            { id: 'bike_se', name: 'Se de Braga', lat: 41.54952, lon: -8.42686 },
+            { id: 'bike_estacao_cp', name: 'Estacao CP de Braga', lat: 41.54767, lon: -8.43402 },
+            { id: 'bike_mercado', name: 'Mercado Municipal', lat: 41.55323, lon: -8.42706 },
+            { id: 'bike_liberdade', name: 'Avenida da Liberdade', lat: 41.54883, lon: -8.42148 },
+            { id: 'bike_parque_ponte', name: 'Parque da Ponte', lat: 41.54366, lon: -8.42308 },
+            { id: 'bike_sao_victor', name: 'Sao Victor', lat: 41.55383, lon: -8.41226 },
+            { id: 'bike_rodovia', name: 'Parque Desportivo da Rodovia', lat: 41.55795, lon: -8.40787 }
+        ];
 
         function formatText(text) {
             if (!text) return "";
@@ -508,10 +530,31 @@
             document.getElementById('toast')?.classList.add('hidden');
         });
 
+        function renderBikeStations() {
+            stationsLayer.clearLayers();
+            for (const station of BIKE_STATIONS) {
+                const marker = L.circleMarker([station.lat, station.lon], {
+                    radius: 7,
+                    color: '#065f46',
+                    fillColor: '#10b981',
+                    weight: 3,
+                    fillOpacity: 0.9
+                }).addTo(stationsLayer);
+                marker.bindPopup(
+                    `<div style="font-weight:700;color:#065f46">Bike station</div>` +
+                    `<div>${station.name}</div>` +
+                    `<div style="font-size:12px;opacity:.85">${station.id}</div>`
+                );
+            }
+        }
+
         async function loadDevices() {
             try {
                 const res = await fetch(`${API_BASE_URL}/devices/status?minutos=5&offline_after_sec=45`, { headers: authHeaders() });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    setHealth(false);
+                    return;
+                }
                 const data = await res.json();
                 const statusRows = Array.isArray(data.dispositivos) ? data.dispositivos : [];
                 deviceStatusById.clear();
@@ -536,7 +579,9 @@
                 refreshDeviceMarkerStyles(select ? select.value : '');
                 updateActiveDeviceCount();
                 updateHistoryLoadState();
-            } catch {}
+            } catch {
+                setHealth(false);
+            }
         }
 
         function updateHistoryLoadState() {
@@ -646,6 +691,7 @@
         }
 
         function processLiveQueues() {
+            if (!backendOnline) return;
             const select = document.getElementById('device-select');
             const selectedDevice = select ? select.value : '';
             for (const [deviceId, queue] of livePointQueues.entries()) {
@@ -736,7 +782,10 @@
                 const selectedDevice = select ? select.value : '';
                 const query = selectedDevice ? `&device_id=${encodeURIComponent(selectedDevice)}` : '';
                 const res = await fetch(`${API_BASE_URL}/sensors?minutos=1${query}`, { headers: authHeaders() });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    setHealth(false);
+                    return;
+                }
                 const data = await res.json();
                 const rows = (Array.isArray(data.dados) ? data.dados : [])
                     .filter(row => isAfterDashboardStart(row.timestamp));
@@ -746,7 +795,9 @@
                     enqueueLiveRows(rows);
                 }
                 updateSpeedChart(rows, selectedDevice);
-            } catch {}
+            } catch {
+                setHealth(false);
+            }
         }
 
         function renderAlertItem(alerta) {
@@ -1166,6 +1217,7 @@
 
             initChart();
             applyTheme(localStorage.getItem('IOT_THEME') || 'dark');
+            renderBikeStations();
 
             await loadDevices();
             await loadLiveSensors();
