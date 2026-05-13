@@ -7,6 +7,7 @@ class SensorData(BaseModel):
     source: str        
     type: str   
     timestamp: Optional[datetime] = None
+    session_id: Optional[str] = None
     vehicle_type: Optional[str] = None
     trip_id: Optional[str] = None
     sequence: Optional[int] = None

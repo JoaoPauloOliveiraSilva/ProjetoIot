@@ -8,6 +8,8 @@ class AlertData(BaseModel):
     type: str   
     event_type: str
     timestamp: Optional[datetime] = None
+    session_id: Optional[str] = None
+    severity: Optional[str] = None
     vehicle_type: Optional[str] = None
     trip_id: Optional[str] = None
     station_id: Optional[str] = None

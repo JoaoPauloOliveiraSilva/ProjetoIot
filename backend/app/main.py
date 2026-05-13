@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import telemetry, alerts, devices
+from app.routers import telemetry, alerts, devices, sessions
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from app.core.security import is_valid_api_key
@@ -67,3 +67,4 @@ async def websocket_endpoint(websocket: WebSocket):
 app.include_router(telemetry.router, prefix="/api/v1")
 app.include_router(alerts.router, prefix="/api/v1")
 app.include_router(devices.router, prefix="/api/v1")
+app.include_router(sessions.router, prefix="/api/v1")

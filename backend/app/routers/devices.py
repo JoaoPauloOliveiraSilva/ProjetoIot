@@ -38,10 +38,11 @@ def _parse_timestamp(value: str | None) -> datetime | None:
 async def Get_Device_Status(
     minutos: int = Query(1440, ge=1, description="Janela de procura da última telemetria"),
     offline_after_sec: int = Query(60, ge=1, description="Tempo sem telemetria para considerar offline"),
+    session_id: str | None = Query(None, description="Filtrar por sessão de simulação"),
     api_key: str = Depends(validar_api_key)
 ):
     try:
-        sensores = influx_db.get_recent_sensor_data(minutos=minutos)
+        sensores = influx_db.get_recent_sensor_data(minutos=minutos, session_id=session_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except InfluxDBError as exc:
@@ -103,11 +104,12 @@ async def Get_latest(device_id: str ,api_key: str = Depends(validar_api_key)
 async def Get_latest(device_id: str ,
     start: str = Query(..., description="Data de início (ex: -7d, ou timestamp ISO)"),
     end: str = Query("now()", description="Data de fim (ex: now(), ou timestamp ISO)"),
+    session_id: str | None = Query(None, description="Filtrar por sessão de simulação"),
     api_key: str = Depends(validar_api_key)
 ):
  
     try:
-        dados = influx_db.get_device_history(device_id, start, end)
+        dados = influx_db.get_device_history(device_id, start, end, session_id=session_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except InfluxDBError as exc:

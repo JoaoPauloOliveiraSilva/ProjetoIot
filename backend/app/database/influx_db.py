@@ -106,12 +106,26 @@ def _add_optional_fields(point: Point, data, fields: list[str]) -> Point:
             point = point.field(field, value)
     return point
 
+def _alert_severity(data: AlertData) -> str:
+    if data.severity:
+        return data.severity
+    if data.event_type == "fall_accident":
+        return "critical"
+    if data.event_type == "obstacle_risk":
+        return "high"
+    if data.event_type in {"hard_brake", "traffic_jam"}:
+        return "warning"
+    if data.event_type == "dock_data_dump" and (data.missing_count or 0) > 0:
+        return "warning"
+    return "info"
+
 def _sensor_record(registo):
     return {
         "timestamp": registo.get_time().isoformat(),
         "device_id": registo.values.get("device_id"),
         "source": registo.values.get("source"),
         "type": registo.values.get("type"),
+        "session_id": registo.values.get("session_id"),
         "vehicle_type": registo.values.get("vehicle_type"),
         "trip_id": registo.values.get("trip_id"),
         "sequence": registo.values.get("sequence"),
@@ -145,6 +159,8 @@ def _alert_record(registo):
         "type": registo.values.get("type"),
         "event_type": registo.values.get("event_type"),
         "trigger": registo.values.get("trigger"),
+        "session_id": registo.values.get("session_id"),
+        "severity": registo.values.get("severity"),
         "vehicle_type": registo.values.get("vehicle_type"),
         "trip_id": registo.values.get("trip_id"),
         "station_id": registo.values.get("station_id"),
@@ -198,7 +214,7 @@ def get_latest_device_state(device_id: str):
             return _sensor_record(registo)
     return None
 
-def get_device_history(device_id: str, start: str, end: str):
+def get_device_history(device_id: str, start: str, end: str, session_id: Optional[str] = None):
     start_expr = _time_expr(start)
     end_expr = _time_expr(end)
     query = f"""
@@ -208,6 +224,8 @@ def get_device_history(device_id: str, start: str, end: str):
           |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})
           |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     """
+    if session_id:
+        query = query.rstrip() + f'\n          |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})\n'
     tabelas = _query_or_raise(query)
     resultados = []
     for tabela in tabelas:
@@ -225,6 +243,7 @@ def save_alert_data(data: AlertData):
         .tag("type", data.type)
         .tag("event_type", data.event_type)
         .tag("trigger", data.trigger)
+        .field("severity", _alert_severity(data))
         .field("lat", data.lat)
         .field("lon", data.lon)
         .field("speed", data.speed if data.speed is not None else 0.0)
@@ -232,6 +251,8 @@ def save_alert_data(data: AlertData):
         .field("accel_y", data.accel_y if data.accel_y is not None else 0.0)
         .field("accel_z", data.accel_z if data.accel_z is not None else 0.0)
     )
+    if data.session_id:
+        ponto = ponto.tag("session_id", data.session_id)
     ponto = _add_optional_fields(ponto, data, ALERT_OPTIONAL_FIELDS)
 
     if data.timestamp:
@@ -262,6 +283,8 @@ def save_sensor_data(data: SensorData):
         .field("accel_y", data.accel_y)
         .field("accel_z", data.accel_z)
     )
+    if data.session_id:
+        ponto = ponto.tag("session_id", data.session_id)
     ponto = _add_optional_fields(ponto, data, SENSOR_OPTIONAL_FIELDS)
 
     if data.timestamp:
@@ -280,7 +303,13 @@ def save_sensor_data(data: SensorData):
         
         
 
-def get_recent_alerts(minutos: int, device_id: Optional[str] = None, event_type: Optional[str] = None):
+def get_recent_alerts(
+    minutos: int,
+    device_id: Optional[str] = None,
+    event_type: Optional[str] = None,
+    session_id: Optional[str] = None,
+    severity: Optional[str] = None,
+):
     query_lines = [
         f'from(bucket: {_bucket()})',
         f'  |> range(start: {_minutes_range(minutos)})',
@@ -293,6 +322,10 @@ def get_recent_alerts(minutos: int, device_id: Optional[str] = None, event_type:
         query_lines.append(f'  |> filter(fn: (r) => r["event_type"] == {_flux_string(event_type)})')
         
     query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
+    if session_id:
+        query_lines.append(f'  |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})')
+    if severity:
+        query_lines.append(f'  |> filter(fn: (r) => exists r.severity and r.severity == {_flux_string(severity)})')
     query = "\n".join(query_lines)
     
     tabelas = _query_or_raise(query)
@@ -302,7 +335,12 @@ def get_recent_alerts(minutos: int, device_id: Optional[str] = None, event_type:
             resultados.append(_alert_record(registo))
     return resultados
     
-def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None, trip_id: Optional[str] = None):
+def get_recent_sensor_data(
+    minutos: int,
+    device_id: Optional[str] = None,
+    trip_id: Optional[str] = None,
+    session_id: Optional[str] = None,
+):
     query_lines = [
         f'from(bucket: {_bucket()})',
         f'  |> range(start: {_minutes_range(minutos)})',
@@ -313,6 +351,8 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None, trip_i
         query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
         
     query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
+    if session_id:
+        query_lines.append(f'  |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})')
     if trip_id:
         query_lines.append(f'  |> filter(fn: (r) => exists r.trip_id and r.trip_id == {_flux_string(trip_id)})')
     query = "\n".join(query_lines)
@@ -324,7 +364,7 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None, trip_i
             resultados.append(_sensor_record(registo))
     return resultados
 
-def get_alerts_stats(minutos: int = 43200, device_id: Optional[str] = None):
+def get_alerts_stats(minutos: int = 43200, device_id: Optional[str] = None, session_id: Optional[str] = None):
     query_lines = [
         f'from(bucket: {_bucket()})',
         f'  |> range(start: {_minutes_range(minutos)})',
@@ -333,6 +373,8 @@ def get_alerts_stats(minutos: int = 43200, device_id: Optional[str] = None):
     ]
     if device_id:
         query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
+    if session_id:
+        query_lines.append(f'  |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})')
     query_lines.extend([
         '  |> group(columns: ["event_type"])',
         '  |> count()',

@@ -31,6 +31,7 @@ from import_dataset import (
     DEFAULT_MQTT_PORT,
     Scenario,
     alert_payload,
+    default_session_id,
     discover_scenarios,
     parse_timestamp,
     read_csv,
@@ -74,12 +75,13 @@ def row_delay(previous_row: dict[str, str] | None, row: dict[str, str], speedup:
     return delay / speedup if speedup > 0 else 0.0
 
 
-def build_payload(row: dict[str, str], device_id: str, scenario_id: str, vehicle_type: str, trip_id: str) -> dict[str, Any]:
+def build_payload(row: dict[str, str], device_id: str, scenario_id: str, vehicle_type: str, trip_id: str, session_id: str) -> dict[str, Any]:
     payload = telemetry_payload(row)
     payload["device_id"] = device_id
     payload["timestamp"] = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
     payload["source"] = f"fleet_simulation:{scenario_id}"
     payload["type"] = "telemetry"
+    payload["session_id"] = session_id
     payload["vehicle_type"] = vehicle_type
     payload["trip_id"] = trip_id
     return payload
@@ -92,12 +94,14 @@ def build_truth_alert(
     device_id: str,
     scenario_id: str,
     trip_id: str,
+    session_id: str,
 ) -> dict[str, Any]:
     alert = alert_payload(event, row)
     alert["device_id"] = device_id
     alert["timestamp"] = telemetry["timestamp"]
     alert["source"] = f"fleet_simulation_truth:{scenario_id}"
     alert["type"] = "alert"
+    alert["session_id"] = session_id
     alert["trip_id"] = trip_id
     return alert
 
@@ -111,6 +115,7 @@ def build_dock_dump_alert(
     sent: int,
     failed: int,
     received: int | None,
+    session_id: str,
 ) -> dict[str, Any]:
     last_row = rows[-1]
     expected = len(rows)
@@ -126,6 +131,8 @@ def build_dock_dump_alert(
         "source": f"fleet_simulation_dock:{scenario.scenario_id}",
         "type": "alert",
         "event_type": "dock_data_dump",
+        "session_id": session_id,
+        "severity": "info" if missing == 0 else "warning",
         "vehicle_type": "bicycle",
         "trip_id": trip_id,
         "lat": float(end_station.get("lat", last_row["lat"])),
@@ -269,14 +276,14 @@ def replay_trip(
         if delay > 0 and stop_event.wait(delay):
             break
 
-        payload = build_payload(row, device_id, scenario.scenario_id, vehicle_type, trip_id)
+        payload = build_payload(row, device_id, scenario.scenario_id, vehicle_type, trip_id, args.session_id)
         attempted += 1
         try:
             send_payload(payload, args, mqtt_client, mqtt_lock)
             sent += 1
             if args.mode == "mqtt" and truth_events:
                 for event in truth_events.get(row["timestamp"], []):
-                    alert = build_truth_alert(event, row, payload, device_id, scenario.scenario_id, trip_id)
+                    alert = build_truth_alert(event, row, payload, device_id, scenario.scenario_id, trip_id, args.session_id)
                     send_truth_alert(alert, args, mqtt_client, mqtt_lock)
                     alert_sent += 1
         except (RuntimeError, TimeoutError, urllib.error.URLError) as exc:
@@ -297,7 +304,7 @@ def replay_trip(
     ):
         try:
             received = wait_for_received_trip_rows(args, device_id, trip_id, len(rows))
-            dock_alert = build_dock_dump_alert(scenario, truth, rows, device_id, trip_id, sent, failed, received)
+            dock_alert = build_dock_dump_alert(scenario, truth, rows, device_id, trip_id, sent, failed, received, args.session_id)
             send_truth_alert(dock_alert, args, mqtt_client, mqtt_lock)
             alert_sent += 1
         except RuntimeError as exc:
@@ -381,6 +388,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset-root", default=str(DEFAULT_DATASET_ROOT), help="Root folder containing Braga scenarios.")
     parser.add_argument("--scenario", action="append", default=[], help="Limit simulation to this scenario. Can be repeated.")
     parser.add_argument("--mode", choices=["mqtt", "rest"], default="mqtt", help="Transport used by simulated vehicles.")
+    parser.add_argument("--session-id", default=os.getenv("IOT_SESSION_ID", "auto"), help="Simulation session id; use 'auto' to create a new id at startup.")
     parser.add_argument("--fleet-size", type=int, default=7, help="Number of simulated vehicles.")
     parser.add_argument("--device-prefix", default="scooter_demo_", help="Prefix for generated device ids.")
     parser.add_argument("--bike-device-prefix", default="bike_demo_", help="Prefix for generated bicycle device ids.")
@@ -414,6 +422,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.session_id == "auto":
+        args.session_id = default_session_id("demo")
     if args.fleet_size < 1:
         raise ValueError("--fleet-size must be at least 1")
 
@@ -433,7 +443,7 @@ def main() -> None:
 
     print(
         f"Starting fleet simulation: vehicles={args.fleet_size} scenarios={len(scenarios)} "
-        f"mode={args.mode} speedup={args.speedup} selection={args.selection}",
+        f"mode={args.mode} speedup={args.speedup} selection={args.selection} session={args.session_id}",
         flush=True,
     )
 

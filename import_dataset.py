@@ -19,7 +19,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +34,7 @@ SEND_FIELDS = {
     "timestamp",
     "source",
     "type",
+    "session_id",
     "vehicle_type",
     "trip_id",
     "sequence",
@@ -125,6 +126,8 @@ def alert_payload(event: dict[str, Any], row: dict[str, str]) -> dict[str, Any]:
         "source": "simulated_truth",
         "type": "alert",
         "event_type": event["event_type"],
+        "session_id": row.get("session_id") or None,
+        "severity": event.get("severity") or severity_for_event(event["event_type"]),
         "vehicle_type": row.get("vehicle_type") or None,
         "lat": float(event.get("lat", row["lat"])),
         "lon": float(event.get("lon", row["lon"])),
@@ -140,6 +143,22 @@ def alert_payload(event: dict[str, Any], row: dict[str, str]) -> dict[str, Any]:
     if row.get("ultrasonic_valid"):
         payload["ultrasonic_valid"] = parse_bool(row["ultrasonic_valid"])
     return payload
+
+
+def severity_for_event(event_type: str) -> str:
+    if event_type == "fall_accident":
+        return "critical"
+    if event_type == "obstacle_risk":
+        return "high"
+    if event_type in {"hard_brake", "traffic_jam"}:
+        return "warning"
+    if event_type == "dock_data_dump":
+        return "info"
+    return "info"
+
+
+def default_session_id(prefix: str = "replay") -> str:
+    return f"{prefix}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
 
 
 def discover_scenarios(dataset_root: Path, selected: list[str]) -> list[Scenario]:
@@ -251,6 +270,8 @@ def replay_scenario(
     for row in rows:
         wait_for_replay(previous_row, row, args.realtime, args.speedup)
         payload = telemetry_payload(row)
+        if args.session_id:
+            payload["session_id"] = args.session_id
 
         try:
             if args.mode == "rest":
@@ -269,6 +290,7 @@ def replay_scenario(
 
         if args.mode == "mqtt" and truth_events:
             for event in truth_events.get(row["timestamp"], []):
+                row["session_id"] = args.session_id
                 alert = alert_payload(event, row)
                 topic = f"/bike/{alert['device_id']}/alert"
                 result = mqtt_client.publish(topic, json.dumps(alert), qos=1)
@@ -288,6 +310,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mode", choices=["rest", "mqtt", "dry-run"], default="rest", help="Replay transport.")
     parser.add_argument("--api-url", default=os.getenv("IOT_API_URL", DEFAULT_API_URL), help="REST endpoint URL.")
     parser.add_argument("--api-key", default=os.getenv("API_KEY_EDGE") or os.getenv("IOT_API_KEY", ""), help="REST API key.")
+    parser.add_argument("--session-id", default=os.getenv("IOT_SESSION_ID", ""), help="Simulation session id to attach to telemetry and truth alerts.")
     parser.add_argument("--timeout", type=float, default=10.0, help="REST request timeout in seconds.")
     parser.add_argument("--mqtt-host", default=os.getenv("MQTT_BROKER", "localhost"), help="MQTT broker host.")
     parser.add_argument("--mqtt-port", type=int, default=int(os.getenv("MQTT_HOST_PORT") or os.getenv("MQTT_PORT", str(DEFAULT_MQTT_PORT))), help="MQTT broker port.")
@@ -305,6 +328,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = build_parser().parse_args()
+    if args.mode != "dry-run" and args.session_id == "auto":
+        args.session_id = default_session_id()
     dataset_root = Path(args.dataset_root)
     scenarios = discover_scenarios(dataset_root, args.scenario)
 

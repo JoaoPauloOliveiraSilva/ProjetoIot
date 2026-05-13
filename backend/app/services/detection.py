@@ -9,6 +9,19 @@ logger = logging.getLogger(__name__)
 
 device_states = {}
 
+EVENT_SEVERITY = {
+    "fall_accident": "critical",
+    "obstacle_risk": "high",
+    "hard_brake": "warning",
+    "traffic_jam": "warning",
+    "dock_data_dump": "info",
+}
+
+
+def severity_for_event(event_type: str) -> str:
+    return EVENT_SEVERITY.get(event_type, "info")
+
+
 def create_alert(sensor: SensorData, event_type: str, trigger: str) -> AlertData:
     return AlertData(
         device_id=sensor.device_id,
@@ -16,6 +29,8 @@ def create_alert(sensor: SensorData, event_type: str, trigger: str) -> AlertData
         type="alert",
         event_type=event_type,
         timestamp=sensor.timestamp or datetime.now(timezone.utc),
+        session_id=sensor.session_id,
+        severity=severity_for_event(event_type),
         lat=sensor.lat,
         lon=sensor.lon,
         trip_id=sensor.trip_id,

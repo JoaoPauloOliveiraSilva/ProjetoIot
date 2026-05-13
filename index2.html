@@ -215,6 +215,22 @@
                                     <div class="text-xs text-on-surface-variant mt-2">Loads history for selected device, or all devices.</div>
                                 </div>
                             </div>
+                            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <label class="bg-surface-container-highest/60 rounded-lg border border-outline-variant p-3 flex items-center justify-between gap-3">
+                                    <span>
+                                        <span class="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Critical zones</span>
+                                        <span id="critical-zone-summary" class="block text-sm text-on-surface">No critical zones yet</span>
+                                    </span>
+                                    <input id="toggle-critical-zones" type="checkbox" class="rounded border-outline-variant bg-surface-container-highest text-primary" checked />
+                                </label>
+                                <label class="bg-surface-container-highest/60 rounded-lg border border-outline-variant p-3 flex items-center justify-between gap-3">
+                                    <span>
+                                        <span class="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Session filter</span>
+                                        <span id="session-filter-label" class="block text-sm text-on-surface truncate">latest session</span>
+                                    </span>
+                                    <input id="toggle-session-filter" type="checkbox" class="rounded border-outline-variant bg-surface-container-highest text-primary" checked />
+                                </label>
+                            </div>
                             <div class="mt-2 flex justify-end gap-2">
                                 <button id="btn-fit" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-3 py-1 text-xs font-semibold">
                                     Fit devices
@@ -237,8 +253,62 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-12 lg:col-span-4 flex flex-col gap-container-gap h-full">
-                    <div class="glass-panel rounded-xl flex flex-col flex-1 min-h-0">
+                <div class="col-span-12 lg:col-span-4 flex flex-col gap-container-gap h-full overflow-y-auto pr-1">
+                    <div class="glass-panel rounded-xl flex flex-col shrink-0">
+                        <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">play_circle</span>
+                                Simulation Session
+                            </h3>
+                            <button id="btn-use-latest-session" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-2 py-1 text-xs font-semibold">
+                                Use latest
+                            </button>
+                        </div>
+                        <div class="p-panel-padding flex flex-col gap-3">
+                            <div>
+                                <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Active session</div>
+                                <div id="session-id" class="font-mono-data text-mono-data text-primary truncate">waiting</div>
+                                <div id="session-window" class="text-xs text-on-surface-variant mt-1">No active simulator data yet</div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Vehicles</div>
+                                    <div id="session-vehicles" class="font-mono-data text-mono-data text-on-surface">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Telemetry</div>
+                                    <div id="session-telemetry" class="font-mono-data text-mono-data text-primary">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Alerts</div>
+                                    <div id="session-alerts" class="font-mono-data text-mono-data text-error">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Dumps</div>
+                                    <div id="session-dumps" class="font-mono-data text-mono-data text-secondary">0/0</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                                <div class="rounded-lg bg-surface-container-highest border border-outline-variant p-2">
+                                    <div class="text-error font-bold">Critical</div>
+                                    <div id="session-critical" class="font-mono-data text-mono-data">0</div>
+                                </div>
+                                <div class="rounded-lg bg-surface-container-highest border border-outline-variant p-2">
+                                    <div class="text-secondary font-bold">High</div>
+                                    <div id="session-high" class="font-mono-data text-mono-data">0</div>
+                                </div>
+                                <div class="rounded-lg bg-surface-container-highest border border-outline-variant p-2">
+                                    <div class="text-primary-fixed-dim font-bold">Warn</div>
+                                    <div id="session-warning" class="font-mono-data text-mono-data">0</div>
+                                </div>
+                                <div class="rounded-lg bg-surface-container-highest border border-outline-variant p-2">
+                                    <div class="text-on-surface-variant font-bold">Info</div>
+                                    <div id="session-info" class="font-mono-data text-mono-data">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel rounded-xl flex flex-col shrink-0 min-h-[260px]">
                         <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
                             <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary">router</span>
@@ -291,6 +361,36 @@
                                 last: <span id="qos-last">-</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="glass-panel rounded-xl flex flex-col shrink-0 min-h-[260px] max-h-[360px] overflow-hidden">
+                        <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">two_wheeler</span>
+                                Fleet Status
+                            </h3>
+                            <span id="fleet-summary" class="font-mono-data text-mono-data text-on-surface-variant text-xs">0 vehicles</span>
+                        </div>
+                        <div class="p-panel-padding border-b border-outline-variant">
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Bikes</div>
+                                    <div id="fleet-bikes" class="font-mono-data text-mono-data text-primary">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Scooters</div>
+                                    <div id="fleet-scooters" class="font-mono-data text-mono-data text-on-surface">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Moving</div>
+                                    <div id="fleet-moving" class="font-mono-data text-mono-data text-secondary">0</div>
+                                </div>
+                                <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Docked</div>
+                                    <div id="fleet-docked" class="font-mono-data text-mono-data text-primary-fixed">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fleet-list" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2"></div>
                     </div>
                     <div class="glass-panel rounded-xl flex flex-col min-h-[240px] max-h-[300px] overflow-hidden">
                         <div class="p-panel-padding border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
@@ -373,7 +473,7 @@
                 </button>
             </div>
             <div class="p-panel-padding border-b border-outline-variant bg-surface-container-low/30">
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <select id="alert-type" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
                         <option value="">All types</option>
                         <option value="fall_accident">fall_accident</option>
@@ -381,6 +481,13 @@
                         <option value="traffic_jam">traffic_jam</option>
                         <option value="obstacle_risk">obstacle_risk</option>
                         <option value="dock_data_dump">dock_data_dump</option>
+                    </select>
+                    <select id="alert-severity" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
+                        <option value="">All severity</option>
+                        <option value="critical">critical</option>
+                        <option value="high">high</option>
+                        <option value="warning">warning</option>
+                        <option value="info">info</option>
                     </select>
                     <select id="alert-range" class="bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg text-sm">
                         <option value="60" selected>Last 60m</option>
@@ -418,12 +525,40 @@
 
         const READ_STORAGE_KEY = 'read_alert_keys_v2';
         const readAlertKeys = new Set(JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]'));
+        const SESSION_STORAGE_KEY = 'iot_active_session_id';
         let showRead = false;
         let backendOnline = false;
         let dockDumpsSinceMs = Date.now();
+        let activeSessionId = params.get('session_id') || localStorage.getItem(SESSION_STORAGE_KEY) || '';
+        let sessionFilterEnabled = true;
+        let sessionSummary = null;
 
         function authHeaders() {
             return API_KEY ? { 'X-API-Key': API_KEY } : {};
+        }
+
+        function activeSessionParam(force = false) {
+            if (!force && (!sessionFilterEnabled || !activeSessionId)) return '';
+            return `session_id=${encodeURIComponent(activeSessionId)}`;
+        }
+
+        function appendSessionParam(parts) {
+            const sessionPart = activeSessionParam();
+            if (sessionPart) parts.push(sessionPart);
+        }
+
+        function setActiveSession(sessionId, persist = true) {
+            if (!sessionId || sessionId === activeSessionId) return false;
+            activeSessionId = sessionId;
+            if (persist) localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+            document.getElementById('session-filter-label').innerText = sessionId;
+            resetLiveTrails();
+            cachedAlerts = [];
+            cachedDockDumps = [];
+            renderAlerts();
+            renderBikeDumps();
+            renderCriticalZones();
+            return true;
         }
 
         function updateActiveDeviceCount() {
@@ -490,6 +625,7 @@
         const stationsLayer = L.layerGroup().addTo(map);
         const devicesLayer = L.layerGroup().addTo(map);
         const alertsLayer = L.layerGroup().addTo(map);
+        const criticalZonesLayer = L.layerGroup().addTo(map);
         const historyLayer = L.layerGroup().addTo(map);
         const liveTrailLayer = L.layerGroup().addTo(map);
 
@@ -520,6 +656,22 @@
         function formatText(text) {
             if (!text) return "";
             return String(text).replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function severityForAlert(alerta) {
+            if (alerta?.severity) return alerta.severity;
+            if (alerta?.event_type === 'fall_accident') return 'critical';
+            if (alerta?.event_type === 'obstacle_risk') return 'high';
+            if (alerta?.event_type === 'hard_brake' || alerta?.event_type === 'traffic_jam') return 'warning';
+            if (alerta?.event_type === 'dock_data_dump' && Number(alerta?.missing_count || 0) > 0) return 'warning';
+            return 'info';
+        }
+
+        function severityStyle(severity) {
+            if (severity === 'critical') return { color: '#ff4d4d', label: 'Critical', score: 4 };
+            if (severity === 'high') return { color: '#ffb95f', label: 'High', score: 3 };
+            if (severity === 'warning') return { color: '#facc15', label: 'Warning', score: 2 };
+            return { color: '#4edea3', label: 'Info', score: 1 };
         }
 
         function getAlertKey(alerta) {
@@ -582,7 +734,15 @@
 
         async function loadDevices() {
             try {
-                const res = await fetch(`${API_BASE_URL}/devices/status?minutos=5&offline_after_sec=45`, { headers: authHeaders() });
+                if (sessionFilterEnabled && !activeSessionId) {
+                    deviceStatusById.clear();
+                    renderFleetStatus();
+                    updateActiveDeviceCount();
+                    return;
+                }
+                const parts = ['minutos=5', 'offline_after_sec=45'];
+                appendSessionParam(parts);
+                const res = await fetch(`${API_BASE_URL}/devices/status?${parts.join('&')}`, { headers: authHeaders() });
                 if (!res.ok) {
                     setHealth(false);
                     return;
@@ -611,6 +771,7 @@
                 refreshDeviceMarkerStyles(select ? select.value : '');
                 updateActiveDeviceCount();
                 updateHistoryLoadState();
+                renderFleetStatus();
             } catch {
                 setHealth(false);
             }
@@ -619,6 +780,85 @@
         function updateHistoryLoadState() {
             const btn = document.getElementById('btn-load-history');
             if (btn) btn.disabled = false;
+        }
+
+        function lastAlertForDevice(deviceId) {
+            return cachedAlerts
+                .filter(alerta => alerta.device_id === deviceId)
+                .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0] || null;
+        }
+
+        function operationalStateFor(status) {
+            if (!status?.online) return 'offline';
+            const latest = status.latest || {};
+            const speed = Number(latest.speed || 0);
+            if (latest.charging || latest.dock_status === 'charging') return 'charging';
+            if (latest.dock_status) return 'docked';
+            if (speed > 1.0) return 'moving';
+            return 'stopped';
+        }
+
+        function renderFleetStatus() {
+            const list = document.getElementById('fleet-list');
+            if (!list) return;
+            const rows = Array.from(deviceStatusById.values()).sort((a, b) => String(a.device_id).localeCompare(String(b.device_id)));
+            const bikes = rows.filter(row => (row.latest?.vehicle_type || '').toLowerCase() === 'bicycle' || String(row.device_id).startsWith('bike_')).length;
+            const scooters = rows.length - bikes;
+            const moving = rows.filter(row => operationalStateFor(row) === 'moving').length;
+            const docked = rows.filter(row => ['docked', 'charging'].includes(operationalStateFor(row))).length;
+            document.getElementById('fleet-summary').innerText = `${rows.length} vehicles`;
+            document.getElementById('fleet-bikes').innerText = String(bikes);
+            document.getElementById('fleet-scooters').innerText = String(scooters);
+            document.getElementById('fleet-moving').innerText = String(moving);
+            document.getElementById('fleet-docked').innerText = String(docked);
+            list.innerHTML = '';
+            if (rows.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'text-sm text-on-surface-variant bg-surface-container-highest/50 rounded-lg p-3 border border-outline-variant';
+                empty.innerText = activeSessionId ? 'No vehicles in this session yet.' : 'Waiting for the simulator session.';
+                list.appendChild(empty);
+                return;
+            }
+            for (const row of rows) {
+                const latest = row.latest || {};
+                const vehicleType = latest.vehicle_type || (String(row.device_id).startsWith('bike_') ? 'bicycle' : 'scooter');
+                const state = operationalStateFor(row);
+                const battery = latest.battery == null ? '-' : `${Number(latest.battery).toFixed(1)}%`;
+                const speed = latest.speed == null ? '-' : `${Number(latest.speed).toFixed(1)} km/h`;
+                const alert = lastAlertForDevice(row.device_id);
+                const sev = severityForAlert(alert);
+                const style = severityStyle(sev);
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = `text-left rounded-lg p-3 border border-outline-variant bg-surface-container-highest hover:bg-surface-bright transition-colors ${row.online ? '' : 'opacity-60'}`;
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="font-label-caps text-label-caps text-on-surface truncate">${row.device_id}</div>
+                            <div class="text-xs text-on-surface-variant">${formatText(vehicleType)} • ${formatText(state)} • ${speed}</div>
+                        </div>
+                        <div class="text-xs font-bold ${row.online ? 'text-primary' : 'text-error'}">${row.online ? 'ONLINE' : 'OFFLINE'}</div>
+                    </div>
+                    <div class="mt-2 grid grid-cols-3 gap-2 text-xs text-on-surface-variant">
+                        <div>battery <span class="text-on-surface">${battery}</span></div>
+                        <div>age <span class="text-on-surface">${Number(row.age_sec || 0).toFixed(1)}s</span></div>
+                        <div>trip <span class="text-on-surface">${latest.trip_id ? 'yes' : '-'}</span></div>
+                    </div>
+                    <div class="mt-2 text-xs truncate" style="color:${alert ? style.color : '#bbcabf'}">
+                        ${alert ? `${style.label}: ${formatText(alert.event_type)}` : 'No alerts in session'}
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    const lat = Number(latest.lat);
+                    const lon = Number(latest.lon);
+                    if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                        map.setView([lat, lon], 16, { animate: true });
+                        const marker = deviceMarkers.get(row.device_id);
+                        if (marker) marker.openPopup();
+                    }
+                });
+                list.appendChild(item);
+            }
         }
 
         function clearHistory() {
@@ -679,6 +919,7 @@
             });
             setDeviceMarker(row.device_id, lat, lon, selectedDevice && row.device_id === selectedDevice);
             updateActiveDeviceCount();
+            renderFleetStatus();
 
             const line = getLiveTrail(row.device_id);
             const points = line.getLatLngs();
@@ -727,6 +968,7 @@
             }
             updateActiveDeviceCount();
             liveSensorsSeeded = true;
+            renderFleetStatus();
         }
 
         function enqueueLiveRows(rows) {
@@ -801,19 +1043,21 @@
         }
 
         function alertMarkerStyle(alerta) {
+            const severity = severityForAlert(alerta);
+            const sevStyle = severityStyle(severity);
             if (alerta.event_type === 'fall_accident') {
-                return { label: 'FALL', stroke: '#ff0000', fill: '#ff0000', radius: 12, fillOpacity: 0.85 };
+                return { label: 'FALL', stroke: sevStyle.color, fill: sevStyle.color, radius: 13, fillOpacity: 0.85, severity };
             }
             if (alerta.event_type === 'obstacle_risk') {
-                return { label: 'OBSTACLE', stroke: '#ffb95f', fill: '#ffb95f', radius: 10, fillOpacity: 0.75 };
+                return { label: 'OBSTACLE', stroke: sevStyle.color, fill: sevStyle.color, radius: 11, fillOpacity: 0.78, severity };
             }
             if (alerta.event_type === 'traffic_jam') {
-                return { label: 'JAM', stroke: '#a78bfa', fill: '#a78bfa', radius: 10, fillOpacity: 0.7 };
+                return { label: 'JAM', stroke: sevStyle.color, fill: sevStyle.color, radius: 10, fillOpacity: 0.72, severity };
             }
             if (alerta.event_type === 'dock_data_dump') {
-                return { label: 'DOCK', stroke: '#10b981', fill: '#10b981', radius: 10, fillOpacity: 0.75 };
+                return { label: 'DOCK', stroke: sevStyle.color, fill: sevStyle.color, radius: 9, fillOpacity: 0.72, severity };
             }
-            return { label: 'ALERT', stroke: '#ff7a73', fill: '#ff7a73', radius: 10, fillOpacity: 0.7 };
+            return { label: 'ALERT', stroke: sevStyle.color, fill: sevStyle.color, radius: 10, fillOpacity: 0.7, severity };
         }
 
         function setAlertMarker(alerta) {
@@ -827,15 +1071,22 @@
                 weight: 4,
                 fillOpacity: style.fillOpacity
             }).addTo(alertsLayer);
-            marker.bindPopup(`<div style="font-weight:700;color:${style.stroke}">${style.label}</div><div>${formatText(alerta.event_type)}</div><div style="font-size:12px;opacity:.85">${alerta.device_id || ''}</div>`);
+            marker.bindPopup(`<div style="font-weight:700;color:${style.stroke}">${style.label} • ${formatText(style.severity)}</div><div>${formatText(alerta.event_type)}</div><div style="font-size:12px;opacity:.85">${alerta.device_id || ''}</div>`);
             alertMarkers.set(key, marker);
         }
 
         async function loadLiveSensors() {
             try {
+                if (sessionFilterEnabled && !activeSessionId) {
+                    updateSpeedChart([], '');
+                    return;
+                }
                 const select = document.getElementById('device-select');
                 const selectedDevice = select ? select.value : '';
-                const query = selectedDevice ? `&device_id=${encodeURIComponent(selectedDevice)}` : '';
+                const parts = [];
+                if (selectedDevice) parts.push(`device_id=${encodeURIComponent(selectedDevice)}`);
+                appendSessionParam(parts);
+                const query = parts.length ? `&${parts.join('&')}` : '';
                 const minutes = liveSensorsSeeded ? 1 : 10;
                 const res = await fetch(`${API_BASE_URL}/sensors?minutos=${minutes}${query}`, { headers: authHeaders() });
                 if (!res.ok) {
@@ -859,17 +1110,21 @@
             const key = getAlertKey(alerta);
             const read = readAlertKeys.has(key);
             if (!showRead && read) return null;
+            const severity = severityForAlert(alerta);
+            const sevStyle = severityStyle(severity);
 
             const wrap = document.createElement('div');
-            wrap.className = `bg-surface-container-highest rounded-lg p-3 border-l-2 ${read ? 'border-outline-variant' : 'border-error'} hover:bg-surface-bright transition-colors`;
+            wrap.className = `bg-surface-container-highest rounded-lg p-3 border-l-2 ${read ? 'border-outline-variant' : ''} hover:bg-surface-bright transition-colors`;
+            if (!read) wrap.style.borderLeftColor = sevStyle.color;
 
             const top = document.createElement('div');
             top.className = 'flex justify-between items-start mb-1 gap-3';
             const left = document.createElement('div');
             left.className = 'min-w-0';
             const label = document.createElement('div');
-            label.className = `font-label-caps text-label-caps ${read ? 'text-on-surface-variant' : 'text-error'}`;
-            label.innerText = `${read ? 'READ' : 'LIVE'} • ${alerta.device_id || 'unknown'} • ${formatText(alerta.event_type)}`;
+            label.className = `font-label-caps text-label-caps ${read ? 'text-on-surface-variant' : ''}`;
+            if (!read) label.style.color = sevStyle.color;
+            label.innerText = `${read ? 'READ' : 'LIVE'} • ${sevStyle.label} • ${alerta.device_id || 'unknown'} • ${formatText(alerta.event_type)}`;
             const body = document.createElement('div');
             body.className = 'text-sm text-on-surface-variant mt-1 truncate';
             if (alerta.event_type === 'dock_data_dump') {
@@ -957,16 +1212,85 @@
             }
         }
 
+        function renderCriticalZones() {
+            criticalZonesLayer.clearLayers();
+            const summary = document.getElementById('critical-zone-summary');
+            const enabled = document.getElementById('toggle-critical-zones')?.checked ?? true;
+            if (!enabled) {
+                if (summary) summary.innerText = 'Critical zones hidden';
+                return;
+            }
+            const zones = new Map();
+            for (const alerta of cachedAlerts) {
+                if (!alerta || alerta.lat == null || alerta.lon == null) continue;
+                if (alerta.event_type === 'dock_data_dump') continue;
+                const lat = Number(alerta.lat);
+                const lon = Number(alerta.lon);
+                if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+                const severity = severityForAlert(alerta);
+                if (severity === 'info') continue;
+                const key = `${lat.toFixed(3)}|${lon.toFixed(3)}`;
+                const current = zones.get(key) || {
+                    lat: Number(lat.toFixed(3)),
+                    lon: Number(lon.toFixed(3)),
+                    count: 0,
+                    maxSeverity: 'info',
+                    score: 0,
+                    types: new Map(),
+                };
+                const style = severityStyle(severity);
+                current.count += 1;
+                current.types.set(alerta.event_type, (current.types.get(alerta.event_type) || 0) + 1);
+                if (style.score > current.score) {
+                    current.score = style.score;
+                    current.maxSeverity = severity;
+                }
+                zones.set(key, current);
+            }
+            const sorted = Array.from(zones.values()).sort((a, b) => b.count - a.count).slice(0, 24);
+            if (summary) summary.innerText = sorted.length ? `${sorted.length} zones • top ${sorted[0].count} alerts` : 'No critical zones yet';
+            for (const zone of sorted) {
+                const style = severityStyle(zone.maxSeverity);
+                const radius = Math.min(180, 45 + zone.count * 14);
+                const circle = L.circle([zone.lat, zone.lon], {
+                    radius,
+                    color: style.color,
+                    fillColor: style.color,
+                    weight: 2,
+                    fillOpacity: Math.min(0.35, 0.12 + zone.count * 0.02),
+                }).addTo(criticalZonesLayer);
+                const events = Array.from(zone.types.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([type, count]) => `${formatText(type)}: ${count}`)
+                    .join('<br>');
+                circle.bindPopup(
+                    `<div style="font-weight:700;color:${style.color}">Critical zone • ${style.label}</div>` +
+                    `<div>${zone.count} alerts in this area</div>` +
+                    `<div style="font-size:12px;opacity:.85">${events}</div>`
+                );
+            }
+        }
+
         async function refreshAlerts() {
             try {
+                if (sessionFilterEnabled && !activeSessionId) {
+                    cachedAlerts = [];
+                    renderAlerts();
+                    syncAlertMarkers();
+                    renderCriticalZones();
+                    return;
+                }
                 const select = document.getElementById('device-select');
                 const selectedDevice = select ? select.value : '';
                 const eventType = document.getElementById('alert-type')?.value || '';
+                const severity = document.getElementById('alert-severity')?.value || '';
                 const minutes = Number(document.getElementById('alert-range')?.value || '60');
 
                 const parts = [`minutos=${encodeURIComponent(String(minutes))}`];
                 if (selectedDevice) parts.push(`device_id=${encodeURIComponent(selectedDevice)}`);
                 if (eventType) parts.push(`event_type=${encodeURIComponent(eventType)}`);
+                if (severity) parts.push(`severity=${encodeURIComponent(severity)}`);
+                appendSessionParam(parts);
 
                 const res = await fetch(`${API_BASE_URL}/alerts?${parts.join('&')}`, { headers: authHeaders() });
                 if (!res.ok) return;
@@ -975,6 +1299,8 @@
                 cachedAlerts = dedupeAlerts(alerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderAlerts();
                 syncAlertMarkers();
+                renderCriticalZones();
+                renderFleetStatus();
             } catch {}
         }
 
@@ -996,7 +1322,14 @@
 
         async function loadBikeDumps() {
             try {
-                const res = await fetch(`${API_BASE_URL}/alerts?minutos=43200&event_type=dock_data_dump`, { headers: authHeaders() });
+                if (sessionFilterEnabled && !activeSessionId) {
+                    cachedDockDumps = [];
+                    renderBikeDumps();
+                    return;
+                }
+                const parts = ['minutos=43200', 'event_type=dock_data_dump'];
+                appendSessionParam(parts);
+                const res = await fetch(`${API_BASE_URL}/alerts?${parts.join('&')}`, { headers: authHeaders() });
                 if (!res.ok) return;
                 const data = await res.json();
                 const rows = Array.isArray(data.dados) ? data.dados : [];
@@ -1060,6 +1393,51 @@
                 `;
                 list.appendChild(item);
             }
+        }
+
+        function renderSessionSummary(summary) {
+            sessionSummary = summary || null;
+            const sid = summary?.session_id || activeSessionId || '';
+            document.getElementById('session-id').innerText = sid || 'waiting';
+            document.getElementById('session-filter-label').innerText = sessionFilterEnabled ? (sid || 'latest session') : 'all sessions';
+            if (!summary || summary.status === 'waiting') {
+                document.getElementById('session-window').innerText = 'Waiting for simulator telemetry';
+                document.getElementById('session-vehicles').innerText = '0';
+                document.getElementById('session-telemetry').innerText = '0';
+                document.getElementById('session-alerts').innerText = '0';
+                document.getElementById('session-dumps').innerText = '0/0';
+                document.getElementById('session-critical').innerText = '0';
+                document.getElementById('session-high').innerText = '0';
+                document.getElementById('session-warning').innerText = '0';
+                document.getElementById('session-info').innerText = '0';
+                return;
+            }
+            const start = summary.started_at ? new Date(summary.started_at).toLocaleTimeString() : '-';
+            const last = summary.last_seen ? new Date(summary.last_seen).toLocaleTimeString() : '-';
+            document.getElementById('session-window').innerText = `${start} -> ${last}`;
+            document.getElementById('session-vehicles').innerText = String(summary.devices_online ?? summary.devices_total ?? 0);
+            document.getElementById('session-telemetry').innerText = String(summary.telemetry_count ?? 0);
+            document.getElementById('session-alerts').innerText = String(summary.alert_count ?? 0);
+            document.getElementById('session-dumps').innerText = `${summary.dock_dumps_complete ?? 0}/${summary.dock_dumps_total ?? 0}`;
+            const severities = summary.severity_counts || {};
+            document.getElementById('session-critical').innerText = String(severities.critical ?? 0);
+            document.getElementById('session-high').innerText = String(severities.high ?? 0);
+            document.getElementById('session-warning').innerText = String(severities.warning ?? 0);
+            document.getElementById('session-info').innerText = String(severities.info ?? 0);
+        }
+
+        async function loadSessionSummary(useLatest = false) {
+            try {
+                const parts = ['minutos=60', 'offline_after_sec=45'];
+                if (!useLatest && activeSessionId) parts.push(`session_id=${encodeURIComponent(activeSessionId)}`);
+                const res = await fetch(`${API_BASE_URL}/sessions/summary?${parts.join('&')}`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const summary = await res.json();
+                if (summary.session_id && (useLatest || !activeSessionId || summary.session_id !== activeSessionId)) {
+                    setActiveSession(summary.session_id);
+                }
+                renderSessionSummary(summary);
+            } catch {}
         }
 
         function updateSpeedChart(rows, selectedDevice) {
@@ -1132,7 +1510,9 @@
                 const replayColors = ['#2563eb', '#4edea3', '#ffb95f', '#ff7a73', '#a78bfa', '#38bdf8'];
 
                 for (const [idx, id] of targetIds.entries()) {
-                    const res = await fetch(`${API_BASE_URL}/devices/${encodeURIComponent(id)}/history?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, { headers: authHeaders() });
+                    const parts = [`start=${encodeURIComponent(start)}`, `end=${encodeURIComponent(end)}`];
+                    appendSessionParam(parts);
+                    const res = await fetch(`${API_BASE_URL}/devices/${encodeURIComponent(id)}/history?${parts.join('&')}`, { headers: authHeaders() });
                     if (!res.ok) continue;
                     const data = await res.json();
                     const rows = Array.isArray(data.dados) ? data.dados : [];
@@ -1245,10 +1625,19 @@
             };
             ws.onmessage = (e) => {
                 const alerta = JSON.parse(e.data);
+                if (!activeSessionId && alerta.session_id) {
+                    setActiveSession(alerta.session_id);
+                    renderSessionSummary({ status: 'sucesso', session_id: alerta.session_id });
+                }
+                if (sessionFilterEnabled && activeSessionId && alerta.session_id && alerta.session_id !== activeSessionId) {
+                    return;
+                }
                 cachedAlerts.unshift(alerta);
                 cachedAlerts = dedupeAlerts(cachedAlerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
                 renderAlerts();
                 if (alerta?.lat != null && alerta?.lon != null) setAlertMarker(alerta);
+                renderCriticalZones();
+                renderFleetStatus();
                 if (alerta?.event_type === 'dock_data_dump') {
                     const ts = new Date(alerta.timestamp).getTime();
                     if (Number.isFinite(ts) && ts >= dockDumpsSinceMs) {
@@ -1323,6 +1712,28 @@
         document.getElementById('btn-load-history')?.addEventListener('click', loadHistory);
         document.getElementById('btn-refresh-alerts')?.addEventListener('click', refreshAlerts);
         document.getElementById('btn-refresh-dumps')?.addEventListener('click', loadBikeDumps);
+        document.getElementById('alert-severity')?.addEventListener('change', refreshAlerts);
+        document.getElementById('alert-type')?.addEventListener('change', refreshAlerts);
+        document.getElementById('alert-range')?.addEventListener('change', refreshAlerts);
+        document.getElementById('toggle-critical-zones')?.addEventListener('change', renderCriticalZones);
+        document.getElementById('toggle-session-filter')?.addEventListener('change', async (event) => {
+            sessionFilterEnabled = Boolean(event.target.checked);
+            resetLiveTrails();
+            await loadSessionSummary(!sessionFilterEnabled);
+            await loadDevices();
+            await loadLiveSensors();
+            await refreshAlerts();
+            await loadBikeDumps();
+        });
+        document.getElementById('btn-use-latest-session')?.addEventListener('click', async () => {
+            activeSessionId = '';
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+            await loadSessionSummary(true);
+            await loadDevices();
+            await loadLiveSensors();
+            await refreshAlerts();
+            await loadBikeDumps();
+        });
 
         document.getElementById('btn-toggle-read')?.addEventListener('click', () => {
             showRead = !showRead;
@@ -1345,12 +1756,15 @@
         async function bootstrap() {
             document.getElementById('history-range').value = 'alltime';
             document.getElementById('alert-type').value = '';
+            document.getElementById('alert-severity').value = '';
             document.getElementById('alert-range').value = '60';
 
             initChart();
             applyTheme(localStorage.getItem('IOT_THEME') || 'dark');
             renderBikeStations();
+            renderSessionSummary(null);
 
+            await loadSessionSummary(!activeSessionId);
             await loadDevices();
             await loadLiveSensors();
             cachedAlerts = [];
@@ -1359,6 +1773,7 @@
             await loadBikeDumps();
 
             setInterval(checkHealth, 5000);
+            setInterval(loadSessionSummary, 5000);
             setInterval(loadDevices, 30000);
             setInterval(loadLiveSensors, 2000);
             setInterval(processLiveQueues, 250);
