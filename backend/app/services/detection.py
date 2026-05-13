@@ -18,6 +18,7 @@ def create_alert(sensor: SensorData, event_type: str, trigger: str) -> AlertData
         timestamp=sensor.timestamp or datetime.now(timezone.utc),
         lat=sensor.lat,
         lon=sensor.lon,
+        trip_id=sensor.trip_id,
         trigger=trigger,
         speed=sensor.speed,
         accel_x=sensor.accel_x,

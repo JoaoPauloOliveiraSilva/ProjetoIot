@@ -298,7 +298,12 @@
                                 <span class="material-symbols-outlined text-primary">cloud_done</span>
                                 Bike Station Dumps
                             </h3>
-                            <span class="font-mono-data text-mono-data text-on-surface-variant text-xs">dock_data_dump</span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono-data text-mono-data text-on-surface-variant text-xs">current session</span>
+                                <button id="btn-refresh-dumps" class="bg-surface-container-high/70 text-on-surface border border-outline-variant hover:bg-surface-bright transition-colors rounded-lg px-2 py-1 text-xs font-semibold">
+                                    Refresh
+                                </button>
+                            </div>
                         </div>
                         <div class="p-panel-padding border-b border-outline-variant">
                             <div class="grid grid-cols-3 gap-2">
@@ -307,7 +312,7 @@
                                     <div id="bike-dump-count" class="font-mono-data text-mono-data text-on-surface">0</div>
                                 </div>
                                 <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
-                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Complete</div>
+                                    <div class="text-xs text-on-surface-variant uppercase tracking-wider mb-0.5">Received</div>
                                     <div id="bike-dump-complete" class="font-mono-data text-mono-data text-primary">0%</div>
                                 </div>
                                 <div class="bg-surface-container-highest rounded-lg p-2 text-center border border-outline-variant">
@@ -415,6 +420,7 @@
         const readAlertKeys = new Set(JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]'));
         let showRead = false;
         let backendOnline = false;
+        let dockDumpsSinceMs = Date.now();
 
         function authHeaders() {
             return API_KEY ? { 'X-API-Key': API_KEY } : {};
@@ -465,7 +471,14 @@
             try {
                 const base = API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL.slice(0, -7) : API_BASE_URL;
                 const res = await fetch(`${base}/health/ready`);
-                setHealth(res.ok);
+                if (!res.ok) {
+                    setHealth(false);
+                    return;
+                }
+                const data = await res.json();
+                const startedAt = new Date(data.started_at).getTime();
+                if (Number.isFinite(startedAt)) dockDumpsSinceMs = startedAt;
+                setHealth(true);
             } catch {
                 setHealth(false);
             }
@@ -510,7 +523,7 @@
         }
 
         function getAlertKey(alerta) {
-            return `${alerta.device_id || ''}|${alerta.event_type || ''}|${alerta.timestamp || ''}`;
+            return `${alerta.device_id || ''}|${alerta.event_type || ''}|${alerta.timestamp || ''}|${alerta.trip_id || ''}`;
         }
 
         function dedupeAlerts(alerts) {
@@ -988,8 +1001,10 @@
                 const data = await res.json();
                 const rows = Array.isArray(data.dados) ? data.dados : [];
                 cachedDockDumps = dedupeAlerts(rows)
+                    .filter(d => Number.isFinite(new Date(d.timestamp).getTime()))
+                    .filter(d => new Date(d.timestamp).getTime() >= dockDumpsSinceMs)
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                    .slice(0, 30);
+                    .slice(0, 250);
                 renderBikeDumps();
             } catch {}
         }
@@ -1001,7 +1016,7 @@
 
             const count = cachedDockDumps.length;
             const complete = count
-                ? cachedDockDumps.filter(d => Number(d.completeness_pct ?? 0) >= 99.9 && Number(d.missing_count ?? 0) === 0 && Number(d.failed_count ?? 0) === 0).length
+                ? cachedDockDumps.filter(d => Number(d.completeness_pct ?? 0) >= 99.9 && Number(d.missing_count ?? 0) === 0).length
                 : 0;
             const missing = cachedDockDumps.reduce((acc, d) => acc + Number(d.missing_count ?? 0), 0);
             document.getElementById('bike-dump-count').innerText = String(count);
@@ -1011,19 +1026,20 @@
             if (count === 0) {
                 const empty = document.createElement('div');
                 empty.className = 'text-sm text-on-surface-variant bg-surface-container-highest/50 rounded-lg p-3 border border-outline-variant';
-                empty.innerText = 'No bicycle dock dumps yet.';
+                empty.innerText = 'No bicycle has finished a docked trip in this dashboard session yet.';
                 list.appendChild(empty);
                 return;
             }
 
-            for (const dump of cachedDockDumps.slice(0, 10)) {
+            for (const dump of cachedDockDumps) {
                 const pct = Number(dump.completeness_pct ?? 0);
-                const ok = pct >= 99.9 && Number(dump.missing_count ?? 0) === 0 && Number(dump.failed_count ?? 0) === 0;
+                const ok = pct >= 99.9 && Number(dump.missing_count ?? 0) === 0;
                 const item = document.createElement('div');
                 item.className = `rounded-lg p-3 border-l-2 bg-surface-container-highest ${ok ? 'border-primary' : 'border-error'}`;
                 const station = dump.station_name || dump.station_id || 'station';
                 const expected = Number(dump.expected_count ?? 0);
                 const sent = Number(dump.sent_count ?? 0);
+                const received = Number(dump.received_count ?? sent);
                 const failed = Number(dump.failed_count ?? 0);
                 const battery = dump.battery_after == null ? '-' : `${Number(dump.battery_after).toFixed(1)}%`;
                 item.innerHTML = `
@@ -1035,10 +1051,11 @@
                         <div class="font-mono-data text-mono-data ${ok ? 'text-primary' : 'text-error'}">${pct.toFixed(1)}%</div>
                     </div>
                     <div class="mt-2 grid grid-cols-3 gap-2 text-xs text-on-surface-variant">
-                        <div>sent <span class="text-on-surface">${sent}/${expected}</span></div>
+                        <div>received <span class="text-on-surface">${received}/${expected}</span></div>
                         <div>failed <span class="text-on-surface">${failed}</span></div>
                         <div>battery <span class="text-on-surface">${battery}</span></div>
                     </div>
+                    <div class="mt-1 text-xs text-on-surface-variant">mqtt sent ${sent}/${expected} • ${formatText(dump.verification_status || 'backend_verified')}</div>
                     <div class="mt-1 text-xs text-on-surface-variant">${new Date(dump.timestamp).toLocaleString()}</div>
                 `;
                 list.appendChild(item);
@@ -1233,9 +1250,12 @@
                 renderAlerts();
                 if (alerta?.lat != null && alerta?.lon != null) setAlertMarker(alerta);
                 if (alerta?.event_type === 'dock_data_dump') {
-                    cachedDockDumps.unshift(alerta);
-                    cachedDockDumps = dedupeAlerts(cachedDockDumps).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 30);
-                    renderBikeDumps();
+                    const ts = new Date(alerta.timestamp).getTime();
+                    if (Number.isFinite(ts) && ts >= dockDumpsSinceMs) {
+                        cachedDockDumps.unshift(alerta);
+                        cachedDockDumps = dedupeAlerts(cachedDockDumps).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 250);
+                        renderBikeDumps();
+                    }
                 }
                 showToast(`Alert: ${formatText(alerta.event_type)}`, `${alerta.device_id || ''} • ${new Date(alerta.timestamp).toLocaleString()}`);
             };
@@ -1302,6 +1322,7 @@
 
         document.getElementById('btn-load-history')?.addEventListener('click', loadHistory);
         document.getElementById('btn-refresh-alerts')?.addEventListener('click', refreshAlerts);
+        document.getElementById('btn-refresh-dumps')?.addEventListener('click', loadBikeDumps);
 
         document.getElementById('btn-toggle-read')?.addEventListener('click', () => {
             showRead = !showRead;
@@ -1334,9 +1355,9 @@
             await loadLiveSensors();
             cachedAlerts = [];
             renderAlerts();
+            await checkHealth();
             await loadBikeDumps();
 
-            checkHealth();
             setInterval(checkHealth, 5000);
             setInterval(loadDevices, 30000);
             setInterval(loadLiveSensors, 2000);

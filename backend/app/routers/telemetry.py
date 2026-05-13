@@ -45,11 +45,12 @@ async def receive_alert_data(data: SensorData,
 async def fetch_alerts(
     minutos: int = Query(60, ge=1, description="Minutos para trás"),
     device_id: str | None = Query(None, description="Filtrar por dispositivo"),
+    trip_id: str | None = Query(None, description="Filtrar por viagem simulada"),
     api_key: str = Depends(validar_api_key)
 ):
 
     try:
-        dados = influx_db.get_recent_sensor_data(minutos=minutos, device_id=device_id)
+        dados = influx_db.get_recent_sensor_data(minutos=minutos, device_id=device_id, trip_id=trip_id)
     except InfluxDBError as exc:
         raise _db_unavailable(exc) from exc
     

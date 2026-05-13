@@ -26,7 +26,7 @@ Os cenarios de bicicleta incluem tambem:
 - `end_station_id`, `end_station_name`
 - `dock_status` e `charging`
 
-No fim da viagem, a bicicleta fica parada na estacao final durante algumas amostras com `charging=true`. O simulador usa estes metadados para publicar o evento operacional `dock_data_dump`, que resume se a descarga de dados foi completa. Todos os cenarios de bicicleta começam numa estacao e acabam numa estacao, podendo ser a mesma.
+No fim da viagem, a bicicleta fica parada na estacao final durante algumas amostras com `charging=true`. O simulador usa estes metadados para publicar o evento operacional `dock_data_dump`, que resume se a descarga de dados foi completa. Esse evento compara as linhas esperadas da viagem com as linhas efetivamente recebidas pelo backend para o `trip_id` dessa viagem. Todos os cenarios de bicicleta começam numa estacao e acabam numa estacao, podendo ser a mesma.
 
 ## Cenarios
 

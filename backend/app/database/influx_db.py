@@ -78,6 +78,7 @@ SENSOR_OPTIONAL_FIELDS = [
 
 ALERT_OPTIONAL_FIELDS = [
     "vehicle_type",
+    "trip_id",
     "station_id",
     "station_name",
     "gyro_x",
@@ -91,9 +92,11 @@ ALERT_OPTIONAL_FIELDS = [
     "battery_after",
     "expected_count",
     "sent_count",
+    "received_count",
     "failed_count",
     "missing_count",
     "completeness_pct",
+    "verification_status",
 ]
 
 def _add_optional_fields(point: Point, data, fields: list[str]) -> Point:
@@ -143,6 +146,7 @@ def _alert_record(registo):
         "event_type": registo.values.get("event_type"),
         "trigger": registo.values.get("trigger"),
         "vehicle_type": registo.values.get("vehicle_type"),
+        "trip_id": registo.values.get("trip_id"),
         "station_id": registo.values.get("station_id"),
         "station_name": registo.values.get("station_name"),
         "lat": registo.values.get("lat"),
@@ -162,9 +166,11 @@ def _alert_record(registo):
         "battery_after": registo.values.get("battery_after"),
         "expected_count": registo.values.get("expected_count"),
         "sent_count": registo.values.get("sent_count"),
+        "received_count": registo.values.get("received_count"),
         "failed_count": registo.values.get("failed_count"),
         "missing_count": registo.values.get("missing_count"),
         "completeness_pct": registo.values.get("completeness_pct"),
+        "verification_status": registo.values.get("verification_status"),
     }
 
 def get_all_devices():
@@ -296,7 +302,7 @@ def get_recent_alerts(minutos: int, device_id: Optional[str] = None, event_type:
             resultados.append(_alert_record(registo))
     return resultados
     
-def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
+def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None, trip_id: Optional[str] = None):
     query_lines = [
         f'from(bucket: {_bucket()})',
         f'  |> range(start: {_minutes_range(minutos)})',
@@ -307,6 +313,8 @@ def get_recent_sensor_data(minutos: int, device_id: Optional[str] = None):
         query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
         
     query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
+    if trip_id:
+        query_lines.append(f'  |> filter(fn: (r) => exists r.trip_id and r.trip_id == {_flux_string(trip_id)})')
     query = "\n".join(query_lines)
     
     tabelas = _query_or_raise(query)

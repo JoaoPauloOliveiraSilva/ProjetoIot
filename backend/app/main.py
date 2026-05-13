@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 
 load_dotenv(".env")
 
+SERVICE_STARTED_AT = datetime.now(timezone.utc)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()
@@ -34,6 +36,7 @@ async def health():
     return {
         "status": "ok",
         "service": "iot-backend",
+        "started_at": SERVICE_STARTED_AT.isoformat(),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
@@ -44,6 +47,7 @@ async def readiness():
     return {
         "status": "ready",
         "service": "iot-backend",
+        "started_at": SERVICE_STARTED_AT.isoformat(),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 

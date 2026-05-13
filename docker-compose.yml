@@ -98,6 +98,8 @@ services:
     environment:
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
+      IOT_API_KEY: ${API_KEY_EDGE:-iot}
+      IOT_DOCK_VERIFY_API_URL: http://backend:8000/api/v1/sensors
     volumes:
       - mosquitto-data:/mosquitto-data:ro
     depends_on:

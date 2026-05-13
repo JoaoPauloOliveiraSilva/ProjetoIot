@@ -9,6 +9,7 @@ class AlertData(BaseModel):
     event_type: str
     timestamp: Optional[datetime] = None
     vehicle_type: Optional[str] = None
+    trip_id: Optional[str] = None
     station_id: Optional[str] = None
     station_name: Optional[str] = None
     lat: float        
@@ -29,6 +30,8 @@ class AlertData(BaseModel):
     battery_after: Optional[float] = None
     expected_count: Optional[int] = None
     sent_count: Optional[int] = None
+    received_count: Optional[int] = None
     failed_count: Optional[int] = None
     missing_count: Optional[int] = None
     completeness_pct: Optional[float] = None
+    verification_status: Optional[str] = None

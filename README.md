@@ -16,7 +16,7 @@ Os datasets principais estão em `datasets/braga`, com 100 rotas simuladas sobre
 - `telemetry.csv`: telemetria temporal.
 - `truth.json`: eventos esperados para validação.
 
-Os cenários de bicicleta incluem ainda `vehicle_type=bicycle`, estação inicial/final, estado de docking e amostras finais de carregamento. Todas as bicicletas começam e terminam numa estação. Quando usados no simulador contínuo por MQTT, o fim da viagem publica um alerta QoS 1 `dock_data_dump`, com contadores de linhas esperadas, enviadas, falhadas, em falta e percentagem de completude da descarga de dados.
+Os cenários de bicicleta incluem ainda `vehicle_type=bicycle`, estação inicial/final, estado de docking e amostras finais de carregamento. Todas as bicicletas começam e terminam numa estação. Quando usados no simulador contínuo por MQTT, o fim da viagem publica um alerta QoS 1 `dock_data_dump`, com contadores de linhas esperadas, publicadas, recebidas pelo backend, falhadas, em falta e percentagem de completude da descarga de dados.
 
 Cada linha inclui pelo menos 3 sensores:
 
@@ -97,7 +97,7 @@ O comando `docker compose up --build` inicia a stack completa: Mosquitto, Influx
 docker compose up --build
 ```
 
-O serviço `iot-simulator` lê os datasets em `datasets/braga`, publica telemetria em MQTT TLS para o broker, e o backend processa/persiste os dados e propaga alertas por WebSocket.
+O serviço `iot-simulator` lê os datasets em `datasets/braga`, publica telemetria em MQTT TLS para o broker, publica eventos críticos esperados como MQTT QoS 1, e o backend processa/persiste os dados e propaga alertas por WebSocket.
 
 #### Verificar TLS + CA (MQTT)
 
@@ -208,7 +208,7 @@ docker compose up --build
 
 Assim, o fluxo fica igual à arquitetura final: datasets -> simulador Docker -> Mosquitto MQTT TLS -> backend -> InfluxDB/dashboard/WebSocket.
 
-O simulador mantém várias trotinetes e bicicletas ativas, escolhe aleatoriamente datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+O simulador mantém várias trotinetes e bicicletas ativas, escolhe aleatoriamente datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend. No Docker, os eventos críticos do `truth.json` são publicados em `/bike/{device_id}/alert` com QoS 1, e as bicicletas publicam `dock_data_dump` só quando chegam ao fim da viagem.
 
 ```powershell
 # Recomendado: via MQTT (TLS), com telemetria QoS 0 e alertas esperados QoS 1
@@ -218,7 +218,7 @@ python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.cr
 python simulate_fleet.py --mode rest --fleet-size 12 --speedup 5 --selection random --api-key iot
 ```
 
-O simulador corre enquanto o Docker Compose estiver ativo. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final.
+O simulador corre enquanto o Docker Compose estiver ativo. Com o compose atual, o MQTT externo está em `localhost:8883` (TLS). Por predefinição, as bicicletas publicam `dock_data_dump` quando chegam à estação final. Esse dump usa um `trip_id` único e compara `expected_count` com `received_count` consultado no backend, para mostrar se a telemetria enviada por MQTT chegou e foi persistida.
 
 ### 7. Testes Unitários e Latência de Alertas
 
