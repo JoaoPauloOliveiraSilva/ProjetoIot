@@ -91,6 +91,14 @@ Serviços:
 - InfluxDB: `http://localhost:18086` com `admin/adminadmin`
 - MQTT (TLS): `localhost:8883` com `MQTT_USERNAME`/`MQTT_PASSWORD` do `.env`
 
+Por omissão, `docker compose up --build` inicia a infraestrutura principal: Mosquitto, InfluxDB, backend e dashboard. Para iniciar também o simulador Docker, usar o perfil `demo`:
+
+```powershell
+docker compose --profile demo up --build
+```
+
+Neste modo, o serviço `iot-simulator` lê os datasets em `datasets/braga`, publica telemetria em MQTT TLS para o broker, e o backend processa/persiste os dados e propaga alertas por WebSocket.
+
 #### Verificar TLS + CA (MQTT)
 
 O broker MQTT expõe apenas TLS em `8883`. Isso fornece encriptação em trânsito e permite validar a identidade do broker via CA (evita ataques do tipo man-in-the-middle).
@@ -192,7 +200,15 @@ python scripts\smoke_test_stack.py
 ```
 
 ### 6. Simulação Contínua de Frota para Demo
-Para a demonstração, usar o simulador contínuo. Ele mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
+Para a demonstração, o modo recomendado é usar o simulador dentro de Docker:
+
+```powershell
+docker compose --profile demo up --build
+```
+
+Assim, o fluxo fica igual à arquitetura final: datasets -> simulador Docker -> Mosquitto MQTT TLS -> backend -> InfluxDB/dashboard/WebSocket.
+
+Também é possível correr o simulador manualmente fora de Docker. Ele mantém várias trotinetes e bicicletas ativas, escolhe datasets de Braga, reescreve os timestamps para o momento atual e envia a telemetria para o backend.
 
 ```powershell
 # Recomendado: via MQTT (TLS), com telemetria QoS 0 e alertas esperados QoS 1

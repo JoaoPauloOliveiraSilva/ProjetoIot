@@ -89,6 +89,24 @@ services:
       backend:
         condition: service_healthy
 
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    container_name: iot-simulator
+    profiles: ["demo"]
+    restart: unless-stopped
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME:-iot}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
+    volumes:
+      - mosquitto-data:/mosquitto-data:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+
 volumes:
   influxdb-data:
   mosquitto-data:
