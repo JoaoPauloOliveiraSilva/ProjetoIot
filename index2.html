@@ -388,17 +388,10 @@
         const READ_STORAGE_KEY = 'read_alert_keys_v2';
         const readAlertKeys = new Set(JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]'));
         let showRead = false;
-        const dashboardStartedAt = Date.now();
         let backendOnline = false;
 
         function authHeaders() {
             return API_KEY ? { 'X-API-Key': API_KEY } : {};
-        }
-
-        function isAfterDashboardStart(timestamp) {
-            if (!timestamp) return false;
-            const ts = new Date(timestamp).getTime();
-            return Number.isFinite(ts) && ts >= dashboardStartedAt;
         }
 
         function updateActiveDeviceCount() {
@@ -658,19 +651,42 @@
         }
 
         function seedLiveSensors(rows, selectedDevice) {
-            const latestByDevice = new Map();
+            const byDevice = new Map();
             for (const row of rows) {
                 if (row.lat == null || row.lon == null || !row.device_id || !row.timestamp) continue;
-                const current = latestByDevice.get(row.device_id);
-                if (!current || new Date(row.timestamp) > new Date(current.timestamp)) {
-                    latestByDevice.set(row.device_id, row);
-                }
+                if (selectedDevice && row.device_id !== selectedDevice) continue;
+                if (!byDevice.has(row.device_id)) byDevice.set(row.device_id, []);
+                byDevice.get(row.device_id).push(row);
             }
 
-            for (const row of latestByDevice.values()) {
-                appendLivePoint(row, selectedDevice);
-                liveLastTimestampByDevice.set(row.device_id, new Date(row.timestamp).getTime());
+            for (const [deviceId, deviceRows] of byDevice.entries()) {
+                const sorted = deviceRows
+                    .filter(row => Number.isFinite(new Date(row.timestamp).getTime()))
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                    .slice(-LIVE_TRAIL_LIMIT);
+                if (sorted.length === 0) continue;
+
+                const latest = sorted[sorted.length - 1];
+                const points = sorted
+                    .map(row => [Number(row.lat), Number(row.lon)])
+                    .filter(point => Number.isFinite(point[0]) && Number.isFinite(point[1]));
+                if (points.length === 0) continue;
+
+                deviceStatusById.set(deviceId, {
+                    device_id: deviceId,
+                    online: true,
+                    status: 'online',
+                    last_seen: latest.timestamp,
+                    age_sec: 0,
+                    latest
+                });
+
+                const line = getLiveTrail(deviceId);
+                line.setLatLngs(points);
+                setDeviceMarker(deviceId, Number(latest.lat), Number(latest.lon), selectedDevice && deviceId === selectedDevice);
+                liveLastTimestampByDevice.set(deviceId, new Date(latest.timestamp).getTime());
             }
+            updateActiveDeviceCount();
             liveSensorsSeeded = true;
         }
 
@@ -781,14 +797,14 @@
                 const select = document.getElementById('device-select');
                 const selectedDevice = select ? select.value : '';
                 const query = selectedDevice ? `&device_id=${encodeURIComponent(selectedDevice)}` : '';
-                const res = await fetch(`${API_BASE_URL}/sensors?minutos=1${query}`, { headers: authHeaders() });
+                const minutes = liveSensorsSeeded ? 1 : 10;
+                const res = await fetch(`${API_BASE_URL}/sensors?minutos=${minutes}${query}`, { headers: authHeaders() });
                 if (!res.ok) {
                     setHealth(false);
                     return;
                 }
                 const data = await res.json();
-                const rows = (Array.isArray(data.dados) ? data.dados : [])
-                    .filter(row => isAfterDashboardStart(row.timestamp));
+                const rows = Array.isArray(data.dados) ? data.dados : [];
                 if (!liveSensorsSeeded) {
                     seedLiveSensors(rows, selectedDevice);
                 } else {
@@ -915,8 +931,7 @@
                 const res = await fetch(`${API_BASE_URL}/alerts?${parts.join('&')}`, { headers: authHeaders() });
                 if (!res.ok) return;
                 const data = await res.json();
-                const alerts = (Array.isArray(data.dados) ? data.dados : [])
-                    .filter(alerta => isAfterDashboardStart(alerta.timestamp));
+                const alerts = Array.isArray(data.dados) ? data.dados : [];
                 cachedAlerts = dedupeAlerts(alerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderAlerts();
                 syncAlertMarkers();
@@ -1122,7 +1137,6 @@
             };
             ws.onmessage = (e) => {
                 const alerta = JSON.parse(e.data);
-                if (!isAfterDashboardStart(alerta.timestamp)) return;
                 cachedAlerts.unshift(alerta);
                 cachedAlerts = dedupeAlerts(cachedAlerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
                 renderAlerts();
