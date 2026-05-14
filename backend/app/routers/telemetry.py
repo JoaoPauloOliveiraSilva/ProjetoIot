@@ -42,7 +42,7 @@ async def receive_alert_data(data: SensorData,
     }
     
 @router.get("/sensors")
-async def fetch_alerts(
+def fetch_alerts(
     minutos: int = Query(60, ge=1, description="Minutos para trás"),
     device_id: str | None = Query(None, description="Filtrar por dispositivo"),
     trip_id: str | None = Query(None, description="Filtrar por viagem simulada"),
@@ -63,5 +63,5 @@ async def fetch_alerts(
 
 
 @router.get("/qos/status")
-async def qos_status(api_key: str = Depends(validar_api_key)):
+def qos_status(api_key: str = Depends(validar_api_key)):
     return {"status": "sucesso", "qos": get_qos_status()}

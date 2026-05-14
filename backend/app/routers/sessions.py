@@ -85,7 +85,7 @@ def _latest_devices(rows: list[dict], offline_after_sec: int) -> tuple[list[dict
 
 
 @router.get("/sessions/summary")
-async def session_summary(
+def session_summary(
     session_id: Optional[str] = Query(None, description="Sessão de simulação a resumir; se omitida usa a mais recente"),
     minutos: int = Query(60, ge=1, description="Janela temporal para procurar sessões recentes"),
     offline_after_sec: int = Query(45, ge=1, description="Tempo sem telemetria para considerar dispositivo offline"),
@@ -96,12 +96,13 @@ async def session_summary(
             sensores = influx_db.get_recent_sensor_data(minutos=minutos, session_id=session_id)
             alertas = influx_db.get_recent_alerts(minutos=minutos, session_id=session_id)
         else:
-            sensores = influx_db.get_recent_sensor_data(minutos=minutos)
-            alertas = influx_db.get_recent_alerts(minutos=minutos)
-            session_id = _latest_session_id(sensores + alertas)
+            session_id = influx_db.get_latest_session_id(minutos=minutos)
             if session_id:
-                sensores = [row for row in sensores if row.get("session_id") == session_id]
-                alertas = [row for row in alertas if row.get("session_id") == session_id]
+                sensores = influx_db.get_recent_sensor_data(minutos=minutos, session_id=session_id)
+                alertas = influx_db.get_recent_alerts(minutos=minutos, session_id=session_id)
+            else:
+                sensores = []
+                alertas = []
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except InfluxDBError as exc:

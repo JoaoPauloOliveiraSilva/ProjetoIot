@@ -26,7 +26,7 @@ api_key: str = Depends(validar_api_key)
     }
     
 @router.get("/alerts")
-async def fetch_alerts(
+def fetch_alerts(
     minutos: int = Query(60, ge=1, description="Minutos para trás"),
     device_id: Optional[str] = Query(None, description="Filtrar por dispositivo"),
     event_type: Optional[str] = Query(None, description="Filtrar por tipo de evento (ex: hard_brake)"),
@@ -53,7 +53,7 @@ async def fetch_alerts(
     }
     
 @router.get("/stats/alerts")
-async def get_alert_statistics(
+def get_alert_statistics(
     minutos: int = Query(43200, ge=1, description="Minutos para trás"),
     device_id: Optional[str] = Query(None, description="Filtrar por dispositivo"),
     session_id: Optional[str] = Query(None, description="Filtrar por sessão de simulação"),

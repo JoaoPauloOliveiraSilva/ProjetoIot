@@ -56,6 +56,25 @@ def ping() -> bool:
         logger.error(f"Erro no ping ao InfluxDB: {exc}")
         return False
 
+
+def get_latest_session_id(minutos: int = 60) -> Optional[str]:
+    query = f"""
+        from(bucket: {_bucket()})
+          |> range(start: {_minutes_range(minutos)})
+          |> filter(fn: (r) => r["_measurement"] == "Sensor" or r["_measurement"] == "Alert")
+          |> filter(fn: (r) => r["_field"] == "lat")
+          |> filter(fn: (r) => exists r.session_id)
+          |> keep(columns: ["_time", "session_id"])
+          |> group()
+          |> sort(columns: ["_time"], desc: true)
+          |> limit(n: 1)
+    """
+    tabelas = _query_or_raise(query)
+    for tabela in tabelas:
+        for registo in tabela.records:
+            return registo.values.get("session_id")
+    return None
+
 SENSOR_OPTIONAL_FIELDS = [
     "vehicle_type",
     "trip_id",
@@ -222,10 +241,10 @@ def get_device_history(device_id: str, start: str, end: str, session_id: Optiona
           |> range(start: {start_expr}, stop: {end_expr})
           |> filter(fn: (r) => r["_measurement"] == "Sensor")
           |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})
-          |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
     """
     if session_id:
         query = query.rstrip() + f'\n          |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})\n'
+    query = query.rstrip() + '\n          |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\n'
     tabelas = _query_or_raise(query)
     resultados = []
     for tabela in tabelas:
@@ -296,7 +315,7 @@ def save_sensor_data(data: SensorData):
             org=settings.INFLUX_ORG,
             record=ponto
         )
-        logger.info(f"Sensor {data.device_id} gravado no InfluxDB")
+        logger.debug(f"Sensor {data.device_id} gravado no InfluxDB")
     except Exception as e:
         logger.error(f"Erro ao gravar sensor no InfluxDB: {e}")
         raise InfluxDBError(str(e)) from e
@@ -320,10 +339,10 @@ def get_recent_alerts(
         query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
     if event_type:
         query_lines.append(f'  |> filter(fn: (r) => r["event_type"] == {_flux_string(event_type)})')
-        
-    query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     if session_id:
         query_lines.append(f'  |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})')
+
+    query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     if severity:
         query_lines.append(f'  |> filter(fn: (r) => exists r.severity and r.severity == {_flux_string(severity)})')
     query = "\n".join(query_lines)
@@ -349,10 +368,10 @@ def get_recent_sensor_data(
     
     if device_id:
         query_lines.append(f'  |> filter(fn: (r) => r["device_id"] == {_flux_string(device_id)})')
-        
-    query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     if session_id:
         query_lines.append(f'  |> filter(fn: (r) => exists r.session_id and r.session_id == {_flux_string(session_id)})')
+
+    query_lines.append('  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")')
     if trip_id:
         query_lines.append(f'  |> filter(fn: (r) => exists r.trip_id and r.trip_id == {_flux_string(trip_id)})')
     query = "\n".join(query_lines)

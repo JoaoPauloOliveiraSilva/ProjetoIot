@@ -10,7 +10,7 @@ def _db_unavailable(exc: Exception) -> HTTPException:
     return HTTPException(status_code=503, detail=f"InfluxDB indisponível: {exc}")
 
 @router.get("/devices")
-async def Get_All_Devices(api_key: str = Depends(validar_api_key)
+def Get_All_Devices(api_key: str = Depends(validar_api_key)
 ):
  
     try:
@@ -35,7 +35,7 @@ def _parse_timestamp(value: str | None) -> datetime | None:
 
 
 @router.get("/devices/status")
-async def Get_Device_Status(
+def Get_Device_Status(
     minutos: int = Query(1440, ge=1, description="Janela de procura da última telemetria"),
     offline_after_sec: int = Query(60, ge=1, description="Tempo sem telemetria para considerar offline"),
     session_id: str | None = Query(None, description="Filtrar por sessão de simulação"),
@@ -86,7 +86,7 @@ async def Get_Device_Status(
 
 
 @router.get("/devices/{device_id}/latest")
-async def Get_latest(device_id: str ,api_key: str = Depends(validar_api_key)
+def Get_latest(device_id: str ,api_key: str = Depends(validar_api_key)
 ):
  
     try:
@@ -101,7 +101,7 @@ async def Get_latest(device_id: str ,api_key: str = Depends(validar_api_key)
 
 
 @router.get("/devices/{device_id}/history")
-async def Get_latest(device_id: str ,
+def Get_latest(device_id: str ,
     start: str = Query(..., description="Data de início (ex: -7d, ou timestamp ISO)"),
     end: str = Query("now()", description="Data de fim (ex: now(), ou timestamp ISO)"),
     session_id: str | None = Query(None, description="Filtrar por sessão de simulação"),
