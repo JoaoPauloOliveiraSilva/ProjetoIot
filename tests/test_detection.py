@@ -21,6 +21,7 @@ from app.services.detection import analyze_telemetry, reset_detection_state  # n
 def sample(**overrides):
     payload = {
         "device_id": "scooter_test_001",
+        "session_id": "unit_session",
         "source": "unit_test",
         "type": "telemetry",
         "timestamp": datetime(2026, 5, 12, 10, 0, tzinfo=timezone.utc),
@@ -50,17 +51,21 @@ class DetectionTests(unittest.TestCase):
         alert = analyze_telemetry(sample(accel_x=24.0))
         self.assertIsNotNone(alert)
         self.assertEqual(alert.event_type, "fall_accident")
+        self.assertEqual(alert.severity, "critical")
+        self.assertEqual(alert.session_id, "unit_session")
 
     def test_hard_brake(self):
         alert = analyze_telemetry(sample(accel_y=-7.2))
         self.assertIsNotNone(alert)
         self.assertEqual(alert.event_type, "hard_brake")
+        self.assertEqual(alert.severity, "warning")
 
     def test_obstacle_risk_from_ultrasonic(self):
         alert = analyze_telemetry(sample(range_front_m=0.35, speed=11.0))
         self.assertIsNotNone(alert)
         self.assertEqual(alert.event_type, "obstacle_risk")
         self.assertEqual(alert.trigger, "front_range_threshold")
+        self.assertEqual(alert.severity, "high")
 
     def test_traffic_jam_uses_sample_timestamps(self):
         start = datetime(2026, 5, 12, 10, 0, tzinfo=timezone.utc)
@@ -78,6 +83,7 @@ class DetectionTests(unittest.TestCase):
                 break
         self.assertIsNotNone(alert)
         self.assertEqual(alert.event_type, "traffic_jam")
+        self.assertEqual(alert.severity, "warning")
 
     def test_normal_sample_has_no_alert(self):
         alert = analyze_telemetry(sample(speed=15.0, accel_x=0.1, accel_y=0.0, accel_z=9.7))

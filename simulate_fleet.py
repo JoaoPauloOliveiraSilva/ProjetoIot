@@ -2,8 +2,9 @@
 """
 Continuous demo simulator for a fleet of Braga micromobility vehicles.
 
-Each simulated vehicle repeatedly picks one of the Braga datasets, rewrites the
-device_id and timestamp, and streams telemetry to the backend by REST or MQTT.
+Each simulated vehicle gets a stable type, repeatedly picks one Braga dataset of
+that type, rewrites the device_id and timestamp, and streams telemetry to the
+backend by REST or MQTT.
 For bicycle datasets, the simulator can also publish a QoS 1 dock/data-dump
 event when the bicycle is returned to a charging station.
 """
@@ -334,8 +335,22 @@ def choose_scenario(
     return scenarios[(scooter_index + trip_index) % len(scenarios)]
 
 
-def device_id_for_scenario(args: argparse.Namespace, device_index: int, scenario: Scenario) -> str:
-    if scenario.vehicle_type == "bicycle":
+def vehicle_type_for_index(device_index: int, scenarios: list[Scenario]) -> str:
+    available = {scenario.vehicle_type for scenario in scenarios}
+    if "bicycle" in available and "scooter" in available:
+        return "bicycle" if device_index % 2 == 0 else "scooter"
+    if "bicycle" in available:
+        return "bicycle"
+    return "scooter"
+
+
+def scenarios_for_vehicle_type(scenarios: list[Scenario], vehicle_type: str) -> list[Scenario]:
+    filtered = [scenario for scenario in scenarios if scenario.vehicle_type == vehicle_type]
+    return filtered or scenarios
+
+
+def device_id_for_vehicle(args: argparse.Namespace, device_index: int, vehicle_type: str) -> str:
+    if vehicle_type == "bicycle":
         return f"{args.bike_device_prefix}{device_index + 1:03d}"
     return f"{args.device_prefix}{device_index + 1:03d}"
 
@@ -354,6 +369,9 @@ def vehicle_worker(
     mqtt_lock: threading.Lock,
 ) -> None:
     rng = random.Random((args.seed or int(time.time())) + device_index)
+    vehicle_type = vehicle_type_for_index(device_index, scenarios)
+    vehicle_scenarios = scenarios_for_vehicle_type(scenarios, vehicle_type)
+    device_id = device_id_for_vehicle(args, device_index, vehicle_type)
 
     initial_delay = device_index * args.start_stagger_sec
     if initial_delay > 0 and stop_event.wait(initial_delay):
@@ -361,11 +379,10 @@ def vehicle_worker(
 
     trip_index = 0
     while not stop_event.is_set() and (args.trips_per_scooter == 0 or trip_index < args.trips_per_scooter):
-        scenario = choose_scenario(scenarios, device_index, trip_index, args.selection, rng)
-        device_id = device_id_for_scenario(args, device_index, scenario)
+        scenario = choose_scenario(vehicle_scenarios, device_index, trip_index, args.selection, rng)
         trip_id = make_trip_id(device_id, scenario.scenario_id, trip_index)
         print(
-            f"[{device_id}] trip={trip_index + 1} vehicle={scenario.vehicle_type} "
+            f"[{device_id}] trip={trip_index + 1} vehicle={vehicle_type} "
             f"scenario={scenario.scenario_id} trip_id={trip_id}",
             flush=True,
         )
