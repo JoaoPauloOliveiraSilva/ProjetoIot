@@ -1,8 +1,10 @@
 import json
 import logging
+import os
 import queue
 import threading
 import time
+import zlib
 from collections import deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -23,6 +25,14 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 fastapi_loop = None
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return max(1, int(os.getenv(name, str(default))))
+    except ValueError:
+        logger.warning("Valor invalido para %s; a usar %s", name, default)
+        return default
 
 
 def _now_iso() -> str:
@@ -60,11 +70,14 @@ class MqttQosStatus:
 
 class MqttIngestionQueue:
     def __init__(self) -> None:
-        self._queue: queue.PriorityQueue[tuple[int, int, dict[str, Any]]] = queue.PriorityQueue()
+        self._worker_count = _env_int("MQTT_INGEST_WORKERS", 6)
+        self._queues: list[queue.PriorityQueue[tuple[int, int, dict[str, Any]]]] = [
+            queue.PriorityQueue() for _ in range(self._worker_count)
+        ]
         self._seq = 0
         self._lock = threading.Lock()
         self._stop_event = threading.Event()
-        self._worker: Optional[threading.Thread] = None
+        self._workers: list[threading.Thread] = []
         self._window_sec = 60.0
 
         self._connected = False
@@ -90,16 +103,26 @@ class MqttIngestionQueue:
         self._processing_samples_qos0: deque[tuple[float, float]] = deque()
 
     def start(self) -> None:
-        if self._worker and self._worker.is_alive():
+        self._workers = [worker for worker in self._workers if worker.is_alive()]
+        if len(self._workers) >= self._worker_count:
             return
         self._stop_event.clear()
-        self._worker = threading.Thread(target=self._worker_loop, name="mqtt-ingestion-worker", daemon=True)
-        self._worker.start()
+        for idx in range(len(self._workers), self._worker_count):
+            worker = threading.Thread(
+                target=self._worker_loop,
+                args=(idx,),
+                name=f"mqtt-ingestion-worker-{idx + 1}",
+                daemon=True,
+            )
+            worker.start()
+            self._workers.append(worker)
 
     def stop(self) -> None:
         self._stop_event.set()
-        if self._worker and self._worker.is_alive():
-            self._worker.join(timeout=3)
+        for worker in self._workers:
+            if worker.is_alive():
+                worker.join(timeout=3)
+        self._workers = []
 
     def set_connected(self, connected: bool) -> None:
         with self._lock:
@@ -136,6 +159,7 @@ class MqttIngestionQueue:
     def enqueue(self, *, topic: str, payload: dict[str, Any], qos: int) -> None:
         priority = 0 if qos >= 1 else 1
         enqueued_ts = time.time()
+        queue_idx = self._queue_index(payload)
         with self._lock:
             self._seq += 1
             seq = self._seq
@@ -148,7 +172,13 @@ class MqttIngestionQueue:
             self._enqueued_total += 1
             self._last_enqueued_at = _now_iso()
 
-        self._queue.put((priority, seq, {"topic": topic, "payload": payload, "qos": qos, "enqueued_ts": enqueued_ts}))
+        self._queues[queue_idx].put((priority, seq, {"topic": topic, "payload": payload, "qos": qos, "enqueued_ts": enqueued_ts}))
+
+    def _queue_index(self, payload: dict[str, Any]) -> int:
+        device_id = str(payload.get("device_id") or "")
+        if not device_id:
+            return 0
+        return zlib.crc32(device_id.encode("utf-8")) % self._worker_count
 
     def get_status(self) -> MqttQosStatus:
         with self._lock:
@@ -225,10 +255,11 @@ class MqttIngestionQueue:
                 alert_json = alert_data.model_dump(mode="json")
                 asyncio.run_coroutine_threadsafe(manager.broadcast_alert(alert_json), fastapi_loop)
 
-    def _worker_loop(self) -> None:
+    def _worker_loop(self, worker_idx: int) -> None:
+        work_queue = self._queues[worker_idx]
         while not self._stop_event.is_set():
             try:
-                priority, seq, item = self._queue.get(timeout=0.5)
+                priority, seq, item = work_queue.get(timeout=0.5)
             except queue.Empty:
                 continue
             try:
@@ -258,7 +289,7 @@ class MqttIngestionQueue:
                 logger.error(f"Erro ao processar mensagem MQTT na fila: {exc}")
                 traceback.print_exc()
             finally:
-                self._queue.task_done()
+                work_queue.task_done()
 
 
 ingestion_queue = MqttIngestionQueue()

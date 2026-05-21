@@ -64,6 +64,7 @@ services:
       MQTT_TLS_CA_CERT: /mosquitto-data/tls/ca.crt
       MQTT_USERNAME: ${MQTT_USERNAME:-iot}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-iot}
+      MQTT_INGEST_WORKERS: ${MQTT_INGEST_WORKERS:-6}
     volumes:
       - mosquitto-data:/mosquitto-data:ro
     depends_on:

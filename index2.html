@@ -700,6 +700,20 @@
             localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(Array.from(readAlertKeys)));
         }
 
+        function markAlertRead(alerta) {
+            const key = getAlertKey(alerta);
+            readAlertKeys.add(key);
+            persistReadKeys();
+            const marker = alertMarkers.get(key);
+            if (marker) {
+                alertsLayer.removeLayer(marker);
+                alertMarkers.delete(key);
+            }
+            renderAlerts();
+            syncAlertMarkers();
+            renderCriticalZones();
+        }
+
         function showToast(title, body) {
             const toast = document.getElementById('toast');
             const t = document.getElementById('toast-title');
@@ -1146,7 +1160,7 @@
             locate.innerHTML = `<span class="material-symbols-outlined text-[14px]">my_location</span> Locate`;
             locate.addEventListener('click', () => {
                 map.setView([alerta.lat, alerta.lon], 17, { animate: true });
-                setAlertMarker(alerta);
+                if (!readAlertKeys.has(key)) setAlertMarker(alerta);
                 const marker = alertMarkers.get(key);
                 if (marker) marker.openPopup();
             });
@@ -1157,9 +1171,7 @@
             mark.disabled = read;
             mark.style.opacity = read ? '0.4' : '1';
             mark.addEventListener('click', () => {
-                readAlertKeys.add(key);
-                persistReadKeys();
-                refreshAlerts();
+                markAlertRead(alerta);
             });
 
             right.appendChild(locate);
@@ -1210,6 +1222,7 @@
             alertMarkers.clear();
             for (const alerta of cachedAlerts) {
                 if (alerta?.lat == null || alerta?.lon == null) continue;
+                if (readAlertKeys.has(getAlertKey(alerta))) continue;
                 setAlertMarker(alerta);
             }
         }
@@ -1225,6 +1238,7 @@
             const zones = new Map();
             for (const alerta of cachedAlerts) {
                 if (!alerta || alerta.lat == null || alerta.lon == null) continue;
+                if (readAlertKeys.has(getAlertKey(alerta))) continue;
                 if (alerta.event_type === 'dock_data_dump') continue;
                 const lat = Number(alerta.lat);
                 const lon = Number(alerta.lon);
@@ -1357,13 +1371,20 @@
             list.innerHTML = '';
 
             const count = cachedDockDumps.length;
-            const complete = count
-                ? cachedDockDumps.filter(d => Number(d.completeness_pct ?? 0) >= 99.9 && Number(d.missing_count ?? 0) === 0).length
-                : 0;
-            const missing = cachedDockDumps.reduce((acc, d) => acc + Number(d.missing_count ?? 0), 0);
+            const totals = cachedDockDumps.reduce((acc, d) => {
+                const expected = Math.max(0, Number(d.expected_count ?? 0));
+                const receivedRaw = Number(d.received_count ?? d.sent_count ?? 0);
+                const received = expected > 0 ? Math.min(expected, Math.max(0, receivedRaw)) : 0;
+                const missingRaw = Number(d.missing_count ?? Math.max(0, expected - received));
+                acc.expected += expected;
+                acc.received += received;
+                acc.missing += Math.max(0, missingRaw);
+                return acc;
+            }, { expected: 0, received: 0, missing: 0 });
+            const receivedPct = totals.expected > 0 ? Math.round((totals.received / totals.expected) * 100) : 0;
             document.getElementById('bike-dump-count').innerText = String(count);
-            document.getElementById('bike-dump-complete').innerText = count ? `${Math.round((complete / count) * 100)}%` : '0%';
-            document.getElementById('bike-dump-missing').innerText = String(missing);
+            document.getElementById('bike-dump-complete').innerText = `${receivedPct}%`;
+            document.getElementById('bike-dump-missing').innerText = String(totals.missing);
 
             if (count === 0) {
                 const empty = document.createElement('div');
@@ -1658,7 +1679,7 @@
                 cachedAlerts.unshift(alerta);
                 cachedAlerts = dedupeAlerts(cachedAlerts).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 2000);
                 renderAlerts();
-                if (alerta?.lat != null && alerta?.lon != null) setAlertMarker(alerta);
+                syncAlertMarkers();
                 renderCriticalZones();
                 renderFleetStatus();
                 if (alerta?.event_type === 'dock_data_dump') {
@@ -1763,6 +1784,8 @@
             readAlertKeys.clear();
             persistReadKeys();
             renderAlerts();
+            syncAlertMarkers();
+            renderCriticalZones();
         });
 
         document.getElementById('btn-alerts-toggle')?.addEventListener('click', () => {
