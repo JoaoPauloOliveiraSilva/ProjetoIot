@@ -1,12 +1,30 @@
+# Local environment files
 .env
 **/.env
 *.env
 *.env.*
+
+# Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
-datasets/**/_cache/
 venv/
 .venv/
 backend/venv/
-backend/**/__pycache__/
+
+# Generated data and caches
+datasets/**/_cache/
+*.log
+*.tmp
+*.db
+*.sqlite
+
+# Local certificates, keys and secrets generated for demos
 mosquitto-ca*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+certs/
+secrets/
+deploy/mosquitto/certs/

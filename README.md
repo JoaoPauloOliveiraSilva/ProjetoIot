@@ -1,10 +1,15 @@
 # Projeto IoT P01 - Comandos
 
+## Preparar
+
+```powershell
+cd ProjetoIot
+Copy-Item env.example .env
+```
+
 ## Stack Docker
 
 ```powershell
-cd C:\Users\nunor\Desktop\UNI\PEI\ProjetoIot
-Copy-Item env.example .env
 docker compose up -d --build
 ```
 
@@ -17,11 +22,10 @@ docker compose down
 ```
 
 ```powershell
-# apagar tambem volumes/dados locais
 docker compose down -v
 ```
 
-## Abrir servicos
+## Abrir Servicos
 
 ```powershell
 start http://localhost:8080/?api_key=iot
@@ -30,14 +34,25 @@ start http://localhost:8000/health/ready
 start http://localhost:18086
 ```
 
-## Health checks
+## Defaults De Demo
+
+```powershell
+API key: iot
+MQTT username: iot
+MQTT password: iot
+InfluxDB username: admin
+InfluxDB password: iot_demo_password
+InfluxDB token: iot_demo_token
+```
+
+## Health Checks
 
 ```powershell
 Invoke-RestMethod http://localhost:8000/health
 Invoke-RestMethod http://localhost:8000/health/ready
 ```
 
-## Certificado MQTT TLS
+## MQTT TLS
 
 ```powershell
 docker cp iot-mosquitto:/mosquitto/data/tls/ca.crt .\mosquitto-ca.crt
@@ -53,7 +68,7 @@ docker logs iot-simulator --tail 40
 docker logs -f iot-simulator
 ```
 
-## Simulador local
+## Simulador Local
 
 ```powershell
 python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --fleet-size 16 --speedup 5 --selection random --publish-truth-alerts
@@ -63,7 +78,7 @@ python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.cr
 python simulate_fleet.py --mode rest --api-key iot --fleet-size 16 --speedup 5 --selection random
 ```
 
-## Importar datasets
+## Importar Datasets
 
 ```powershell
 python import_dataset.py --mode dry-run
@@ -116,15 +131,15 @@ Invoke-RestMethod "http://localhost:8000/api/v1/alerts?minutos=60" -Headers @{"X
 Invoke-RestMethod "http://localhost:8000/api/v1/alerts?minutos=60&event_type=dock_data_dump" -Headers @{"X-API-Key"="iot"} | ConvertTo-Json -Depth 4
 ```
 
-## Backend local
+## Backend Local
 
 ```powershell
-cd C:\Users\nunor\Desktop\UNI\PEI\ProjetoIot\backend
+cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-## Rebuild parcial
+## Rebuild Parcial
 
 ```powershell
 docker compose up -d --build backend

@@ -1,10 +1,10 @@
 .git
 __pycache__/
+**/__pycache__/
 *.py[cod]
 backend/venv/
 venv/
 .venv/
-backend/**/__pycache__/
 datasets/**/_cache/
 mosquitto-ca*.crt
 all_sensor_data/
@@ -13,3 +13,14 @@ example_sensor_data/
 .env
 *.env
 *.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+certs/
+secrets/
+deploy/mosquitto/certs/
+*.log
+*.tmp
+*.db
+*.sqlite
