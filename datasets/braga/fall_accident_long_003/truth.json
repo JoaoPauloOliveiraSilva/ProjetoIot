@@ -1,7 +1,7 @@
 {
   "scenario_id": "fall_accident_long_003",
   "device_id": "scooter_braga_016",
-  "description": "Queda/acidente depois de uma deslocacao mais longa.",
+  "description": "Fall/accident after a longer trip.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

@@ -1,7 +1,7 @@
 {
   "scenario_id": "traffic_jam_center_002",
   "device_id": "scooter_braga_017",
-  "description": "Congestionamento em percurso urbano central.",
+  "description": "Congestion on a central urban route.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

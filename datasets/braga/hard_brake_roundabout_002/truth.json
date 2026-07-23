@@ -1,7 +1,7 @@
 {
   "scenario_id": "hard_brake_roundabout_002",
   "device_id": "scooter_braga_013",
-  "description": "Travagem brusca num percurso urbano curto.",
+  "description": "Hard braking on a short urban route.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

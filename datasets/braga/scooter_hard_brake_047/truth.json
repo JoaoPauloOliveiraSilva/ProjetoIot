@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_hard_brake_047",
   "device_id": "scooter_braga_047",
-  "description": "Travagem brusca por obstaculo ou conflito em cruzamento. Variante sintetica 3.",
+  "description": "Hard braking due to an obstacle or conflict at an intersection - synthetic variant 3.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

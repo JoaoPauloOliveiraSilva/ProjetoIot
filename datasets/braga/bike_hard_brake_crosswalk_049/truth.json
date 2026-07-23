@@ -1,7 +1,7 @@
 {
   "scenario_id": "bike_hard_brake_crosswalk_049",
   "device_id": "bike_braga_049",
-  "description": "Bicicleta com travagem brusca junto a passadeira ou cruzamento. Variante sintetica 5; inicio e fim em estacao de bicicletas.",
+  "description": "Bicycle with hard braking near a crosswalk or intersection - synthetic variant 5; starts and ends at a bicycle station.",
   "vehicle_type": "bicycle",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
@@ -23,7 +23,7 @@
     "trigger": "trip_end_dock",
     "expected_telemetry_rows": 367,
     "charging_after_dock": true,
-    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+    "description": "At the end of the trip, the bicycle remains at a station, charges the battery, and publishes a data-dump integrity summary."
   },
   "sensors": {
     "gps": [

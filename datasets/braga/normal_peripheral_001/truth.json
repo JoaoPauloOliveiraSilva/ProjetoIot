@@ -1,7 +1,7 @@
 {
   "scenario_id": "normal_peripheral_001",
   "device_id": "scooter_braga_012",
-  "description": "Percurso normal em zonas mais perifericas de Braga.",
+  "description": "Normal route through more peripheral areas of Braga.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_traffic_jam_029",
   "device_id": "scooter_braga_029",
-  "description": "Congestionamento com velocidade baixa durante periodo prolongado. Variante sintetica 1.",
+  "description": "Congestion with low speed for a prolonged period - synthetic variant 1.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

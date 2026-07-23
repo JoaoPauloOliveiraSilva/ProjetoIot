@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_traffic_jam_long_041",
   "device_id": "scooter_braga_041",
-  "description": "Congestionamento prolongado numa rota de maior extensao. Variante sintetica 2.",
+  "description": "Prolonged congestion on a longer route - synthetic variant 2.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

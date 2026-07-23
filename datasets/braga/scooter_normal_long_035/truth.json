@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_normal_long_035",
   "device_id": "scooter_braga_035",
-  "description": "Percurso normal mais longo, cobrindo varias zonas da cidade. Variante sintetica 2.",
+  "description": "Longer normal route covering several areas of the city - synthetic variant 2.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

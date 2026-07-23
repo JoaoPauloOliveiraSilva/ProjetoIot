@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_normal_commute_045",
   "device_id": "scooter_braga_045",
-  "description": "Percurso normal de deslocacao urbana em Braga, sem incidentes. Variante sintetica 3.",
+  "description": "Normal urban trip in Braga, without incidents - synthetic variant 3.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

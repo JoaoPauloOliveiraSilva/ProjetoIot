@@ -1,7 +1,7 @@
 {
   "scenario_id": "fall_accident_curve_002",
   "device_id": "scooter_braga_015",
-  "description": "Queda numa rota curta com imobilizacao posterior.",
+  "description": "Fall on a short route followed by immobilization.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

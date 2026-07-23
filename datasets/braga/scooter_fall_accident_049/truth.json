@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_fall_accident_049",
   "device_id": "scooter_braga_049",
-  "description": "Queda/acidente com pico de aceleracao e imobilizacao. Variante sintetica 3.",
+  "description": "Fall/accident with acceleration peak and immobilization - synthetic variant 3.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

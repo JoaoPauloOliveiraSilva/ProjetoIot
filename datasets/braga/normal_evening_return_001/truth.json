@@ -1,7 +1,7 @@
 {
   "scenario_id": "normal_evening_return_001",
   "device_id": "scooter_braga_011",
-  "description": "Percurso normal de regresso com velocidade moderada.",
+  "description": "Normal return trip at moderate speed.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

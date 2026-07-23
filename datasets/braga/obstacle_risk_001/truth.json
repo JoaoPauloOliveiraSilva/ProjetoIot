@@ -1,7 +1,7 @@
 {
   "scenario_id": "obstacle_risk_001",
   "device_id": "scooter_braga_021",
-  "description": "Obstaculo proximo detetado por ultrassom sem travagem brusca nem queda.",
+  "description": "Nearby obstacle detected by ultrasound without hard braking or fall.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

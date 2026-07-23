@@ -1,7 +1,7 @@
 {
   "scenario_id": "normal_stop_and_go_001",
   "device_id": "scooter_braga_002",
-  "description": "Percurso normal com paragens curtas compativeis com semaforos/cruzamentos.",
+  "description": "Normal route with short stops consistent with traffic lights/intersections.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

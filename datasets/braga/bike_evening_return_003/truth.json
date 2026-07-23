@@ -1,7 +1,7 @@
 {
   "scenario_id": "bike_evening_return_003",
   "device_id": "bike_braga_003",
-  "description": "Regresso de fim de tarde em bicicleta com docking e carregamento no fim.",
+  "description": "Late-afternoon bicycle return with docking and charging at the end.",
   "vehicle_type": "bicycle",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
@@ -23,7 +23,7 @@
     "trigger": "trip_end_dock",
     "expected_telemetry_rows": 546,
     "charging_after_dock": true,
-    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+    "description": "At the end of the trip, the bicycle remains at a station, charges the battery, and publishes a data-dump integrity summary."
   },
   "sensors": {
     "gps": [

@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_mixed_brake_jam_032",
   "device_id": "scooter_braga_032",
-  "description": "Travagem brusca seguida de congestionamento. Variante sintetica 1.",
+  "description": "Hard braking followed by congestion - synthetic variant 1.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

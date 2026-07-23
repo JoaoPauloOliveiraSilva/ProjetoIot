@@ -1,7 +1,7 @@
 {
   "scenario_id": "normal_commute_002",
   "device_id": "scooter_braga_009",
-  "description": "Percurso normal de deslocacao casa-trabalho com distancia media.",
+  "description": "Normal medium-distance commuting route.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

@@ -1,7 +1,7 @@
 {
   "scenario_id": "normal_001",
   "device_id": "scooter_braga_001",
-  "description": "Percurso normal em Braga, sem eventos criticos.",
+  "description": "Normal route in Braga, without critical events.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

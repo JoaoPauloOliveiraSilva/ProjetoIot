@@ -1,7 +1,7 @@
 {
   "scenario_id": "bike_normal_center_036",
   "device_id": "bike_braga_036",
-  "description": "Viagem normal curta entre estacoes centrais de bicicletas. Variante sintetica 4; inicio e fim em estacao de bicicletas.",
+  "description": "Short normal trip between central bicycle stations - synthetic variant 4; starts and ends at a bicycle station.",
   "vehicle_type": "bicycle",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
@@ -23,7 +23,7 @@
     "trigger": "trip_end_dock",
     "expected_telemetry_rows": 380,
     "charging_after_dock": true,
-    "description": "Ao terminar a viagem, a bicicleta fica numa esta\u00e7\u00e3o, carrega a bateria e publica um resumo de integridade da descarga de dados."
+    "description": "At the end of the trip, the bicycle remains at a station, charges the battery, and publishes a data-dump integrity summary."
   },
   "sensors": {
     "gps": [

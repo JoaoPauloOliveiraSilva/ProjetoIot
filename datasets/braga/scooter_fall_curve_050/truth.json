@@ -1,7 +1,7 @@
 {
   "scenario_id": "scooter_fall_curve_050",
   "device_id": "scooter_braga_050",
-  "description": "Queda em curva ou irregularidade da via. Variante sintetica 3.",
+  "description": "Fall on a curve or road irregularity - synthetic variant 3.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

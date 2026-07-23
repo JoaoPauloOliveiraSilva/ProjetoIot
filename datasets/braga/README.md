@@ -1,71 +1,71 @@
 # Braga Micromobility Simulation Datasets
 
-Datasets sinteticos para simular trotinetes e bicicletas em Braga, Portugal. As rotas foram geradas sobre geometria de ruas/ciclovias obtida do OpenStreetMap via Overpass API.
+Synthetic datasets for simulating scooters and bicycles in Braga, Portugal. Routes were generated over street and cycleway geometry obtained from OpenStreetMap through the Overpass API.
 
-## Estrutura
+## Structure
 
-Cada cenario tem:
+Each scenario contains:
 
-- `telemetry.csv`: amostras temporais de telemetria.
-- `truth.json`: eventos esperados para validacao.
+- `telemetry.csv`: time-ordered telemetry samples.
+- `truth.json`: expected events for validation.
 
-O ficheiro `manifest.json` resume todos os 100 cenarios gerados: 50 de trotinetes e 50 de bicicletas.
+The `manifest.json` file summarizes all 100 generated scenarios: 50 scooter scenarios and 50 bicycle scenarios.
 
-## Sensores Incluidos
+## Included Sensors
 
-Cada linha de telemetria inclui, no minimo, dados de 3 sensores:
+Each telemetry row includes data from at least three sensor groups:
 
 - GPS: `lat`, `lon`, `speed`, `gps_accuracy_m`
 - IMU: `accel_x`, `accel_y`, `accel_z`, `gyro_x`, `gyro_y`, `gyro_z`
-- Ultrassom: `range_front_m`, `range_left_m`, `ultrasonic_valid`
+- Ultrasonic: `range_front_m`, `range_left_m`, `ultrasonic_valid`
 
-Os cenarios de bicicleta incluem tambem:
+Bicycle scenarios also include:
 
 - `vehicle_type=bicycle`
 - `start_station_id`, `start_station_name`
 - `end_station_id`, `end_station_name`
-- `dock_status` e `charging`
+- `dock_status` and `charging`
 
-No fim da viagem, a bicicleta fica parada na estacao final durante algumas amostras com `charging=true`. O simulador usa estes metadados para publicar o evento operacional `dock_data_dump`, que resume se a descarga de dados foi completa. Esse evento compara as linhas esperadas da viagem com as linhas efetivamente recebidas pelo backend para o `trip_id` dessa viagem. Todos os cenarios de bicicleta começam numa estacao e acabam numa estacao, podendo ser a mesma.
+At the end of a bicycle trip, the bicycle remains stopped at the final station for a few samples with `charging=true`. The simulator uses this metadata to publish the operational `dock_data_dump` event, which summarizes whether the data dump was complete. This event compares the expected trip rows with the rows effectively received by the backend for that trip's `trip_id`. Every bicycle scenario starts at a station and ends at a station, which may be the same one.
 
-## Cenarios
+## Scenarios
 
-O conjunto combina percursos normais, travagens bruscas, quedas/acidentes, congestionamentos, risco de obstaculo por ultrassom e cenarios mistos. Os nomes abaixo mostram as familias principais; as variantes numeradas completam as 50 rotas de cada veiculo.
+The dataset combines normal routes, hard braking, falls/accidents, traffic jams, ultrasonic obstacle risk, and mixed scenarios. The names below show the main families; numbered variants complete the 50 routes for each vehicle type.
 
-### Trotinetes
+### Scooters
 
-- `normal_001`: percurso normal, sem evento critico.
-- `normal_stop_and_go_001`: percurso normal com paragens curtas.
-- `normal_rough_pavement_001`: piso irregular sem acidente, util para testar falsos positivos.
-- `hard_brake_001`: travagem brusca.
-- `fall_accident_001`: queda/acidente com pico de aceleracao.
-- `traffic_jam_001`: congestionamento prolongado.
-- `obstacle_risk_001`: obstaculo proximo detetado por ultrassom.
-- `mixed_brake_jam_001`: travagem brusca seguida de congestionamento.
+- `normal_001`: normal route without a critical event.
+- `normal_stop_and_go_001`: normal route with short stops.
+- `normal_rough_pavement_001`: rough pavement without an accident, useful for testing false positives.
+- `hard_brake_001`: hard braking.
+- `fall_accident_001`: fall/accident with an acceleration peak.
+- `traffic_jam_001`: prolonged traffic jam.
+- `obstacle_risk_001`: nearby obstacle detected by ultrasound.
+- `mixed_brake_jam_001`: hard braking followed by congestion.
 
-### Bicicletas
+### Bicycles
 
-- `bike_normal_center_001`: percurso normal no centro, com docking no fim.
-- `bike_commute_center_002`: deslocacao curta entre estacoes centrais.
-- `bike_evening_return_003`: regresso de fim de tarde.
-- `bike_hard_brake_center_001`: travagem brusca.
-- `bike_fall_accident_center_001`: queda/acidente.
-- `bike_traffic_jam_center_001`: congestionamento.
-- `bike_obstacle_risk_center_001`: obstaculo proximo.
-- `bike_mixed_brake_jam_center_001`: travagem brusca seguida de congestionamento.
+- `bike_normal_center_001`: normal city-center route with docking at the end.
+- `bike_commute_center_002`: short trip between central stations.
+- `bike_evening_return_003`: late-afternoon return trip.
+- `bike_hard_brake_center_001`: hard braking.
+- `bike_fall_accident_center_001`: fall/accident.
+- `bike_traffic_jam_center_001`: traffic jam.
+- `bike_obstacle_risk_center_001`: nearby obstacle.
+- `bike_mixed_brake_jam_center_001`: hard braking followed by congestion.
 
-## Regenerar
+## Regeneration
 
 ```powershell
 python scripts\generate_braga_datasets.py
 ```
 
-Para forcar novo download de dados OSM:
+To force a new OSM data download:
 
 ```powershell
 python scripts\generate_braga_datasets.py --force-osm
 ```
 
-## Atribuicao
+## Attribution
 
-Dados de ruas derivados de OpenStreetMap. Atribuicao: OpenStreetMap contributors.
+Street data derived from OpenStreetMap. Attribution: OpenStreetMap contributors.

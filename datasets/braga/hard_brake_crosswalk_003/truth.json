@@ -1,7 +1,7 @@
 {
   "scenario_id": "hard_brake_crosswalk_003",
   "device_id": "scooter_braga_014",
-  "description": "Travagem brusca num percurso medio, simulando peao/passadeira.",
+  "description": "Hard braking on a medium route, simulating a pedestrian/crosswalk.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",

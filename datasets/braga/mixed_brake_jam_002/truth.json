@@ -1,7 +1,7 @@
 {
   "scenario_id": "mixed_brake_jam_002",
   "device_id": "scooter_braga_019",
-  "description": "Travagem brusca seguida de fila de transito numa rota media.",
+  "description": "Hard braking followed by a traffic queue on a medium route.",
   "vehicle_type": "scooter",
   "source": "synthetic_osm_replay",
   "city": "Braga, Portugal",
