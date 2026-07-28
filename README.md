@@ -1,13 +1,13 @@
-# Projeto IoT P01 - Comandos
+# IoT P01 Project - Commands
 
-## Preparar
+## Setup
 
 ```powershell
 cd ProjetoIot
 Copy-Item env.example .env
 ```
 
-## Stack Docker
+## Full Docker Stack
 
 ```powershell
 docker compose up -d --build
@@ -17,15 +17,18 @@ docker compose up -d --build
 docker compose ps
 docker compose logs -f backend
 docker compose logs -f simulator
+docker compose logs -f mosquitto
 docker compose restart simulator
 docker compose down
 ```
+
+## Reset Persisted Data
 
 ```powershell
 docker compose down -v
 ```
 
-## Abrir Servicos
+## Open Services
 
 ```powershell
 start http://localhost:8080/?api_key=iot
@@ -34,7 +37,7 @@ start http://localhost:8000/health/ready
 start http://localhost:18086
 ```
 
-## Defaults De Demo
+## Demo Defaults
 
 ```powershell
 API key: iot
@@ -56,29 +59,35 @@ Invoke-RestMethod http://localhost:8000/health/ready
 
 ```powershell
 docker cp iot-mosquitto:/mosquitto/data/tls/ca.crt .\mosquitto-ca.crt
+```
+
+```powershell
+# Expected: TcpTestSucceeded False
 Test-NetConnection localhost -Port 1883
+
+# Expected: TcpTestSucceeded True
 Test-NetConnection localhost -Port 8883
 ```
 
-## Simulador Docker
+## Docker Simulator
 
 ```powershell
 docker compose up -d --build simulator
-docker logs iot-simulator --tail 40
-docker logs -f iot-simulator
+docker compose logs --tail 40 simulator
+docker compose logs -f simulator
 ```
 
-## Simulador Local
+## Local Simulator
 
 ```powershell
-python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --fleet-size 16 --speedup 5 --selection random --publish-truth-alerts
+python simulate_fleet.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot --fleet-size 16 --speedup 5 --selection random --publish-truth-alerts
 ```
 
 ```powershell
 python simulate_fleet.py --mode rest --api-key iot --fleet-size 16 --speedup 5 --selection random
 ```
 
-## Importar Datasets
+## Dataset Replay
 
 ```powershell
 python import_dataset.py --mode dry-run
@@ -96,7 +105,7 @@ python import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.cr
 python import_dataset.py --mode mqtt --mqtt-tls --mqtt-ca-cert .\mosquitto-ca.crt --mqtt-host localhost --mqtt-port 8883 --mqtt-username iot --mqtt-password iot
 ```
 
-## Testes
+## Tests
 
 ```powershell
 python scripts\validate_braga_datasets.py --strict
@@ -105,7 +114,7 @@ python scripts\smoke_test_stack.py
 python scripts\measure_alert_latency.py --api-key iot
 ```
 
-## Consultas API
+## API Queries
 
 ```powershell
 Invoke-RestMethod "http://localhost:8000/api/v1/qos/status" -Headers @{"X-API-Key"="iot"} | ConvertTo-Json -Depth 4
@@ -139,7 +148,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-## Rebuild Parcial
+## Partial Rebuild
 
 ```powershell
 docker compose up -d --build backend
