@@ -1,6 +1,6 @@
 # Braga Micromobility Simulation Dataset
 
-This folder contains the synthetic Braga dataset used to replay and validate the IoT micromobility platform described in the project article, *An Extensible IoT Platform for Collaborative Monitoring of Sustainable Urban Micromobility*. The dataset models shared scooters and bicycles moving through Braga, Portugal, using georeferenced trajectories generated from OpenStreetMap road and cycleway geometry obtained through the Overpass API.
+This folder contains the synthetic Braga dataset. The dataset models shared scooters and bicycles moving through Braga, Portugal, using georeferenced trajectories generated from OpenStreetMap road and cycleway geometry obtained through the Overpass API.
 
 The dataset exists because collecting real falls, crash-like incidents, hard braking, prolonged congestion, and connectivity edge cases on public roads is unsafe and difficult to repeat. Here, those cases are controlled, labelled, and reproducible, so the platform can be tested end to end against known ground truth.
 
