@@ -1,6 +1,6 @@
-# IoT Platform for Urban Micromobility Monitoring
+# UrbMobSense: IoT Platform for Urban Micromobility Monitoring
 
-Collaborative IoT project for monitoring shared micromobility fleets, focused on scooters and shared bicycles. The platform collects simulated telemetry, processes critical events, persists time series data, exposes a REST API, sends real-time alerts via WebSocket, and provides an operational dashboard.
+UrbMobSense: IoT Platform for Urban Micromobility Monitoring, focused on scooters and shared bicycles. The platform collects simulated telemetry, processes critical events, persists time series data, exposes a REST API, sends real-time alerts via WebSocket, and provides an operational dashboard.
 
 The case study uses a synthetic, georeferenced dataset from Braga, Portugal, generated over OpenStreetMap road and cycling infrastructure geometry. The dataset enables reproducible validation of normal scenarios and critical scenarios such as falls, sudden braking, congestion, obstacle risk, and data reconciliation at the end of bicycle trips.
 
